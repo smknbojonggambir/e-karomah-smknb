@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Input Siswa</title>
+</head>
+
+<body>
+
+<h2>Halaman Siswa</h2>
+
+<div id="info"></div>
+
+<button onclick="logout()">Logout</button>
+
+<hr>
+
+<!-- FORM ANDA MASUKKAN DI SINI -->
+
+<script>
+
+let user=JSON.parse(localStorage.getItem("user"));
+
+if(!user || user.role!="Siswa"){
+  location.href="index.html";
+}
+
+info.innerHTML=`
+Nama: ${user.nama}<br>
+Kelompok: ${user.kelompok}
+`;
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+</script>
+
+</body>
+</html>
