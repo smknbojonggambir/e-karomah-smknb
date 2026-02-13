@@ -92,7 +92,19 @@ button{
 /* ================= CONFIG ================= */
 
 const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
+"https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+
+/* ================= LOGIN CHECK ================= */
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!user || user.role!=="siswa"){
+  location.href="index.html";
+}
+
+const nama     = user.nama;
+const kelompok = user.kelompok;
 
 
 /* ================= ELEMENT ================= */
@@ -104,18 +116,6 @@ const longi       = document.getElementById("long");
 const dynamicForm = document.getElementById("dynamicForm");
 const loader      = document.getElementById("loader");
 const btnKirim    = document.getElementById("btnKirim");
-
-
-/* ================= CEK LOGIN ================= */
-
-let user = JSON.parse(localStorage.getItem("user"));
-
-if(!user || user.role !== "siswa"){
-  location.href="index.html";
-}
-
-const nama     = user.nama;
-const kelompok = user.kelompok;
 
 
 /* ================= INFO ================= */
@@ -174,6 +174,8 @@ onclick="toggle('${id}_d',false)"> Tidak
 
 ${withTime?`<input type="time" id="${id}_waktu">`:""}
 
+${withFoto?`<input type="file" id="${id}_foto" accept="image/*">`:""}
+
 <textarea id="${id}_ket" placeholder="Keterangan..."></textarea>
 
 </div>
@@ -182,7 +184,7 @@ ${withTime?`<input type="time" id="${id}_waktu">`:""}
 }
 
 
-/* ================= GENERATE FORM ================= */
+/* ================= GENERATE ================= */
 
 function generateForm(){
 
@@ -190,17 +192,17 @@ dynamicForm.innerHTML =
 
   radioSection("Sahur","sahur",true,true)+
   radioSection("Subuh","subuh")+
-  radioSection("Olahraga","olahraga")+
-  radioSection("Keluarga","keluarga")+
+  radioSection("Olahraga","olahraga",true)+
+  radioSection("Keluarga","keluarga",true)+
   radioSection("Dzuhur","dzuhur")+
-  radioSection("Pesantren","pesantren")+
+  radioSection("Pesantren","pesantren",true)+
   radioSection("Ashar","ashar")+
-  radioSection("Aksi","aksi")+
-  radioSection("Buka","buka")+
+  radioSection("Aksi","aksi",true)+
+  radioSection("Buka","buka",true)+
   radioSection("Magrib","magrib")+
   radioSection("Isya","isya")+
   radioSection("Tarawih","tarawih")+
-  radioSection("Tadarus","tadarus")+
+  radioSection("Tadarus","tadarus",true)+
   radioSection("Tidur","tidur",false,true);
 
 }
@@ -210,47 +212,13 @@ dynamicForm.innerHTML =
 
 async function loadPembimbing(){
 
-  try{
+  const r = await fetch(
+    WEB_APP_URL+
+    "?action=getPembimbing&kelompok="+
+    encodeURIComponent(kelompok)
+  );
 
-    const r = await fetch(
-      WEB_APP_URL+
-      "?action=getPembimbing&kelompok="+
-      encodeURIComponent(kelompok)
-    );
-
-    pembimbing.value = await r.text();
-
-  }catch{
-
-    pembimbing.value="-";
-
-  }
-
-}
-
-
-/* ================= VALIDASI ================= */
-
-function validasi(){
-
-  const list=[
-    "sahur","subuh","olahraga","keluarga","dzuhur",
-    "pesantren","ashar","aksi","buka","magrib",
-    "isya","tarawih","tadarus","tidur"
-  ];
-
-  for(let id of list){
-
-    if(!document.querySelector(`input[name="${id}"]:checked`)){
-
-      alert("⚠️ Semua kegiatan wajib diisi!");
-      return false;
-
-    }
-
-  }
-
-  return true;
+  pembimbing.value = await r.text();
 
 }
 
@@ -260,8 +228,6 @@ function validasi(){
 btnKirim.onclick = kirim;
 
 async function kirim(){
-
-  if(!validasi()) return;
 
   loader.classList.remove("hidden");
   btnKirim.disabled = true;
@@ -289,7 +255,7 @@ async function kirim(){
 
     let st=document.querySelector(`input[name="${id}"]:checked`);
 
-    fd.append(id+"_status",st.value);
+    fd.append(id+"_status",st?st.value:"Tidak");
 
     let w=document.getElementById(id+"_waktu");
     if(w) fd.append(id+"_waktu",w.value||"");
@@ -297,28 +263,39 @@ async function kirim(){
     let k=document.getElementById(id+"_ket");
     if(k) fd.append(id+"_ket",k.value||"");
 
+    let f=document.getElementById(id+"_foto");
+
+    if(f && f.files[0]){
+
+      let reader=new FileReader();
+
+      await new Promise(r=>{
+
+        reader.onload=()=>{
+
+          fd.append(id+"_foto",reader.result);
+          r();
+
+        };
+
+        reader.readAsDataURL(f.files[0]);
+
+      });
+
+    }
+
   }
 
 
-  try{
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    body:fd
+  });
 
-    await fetch(WEB_APP_URL,{
-      method:"POST",
-      body:fd
-    });
 
-    alert("✅ Laporan berhasil dikirim");
+  alert("✅ Laporan berhasil dikirim");
 
-    location.reload();
-
-  }catch(e){
-
-    alert("❌ Gagal mengirim data");
-
-  }
-
-  loader.classList.add("hidden");
-  btnKirim.disabled = false;
+  location.reload();
 
 }
 
