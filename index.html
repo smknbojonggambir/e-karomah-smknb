@@ -2,38 +2,36 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>E-KAROMAH SMKNB</title>
 
 <style>
 body{
-font-family:system-ui;
-background:#0f172a;
-color:#fff;
-padding:20px;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  padding:20px;
 }
 
 .card{
-max-width:420px;
-margin:auto;
-background:#1e293b;
-padding:25px;
-border-radius:12px;
+  max-width:400px;
+  margin:auto;
+  background:rgba(255,255,255,.08);
+  padding:25px;
+  border-radius:12px;
 }
 
-input,select,button,textarea{
-width:100%;
-padding:10px;
-margin:8px 0;
-border-radius:8px;
-border:none;
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
 }
 
 button{
-background:#2563eb;
-color:white;
-font-weight:bold;
-cursor:pointer;
+  background:#2563eb;
+  color:white;
+  font-weight:bold;
 }
 
 .hidden{display:none}
@@ -43,135 +41,162 @@ cursor:pointer;
 <body>
 
 <!-- LOGIN -->
-<div class="card" id="loginBox">
+<div id="loginBox" class="card">
+  <h3>Login E-KAROMAH</h3>
 
-<h3>Login E-KAROMAH</h3>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
 
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 
-<button onclick="login()">Login</button>
-
-<p id="msg"></p>
-
+  <p id="loginMsg"></p>
 </div>
-
-
-<!-- FORM SISWA -->
-<div class="card hidden" id="siswaBox">
-
-<h3>Input Harian</h3>
-
-<p id="info"></p>
-
-<textarea id="kegiatan" placeholder="Kegiatan Hari Ini"></textarea>
-
-<button onclick="kirim()">Kirim</button>
-
-</div>
-
 
 <!-- DASHBOARD -->
-<div class="card hidden" id="monitorBox">
+<div id="dashboard" class="hidden">
 
-<h3>Dashboard Monitoring</h3>
+  <div class="card">
+    <h3 id="welcome"></h3>
+    <p id="roleInfo"></p>
 
-<p id="monitorInfo"></p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-<a href="https://docs.google.com/spreadsheets/d/1Ho7CWJj0bevgYCzQHs2T6jYi_vjjncM3XRiZvyF8INE"
-target="_blank">
+  <!-- FORM SISWA -->
+  <div id="formSiswa" class="card hidden">
 
-<button>Buka Data Laporan</button>
+    <h4>Input Laporan Harian</h4>
 
-</a>
+    <textarea id="laporan" placeholder="Isi kegiatan hari ini"></textarea>
+
+    <button onclick="kirimLaporan()">Kirim</button>
+
+  </div>
+
+  <!-- MONITOR -->
+  <div id="monitorBox" class="card hidden">
+
+    <h4>Monitoring Laporan</h4>
+
+    <button onclick="loadLaporan()">Refresh</button>
+
+    <div id="dataLaporan"></div>
+
+  </div>
 
 </div>
 
 
 <script>
 
-const API="PASTE_WEBAPP_URL_DISINI";
+const URL="PASTE_WEBAPP_URL_DISINI";
 
-/* LOGIN */
+/**************** LOGIN *****************/
 async function login(){
 
-let u=user.value;
-let p=pass.value;
+  let u=username.value;
+  let p=password.value;
 
-let res=await fetch(`${API}?action=login&username=${u}&password=${p}`);
-let data=await res.json();
+  let res=await fetch(`${URL}?action=login&username=${u}&password=${p}`);
+  let data=await res.json();
 
-if(data.status!=="success"){
-msg.innerHTML="❌ Login gagal";
-return;
-}
+  if(data.status=="success"){
 
-/* SIMPAN SESSION */
-sessionStorage.setItem("user",JSON.stringify(data));
+    localStorage.setItem("user",JSON.stringify(data));
 
-loginBox.classList.add("hidden");
+    showDashboard(data);
 
-/* ROLE */
-if(data.role==="Siswa"){
-tampilSiswa(data);
-}else{
-tampilMonitor(data);
-}
-
+  }else{
+    loginMsg.innerHTML="❌ Login gagal";
+  }
 }
 
 
-/* SISWA */
-function tampilSiswa(d){
+/**************** DASHBOARD *****************/
+function showDashboard(user){
 
-siswaBox.classList.remove("hidden");
+  loginBox.classList.add("hidden");
+  dashboard.classList.remove("hidden");
 
-info.innerHTML=`
-Nama : ${d.nama}<br>
-Kelompok : ${d.kelompok}<br>
-Pembimbing : ${d.pembimbing||"-"}
-`;
+  welcome.innerHTML="Halo, "+user.nama;
+  roleInfo.innerHTML="Role: "+user.role;
 
+  if(user.role=="Siswa"){
+    formSiswa.classList.remove("hidden");
+  }
+
+  if(user.role=="Pembimbing" || user.role=="Admin"){
+    monitorBox.classList.remove("hidden");
+    loadLaporan();
+  }
 }
 
 
-/* MONITOR */
-function tampilMonitor(d){
-
-monitorBox.classList.remove("hidden");
-
-monitorInfo.innerHTML=`
-Login sebagai : <b>${d.role}</b><br>
-Nama : ${d.nama}
-`;
-
+/**************** LOGOUT *****************/
+function logout(){
+  localStorage.clear();
+  location.reload();
 }
 
 
-/* KIRIM */
-async function kirim(){
+/**************** KIRIM *****************/
+async function kirimLaporan(){
 
-let d=JSON.parse(sessionStorage.getItem("user"));
+  let user=JSON.parse(localStorage.getItem("user"));
 
-let data={
-action:"kirim",
-username:d.username,
-nama:d.nama,
-kelompok:d.kelompok,
-kegiatan:kegiatan.value
-};
+  let data={
+    action:"kirim",
+    username:user.username,
+    nama:user.nama,
+    kelompok:user.kelompok,
+    laporan:laporan.value
+  };
 
-await fetch(API,{
-method:"POST",
-body:JSON.stringify(data)
-});
+  await fetch(URL,{
+    method:"POST",
+    body:JSON.stringify(data)
+  });
 
-alert("Berhasil disimpan");
+  alert("Berhasil dikirim");
+  laporan.value="";
+}
 
-kegiatan.value="";
 
+/**************** MONITOR *****************/
+async function loadLaporan(){
+
+  let res=await fetch(`${URL}?action=getLaporan`);
+  let data=await res.json();
+
+  let html="<table border=1 width=100%>";
+
+  html+="<tr><th>Nama</th><th>Kelompok</th><th>Laporan</th><th>Tanggal</th></tr>";
+
+  data.forEach(d=>{
+    html+=`
+      <tr>
+        <td>${d.nama}</td>
+        <td>${d.kelompok}</td>
+        <td>${d.laporan}</td>
+        <td>${d.tgl}</td>
+      </tr>
+    `;
+  });
+
+  html+="</table>";
+
+  dataLaporan.innerHTML=html;
+}
+
+
+/**************** AUTO LOGIN *****************/
+let user=localStorage.getItem("user");
+
+if(user){
+  showDashboard(JSON.parse(user));
 }
 
 </script>
+
 </body>
 </html>
