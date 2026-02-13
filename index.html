@@ -7,158 +7,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --bg1: #0f172a;
-  --bg2: #1e293b;
-  --glass: rgba(255, 255, 255, 0.1);
-  --border: rgba(255, 255, 255, 0.1);
-  --text: #f8fafc;
-}
-
+/* CSS STYLE SAMA SEPERTI SEBELUMNYA, DIPERSINGKAT AGAR RAPI */
+:root{ --primary: #3b82f6; --bg1: #0f172a; --bg2: #1e293b; --glass: rgba(255, 255, 255, 0.1); --border: rgba(255, 255, 255, 0.1); --text: #f8fafc; }
 * { margin:0; padding:0; box-sizing:border-box; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: radial-gradient(circle at top left, var(--bg2), var(--bg1));
-  color: var(--text);
-  min-height: 100vh;
-  padding: 20px 15px;
-}
-
+body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left, var(--bg2), var(--bg1)); color: var(--text); min-height: 100vh; padding: 20px 15px; }
 .container { max-width: 600px; margin: auto; }
-
 .header { text-align: center; margin-bottom: 30px; animation: fadeIn 1s ease; }
-.logo {
-  width: 90px; height: 90px;
-  background: rgba(255,255,255,0.95);
-  padding: 5px; border-radius: 50%;
-  margin-bottom: 15px;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-  object-fit: contain;
-}
-h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
-
-/* Glassmorphism Card */
-.card {
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding: 25px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-  margin-bottom: 20px;
-}
-
-/* Form Elements */
+.logo { width: 90px; height: 90px; background: rgba(255,255,255,0.95); padding: 5px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); object-fit: contain; }
+.card { background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 25px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); margin-bottom: 20px; }
 label { font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px; display: block; }
-
-input, textarea, select {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 15px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.3);
-  color: white;
-  font-size: 1rem;
-  transition: 0.3s;
-}
-
-input:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: rgba(0, 0, 0, 0.5);
-}
-
-/* Section Kegiatan */
-.section {
-  background: rgba(255, 255, 255, 0.03);
-  padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 15px;
-  border: 1px solid transparent;
-}
-.section:hover { border-color: rgba(255,255,255,0.1); }
-
+input, textarea { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0, 0, 0, 0.3); color: white; font-size: 1rem; transition: 0.3s; }
+input:focus, textarea:focus { outline: none; border-color: var(--primary); background: rgba(0, 0, 0, 0.5); }
+.section { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid transparent; }
 .section h4 { margin-bottom: 10px; font-weight: 600; color: #60a5fa; }
-
-.radio-group {
-  display: flex; gap: 15px; margin-bottom: 10px;
-}
-
-.radio-btn {
-  flex: 1;
-  position: relative;
-}
-
+.radio-group { display: flex; gap: 15px; margin-bottom: 10px; }
+.radio-btn { flex: 1; position: relative; }
 .radio-btn input { position: absolute; opacity: 0; cursor: pointer; }
-.radio-tile {
-  display: flex; justify-content: center; align-items: center;
-  padding: 10px; border-radius: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  cursor: pointer; transition: 0.3s;
-  font-weight: 600; font-size: 0.9rem;
-}
-
-input:checked + .radio-tile {
-  background: var(--primary);
-  border-color: var(--primary);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-}
-
-/* Button */
-button {
-  width: 100%; padding: 16px;
-  border: none; border-radius: 14px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white; font-weight: 700; font-size: 1rem;
-  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-  margin-top: 10px;
-}
-button:active { transform: scale(0.98); }
-
-/* Utilities */
+.radio-tile { display: flex; justify-content: center; align-items: center; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); cursor: pointer; transition: 0.3s; font-weight: 600; font-size: 0.9rem; }
+input:checked + .radio-tile { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+button { width: 100%; padding: 16px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary), #2563eb); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; }
 .hidden { display: none; }
-.info-box {
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #6ee7b7;
-  padding: 10px; border-radius: 10px;
-  text-align: center; margin-bottom: 20px;
-  font-size: 0.9rem;
-}
-
-/* Loader */
-.loader-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(5px);
-  z-index: 1000;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-}
-.spinner {
-  width: 50px; height: 50px;
-  border: 5px solid rgba(255,255,255,0.1);
-  border-top: 5px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
-}
+.loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
   <div class="header">
     <img class="logo" src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png" alt="Logo">
     <h1>E-KAROMAH SMKNB</h1>
@@ -167,14 +45,14 @@ button:active { transform: scale(0.98); }
   <div class="card" id="loginBox">
     <h3 style="margin-bottom:15px;">🔐 Login Siswa</h3>
     <label>Username</label>
-    <input type="text" id="username" placeholder="Masukkan Username">
+    <input type="text" id="username" placeholder="Contoh: SISWA001">
     <label>Password</label>
     <input type="password" id="password" placeholder="Masukkan Password">
     <button onclick="handleLogin()">MASUK APLIKASI</button>
   </div>
 
   <div class="card hidden" id="formBox">
-    <div class="info-box" id="infoUser"></div>
+    <div class="info-box" id="infoUser" style="text-align:center; padding:10px; color:#6ee7b7; background:rgba(16, 185, 129, 0.2); border-radius:10px; margin-bottom:15px;"></div>
 
     <label>Tanggal Laporan</label>
     <input type="date" id="tanggal">
@@ -182,16 +60,12 @@ button:active { transform: scale(0.98); }
     <label>Pembimbing</label>
     <input type="text" id="pembimbing" readonly style="background:rgba(255,255,255,0.05); color:#94a3b8;">
 
-    <input type="hidden" id="lat">
-    <input type="hidden" id="long">
-
+    <input type="hidden" id="lat"><input type="hidden" id="long">
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
     
     <div id="dynamicForm"></div>
-
     <button onclick="kirimData()">KIRIM LAPORAN</button>
   </div>
-
 </div>
 
 <div class="loader-overlay hidden" id="loader">
@@ -200,19 +74,19 @@ button:active { transform: scale(0.98); }
 </div>
 
 <script>
-// GANTI URL INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxX3mqGpdsPYC296uPLmjTb14q5ibvmZzcVQRizwH8rJmXBfabVQf8XANIu3NrGOH4bsQ/exec";
+// =================================================================
+// ⚠️ TEMPEL URL DEPLOYMENT HASIL LANGKAH 2 DI BAWAH INI
+// =================================================================
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxnpt29o9iC6-DsmE3dg4oylKBLx8NymEPSQ7hqILIuTn_bV5cY5Kjf0DZjCuDe-jRqag/exec"; 
+// =================================================================
 
 let userData = {};
 
-// 1. Setup Awal
 window.onload = () => {
-  // Set default tanggal hari ini
   document.getElementById('tanggal').valueAsDate = new Date();
   getLocation();
 };
 
-// 2. Login Logic
 async function handleLogin() {
   const u = document.getElementById('username').value;
   const p = document.getElementById('password').value;
@@ -220,8 +94,7 @@ async function handleLogin() {
 
   if(!u || !p) return alert("Username dan Password harus diisi!");
 
-  btn.innerText = "Memeriksa...";
-  btn.disabled = true;
+  btn.innerText = "Memeriksa..."; btn.disabled = true;
 
   try {
     const res = await fetch(`${WEB_APP_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
@@ -231,35 +104,28 @@ async function handleLogin() {
       userData = data;
       document.getElementById('loginBox').classList.add('hidden');
       document.getElementById('formBox').classList.remove('hidden');
-      
-      document.getElementById('infoUser').innerHTML = `
-        Halo, <b>${data.nama}</b><br>Kelompok: ${data.kelompok}
-      `;
+      document.getElementById('infoUser').innerHTML = `Halo, <b>${data.nama}</b><br>Kelompok: ${data.kelompok}`;
       
       loadPembimbing(data.kelompok);
       generateForm();
     } else {
-      alert("Login Gagal: Username atau Password salah.");
+      alert("Login Gagal! Cek Username/Password atau koneksi internet.");
     }
   } catch (err) {
-    alert("Gagal terhubung ke server. Coba lagi.");
+    alert("Gagal terhubung. Pastikan URL Script sudah diganti dan Deployment diset 'Anyone'.");
     console.error(err);
   } finally {
-    btn.innerText = "MASUK APLIKASI";
-    btn.disabled = false;
+    btn.innerText = "MASUK APLIKASI"; btn.disabled = false;
   }
 }
 
-// 3. Load Pembimbing
 async function loadPembimbing(kelompok) {
   try {
     const res = await fetch(`${WEB_APP_URL}?action=getPembimbing&kelompok=${encodeURIComponent(kelompok)}`);
-    const text = await res.text();
-    document.getElementById('pembimbing').value = text;
-  } catch (e) { console.error(e); }
+    document.getElementById('pembimbing').value = await res.text();
+  } catch (e) {}
 }
 
-// 4. Generate Form Dinamis
 const listKegiatan = [
   {id:"sahur", label:"1. Makan Sahur", time:true, photo:true},
   {id:"subuh", label:"2. Sholat Subuh"},
@@ -280,41 +146,28 @@ const listKegiatan = [
 function generateForm() {
   const container = document.getElementById('dynamicForm');
   let html = '';
-
   listKegiatan.forEach(item => {
     html += `
       <div class="section">
         <h4>${item.label}</h4>
         <div class="radio-group">
-          <label class="radio-btn">
-            <input type="radio" name="${item.id}" value="Ya" onchange="toggleDetail('${item.id}', true)">
-            <span class="radio-tile">Ya</span>
-          </label>
-          <label class="radio-btn">
-            <input type="radio" name="${item.id}" value="Tidak" onchange="toggleDetail('${item.id}', false)" checked>
-            <span class="radio-tile">Tidak</span>
-          </label>
+          <label class="radio-btn"><input type="radio" name="${item.id}" value="Ya" onchange="toggleDetail('${item.id}', true)"><span class="radio-tile">Ya</span></label>
+          <label class="radio-btn"><input type="radio" name="${item.id}" value="Tidak" onchange="toggleDetail('${item.id}', false)" checked><span class="radio-tile">Tidak</span></label>
         </div>
-
         <div id="${item.id}_detail" class="hidden" style="margin-top:10px;">
           ${item.time ? `<input type="time" id="${item.id}_waktu">` : ''}
           ${item.photo ? `<input type="file" id="${item.id}_foto" accept="image/*">` : ''}
           <textarea id="${item.id}_ket" rows="2" placeholder="Catatan tambahan..."></textarea>
         </div>
-      </div>
-    `;
+      </div>`;
   });
-
   container.innerHTML = html;
 }
 
 function toggleDetail(id, isShow) {
-  const el = document.getElementById(id + '_detail');
-  if(isShow) el.classList.remove('hidden');
-  else el.classList.add('hidden');
+  document.getElementById(id + '_detail').classList.toggle('hidden', !isShow);
 }
 
-// 5. GPS Logic
 function getLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -322,20 +175,18 @@ function getLocation() {
         document.getElementById('lat').value = pos.coords.latitude;
         document.getElementById('long').value = pos.coords.longitude;
       },
-      () => alert("Mohon aktifkan GPS untuk mengisi absensi.")
+      () => alert("Mohon aktifkan GPS!")
     );
   }
 }
 
-// 6. Helper: Convert File to Base64
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]); // Ambil datanya saja
+    reader.onload = () => resolve(reader.result.split(',')[1]);
     reader.onerror = error => reject(error);
 });
 
-// 7. Kirim Data
 async function kirimData() {
   const loader = document.getElementById('loader');
   loader.classList.remove('hidden');
@@ -352,32 +203,29 @@ async function kirimData() {
     kegiatan: {}
   };
 
-  // Loop kegiatan untuk ambil data
-  for (const item of listKegiatan) {
-    const status = document.querySelector(`input[name="${item.id}"]:checked`).value;
-    let dataKegiatan = { status: status, ket: "", waktu: "", foto: "", fotoName: "" };
-
-    if (status === "Ya") {
-      const ketEl = document.getElementById(`${item.id}_ket`);
-      const waktuEl = document.getElementById(`${item.id}_waktu`);
-      const fotoEl = document.getElementById(`${item.id}_foto`);
-
-      if (ketEl) dataKegiatan.ket = ketEl.value;
-      if (waktuEl) dataKegiatan.waktu = waktuEl.value;
-      
-      if (fotoEl && fotoEl.files.length > 0) {
-        dataKegiatan.fotoName = `img_${item.id}_${Date.now()}.jpg`;
-        dataKegiatan.foto = await toBase64(fotoEl.files[0]);
-      }
-    }
-    payload.kegiatan[item.id] = dataKegiatan;
-  }
-
-  // Kirim via fetch POST (JSON Body)
   try {
+    for (const item of listKegiatan) {
+      const status = document.querySelector(`input[name="${item.id}"]:checked`).value;
+      let dataKegiatan = { status: status, ket: "", waktu: "", foto: "", fotoName: "" };
+
+      if (status === "Ya") {
+        const ketEl = document.getElementById(`${item.id}_ket`);
+        const waktuEl = document.getElementById(`${item.id}_waktu`);
+        const fotoEl = document.getElementById(`${item.id}_foto`);
+
+        if (ketEl) dataKegiatan.ket = ketEl.value;
+        if (waktuEl) dataKegiatan.waktu = waktuEl.value;
+        if (fotoEl && fotoEl.files.length > 0) {
+          dataKegiatan.fotoName = `img_${item.id}_${Date.now()}.jpg`;
+          dataKegiatan.foto = await toBase64(fotoEl.files[0]);
+        }
+      }
+      payload.kegiatan[item.id] = dataKegiatan;
+    }
+
     const res = await fetch(WEB_APP_URL, {
       method: "POST",
-      body: JSON.stringify(payload) // Mengirim sebagai string JSON
+      body: JSON.stringify(payload)
     });
     
     const result = await res.text();
@@ -390,7 +238,7 @@ async function kirimData() {
     }
 
   } catch (err) {
-    alert("Error jaringan: " + err);
+    alert("Error: " + err);
   } finally {
     loader.classList.add('hidden');
   }
