@@ -1,186 +1,137 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      margin:0;
-      padding:20px;
-      color:white;
-    }
+// ==========================
+// KONFIGURASI
+// ==========================
+const SPREADSHEET_ID = "1srT53Fp8fW89ViyP61BydjiCPqUNRvKDee8IEnR2Ezo";
+const FOLDER_ID = "1hrAAIpRz_-y4-qTDvzRKNC_ic3RWhw8q";
 
-    .card {
-      background:white;
-      color:black;
-      padding:20px;
-      border-radius:15px;
-      max-width:600px;
-      margin:auto;
-      box-shadow:0 10px 30px rgba(0,0,0,0.3);
-    }
+const SHEET_KELOMPOK = "KELOMPOK";
+const SHEET_USERS = "USERS";
+const SHEET_LAPORAN = "LAPORAN";
 
-    h2 {
-      text-align:center;
-      margin-bottom:20px;
-    }
-
-    select,input,textarea,button {
-      width:100%;
-      padding:10px;
-      margin:8px 0;
-      border-radius:8px;
-      border:1px solid #ccc;
-    }
-
-    button {
-      background:#2c5364;
-      color:white;
-      border:none;
-      cursor:pointer;
-      font-weight:bold;
-    }
-
-    button:hover {
-      background:#203a43;
-    }
-
-    .hidden { display:none; }
-
-    @media(max-width:600px){
-      .card{padding:15px;}
-    }
-  </style>
-</head>
-<body>
-
-<div class="card">
-  <h2>E-KAROMAH SMKNB</h2>
-
-  <!-- STEP 1 -->
-  <label>Pilih Kelompok</label>
-  <select id="kelompok" onchange="loadNama()">
-    <option value="">-- Pilih Kelompok --</option>
-  </select>
-
-  <!-- STEP 2 -->
-  <label>Pilih Nama</label>
-  <select id="nama" onchange="tampilPembimbing()" disabled>
-    <option value="">-- Pilih Nama --</option>
-  </select>
-
-  <!-- PEMBIMBING -->
-  <label>Pembimbing</label>
-  <input type="text" id="pembimbing" readonly>
-
-  <!-- FORM -->
-  <div id="formInput" class="hidden">
-
-    <label>Sahur Waktu</label>
-    <input type="time" id="sahur_waktu">
-
-    <label>Sahur Keterangan</label>
-    <textarea id="sahur_keterangan"></textarea>
-
-    <label>Subuh Status</label>
-    <select id="subuh_status">
-      <option>Ya</option>
-      <option>Tidak</option>
-    </select>
-
-    <label>Subuh Keterangan</label>
-    <textarea id="subuh_keterangan"></textarea>
-
-    <label>Dzuhur Status</label>
-    <select id="dzuhur_status">
-      <option>Ya</option>
-      <option>Tidak</option>
-    </select>
-
-    <label>Dzuhur Keterangan</label>
-    <textarea id="dzuhur_keterangan"></textarea>
-
-    <button onclick="kirim()">Simpan</button>
-
-  </div>
-
-</div>
-
-<script>
-
-function loadKelompok(){
-  google.script.run.withSuccessHandler(function(data){
-    let select = document.getElementById("kelompok");
-    data.forEach(k=>{
-      let opt = document.createElement("option");
-      opt.value=k;
-      opt.text=k;
-      select.appendChild(opt);
-    });
-  }).getKelompok();
+// ==========================
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile("index")
+    .setTitle("E-KAROMAH SMKNB")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-function loadNama(){
-  let kelompok = document.getElementById("kelompok").value;
-  let namaSelect = document.getElementById("nama");
-  namaSelect.innerHTML='<option value="">-- Pilih Nama --</option>';
-  namaSelect.disabled=true;
-
-  if(!kelompok) return;
-
-  google.script.run.withSuccessHandler(function(data){
-    data.forEach(n=>{
-      let opt=document.createElement("option");
-      opt.value=n;
-      opt.text=n;
-      namaSelect.appendChild(opt);
-    });
-    namaSelect.disabled=false;
-  }).getNamaByKelompok(kelompok);
+// ==========================
+// DROPDOWN
+// ==========================
+function getKelompok() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_KELOMPOK);
+  return sheet.getRange("A2:A" + sheet.getLastRow())
+    .getValues().flat().filter(String);
 }
 
-function tampilPembimbing(){
-  let kelompok=document.getElementById("kelompok").value;
-  let nama=document.getElementById("nama").value;
-
-  if(!nama) return;
-
-  google.script.run.withSuccessHandler(function(p){
-    document.getElementById("pembimbing").value=p;
-    document.getElementById("formInput").classList.remove("hidden");
-  }).getPembimbingByKelompok(kelompok);
+function getNamaByKelompok(kelompok) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_USERS);
+  const data = sheet.getDataRange().getValues();
+  let result = [];
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][2] == kelompok) result.push(data[i][0]);
+  }
+  return result;
 }
 
-function kirim(){
-  navigator.geolocation.getCurrentPosition(function(pos){
-
-    let data={
-      nama:document.getElementById("nama").value,
-      kelompok:document.getElementById("kelompok").value,
-      pembimbing:document.getElementById("pembimbing").value,
-      lat:pos.coords.latitude,
-      long:pos.coords.longitude,
-      sahur_waktu:document.getElementById("sahur_waktu").value,
-      sahur_keterangan:document.getElementById("sahur_keterangan").value,
-      subuh_status:document.getElementById("subuh_status").value,
-      subuh_keterangan:document.getElementById("subuh_keterangan").value,
-      dzuhur_status:document.getElementById("dzuhur_status").value,
-      dzuhur_keterangan:document.getElementById("dzuhur_keterangan").value
-    };
-
-    google.script.run.withSuccessHandler(function(res){
-      alert(res);
-      location.reload();
-    }).simpanData(data);
-
-  });
+function getPembimbingByKelompok(kelompok) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_KELOMPOK);
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] == kelompok) return data[i][1];
+  }
+  return "";
 }
 
-loadKelompok();
+// ==========================
+// UPLOAD FILE
+// ==========================
+function uploadFile(base64Data, fileName) {
+  const folder = DriveApp.getFolderById(FOLDER_ID);
+  const contentType = base64Data.match(/^data:(.*);base64,/)[1];
+  const bytes = Utilities.base64Decode(base64Data.split(',')[1]);
+  const blob = Utilities.newBlob(bytes, contentType, fileName);
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return file.getUrl();
+}
 
-</script>
+// ==========================
+// SIMPAN DATA (WAJIB FOTO)
+// ==========================
+function simpanData(form) {
 
-</body>
-</html>
+  // VALIDASI WAJIB FOTO
+  const wajibFoto = [
+    form.sahur_foto,
+    form.olahraga_foto,
+    form.aktivitas_foto,
+    form.pesantren_foto,
+    form.aksi_foto,
+    form.buka_foto,
+    form.tadarus_foto
+  ];
+
+  if (wajibFoto.some(f => !f)) {
+    return "❌ Semua kegiatan wajib upload foto (kecuali sholat & sedekah)";
+  }
+
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_LAPORAN);
+
+  // Upload semua foto
+  const sahurUrl = uploadFile(form.sahur_foto, "Sahur_"+Date.now()+".jpg");
+  const olahragaUrl = uploadFile(form.olahraga_foto, "Olahraga_"+Date.now()+".jpg");
+  const aktivitasUrl = uploadFile(form.aktivitas_foto, "Aktivitas_"+Date.now()+".jpg");
+  const pesantrenUrl = uploadFile(form.pesantren_foto, "Pesantren_"+Date.now()+".jpg");
+  const aksiUrl = uploadFile(form.aksi_foto, "Aksi_"+Date.now()+".jpg");
+  const bukaUrl = uploadFile(form.buka_foto, "Buka_"+Date.now()+".jpg");
+  const tadarusUrl = uploadFile(form.tadarus_foto, "Tadarus_"+Date.now()+".jpg");
+
+  sheet.appendRow([
+    new Date(),
+    "",
+    form.nama,
+    form.kelompok,
+    form.pembimbing,
+    form.lat,
+    form.long,
+    form.sahur_waktu,
+    sahurUrl,
+    form.sahur_keterangan,
+    form.subuh_status,
+    form.subuh_keterangan,
+    olahragaUrl,
+    form.olahraga_keterangan,
+    aktivitasUrl,
+    form.aktivitas_keterangan,
+    form.dzuhur_status,
+    form.dzuhur_keterangan,
+    pesantrenUrl,
+    form.pesantren_keterangan,
+    form.ashar_status,
+    form.ashar_keterangan,
+    aksiUrl,
+    form.aksi_keterangan,
+    bukaUrl,
+    form.buka_keterangan,
+    form.magrib_status,
+    form.magrib_keterangan,
+    form.isya_status,
+    form.isya_keterangan,
+    form.taraweh_status,
+    form.taraweh_keterangan,
+    tadarusUrl,
+    form.tadarus_keterangan,
+    form.tidur_waktu,
+    form.tidur_keterangan,
+    form.sedekah_status,
+    form.sedekah_keterangan,
+    0
+  ]);
+
+  return "✅ Data berhasil disimpan lengkap!";
+}
