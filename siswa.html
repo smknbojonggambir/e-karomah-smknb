@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>E-KAROMAH SMKNB - Siswa</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -22,7 +22,7 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  padding-bottom: 90px; /* Space for fixed button */
+  padding-bottom: 80px; /* Space for fixed button */
 }
 
 /* Header & Info */
@@ -39,49 +39,21 @@ body {
 
 h2 { margin: 0; font-size: 18px; color: var(--primary); }
 
+.user-info-card {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  margin: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+.user-info-card b { color: var(--primary); }
+
 .container {
   max-width: 800px;
   margin: auto;
   padding: 0 20px;
 }
-
-.user-info-card {
-  background: linear-gradient(135deg, #1e293b, #334155);
-  margin: 20px 0;
-  padding: 20px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  font-size: 14px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* --- NEW: WELCOME MESSAGE STYLE --- */
-.welcome-message {
-  text-align: center;
-  margin: 25px 0 20px;
-  animation: fadeIn 0.8s ease-out;
-}
-
-.welcome-message h3 {
-  margin: 0 0 5px;
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.welcome-message p {
-  margin: 0;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-/* ---------------------------------- */
 
 /* Form Sections */
 .section {
@@ -110,7 +82,7 @@ h2 { margin: 0; font-size: 18px; color: var(--primary); }
   border-radius: 2px;
 }
 
-/* Radio Group */
+/* Custom Radio Buttons (Segmented Control) */
 .radio-group {
   display: flex;
   background: rgba(0,0,0,0.3);
@@ -132,12 +104,20 @@ h2 { margin: 0; font-size: 18px; color: var(--primary); }
   overflow: hidden;
 }
 
+/* Sembunyikan radio asli */
 .radio-group input[type="radio"] {
   position: absolute;
   opacity: 0;
   cursor: pointer;
 }
 
+/* Style saat dipilih - Menggunakan CSS logic simple */
+.radio-group label:has(input:checked) {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
+}
+/* Fallback untuk browser lama yg tidak support :has */
 .radio-selected {
   background: var(--primary) !important;
   color: white !important;
@@ -148,9 +128,6 @@ h2 { margin: 0; font-size: 18px; color: var(--primary); }
 .hidden { display: none; }
 .detail-area {
   animation: slideDown 0.3s ease-out;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid rgba(255,255,255,0.05);
 }
 
 @keyframes slideDown {
@@ -176,8 +153,9 @@ input:focus, textarea:focus {
   background: rgba(0,0,0,0.4);
 }
 
-textarea { resize: vertical; min-height: 80px; }
+textarea { resize: vertical; min-height: 60px; }
 
+/* Custom File Input Styling */
 input[type="file"]::file-selector-button {
   margin-right: 15px;
   padding: 8px 16px;
@@ -188,8 +166,11 @@ input[type="file"]::file-selector-button {
   cursor: pointer;
   transition: 0.2s;
 }
+input[type="file"]::file-selector-button:hover {
+  background: var(--primary);
+}
 
-/* Action Bar */
+/* Floating Actions */
 .action-bar {
   position: fixed;
   bottom: 0;
@@ -213,11 +194,21 @@ input[type="file"]::file-selector-button {
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
+#btnKirim:active { transform: scale(0.98); }
+
 .btn-logout {
   background: #ef4444;
   width: auto;
   min-width: 100px;
   margin: 0;
+}
+
+#loader {
+  text-align: center;
+  font-size: 14px;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 </style>
 </head>
@@ -235,20 +226,18 @@ input[type="file"]::file-selector-button {
 
   <div class="user-info-card">
     <div id="info"></div>
-    <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+    <div style="margin-top:10px; pt-10px; border-top:1px solid var(--border);">
       <small style="opacity:0.7">Pembimbing:</small><br>
-      <input type="text" id="pembimbing" readonly style="background:transparent; border:none; padding:0; margin:0; font-weight:600; color:var(--text); width:100%;">
+      <input type="text" id="pembimbing" readonly style="background:transparent; border:none; padding:0; margin:0; font-weight:600; color:var(--text);">
     </div>
   </div>
 
-  <div class="welcome-message">
-    <h3>✨ Yuk, Catat Amal Ibadahmu Hari Ini!</h3>
-    <p>Isi jurnal ibadahmu dengan jujur ya!</p>
-  </div>
   <input type="hidden" id="lat">
   <input type="hidden" id="long">
 
   <div id="dynamicForm"></div>
+
+  <div style="height:60px;"></div>
 
 </div>
 
@@ -257,9 +246,8 @@ input[type="file"]::file-selector-button {
   <button id="btnKirim">KIRIM LAPORAN</button>
 </div>
 
-<div id="loader" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:200; flex-direction:column;">
-  <div style="font-size:30px; margin-bottom:10px;">⏳</div>
-  <div style="color:white; font-weight:600;">Mengirim Laporan...</div>
+<div id="loader" class="hidden" style="position:fixed; bottom:80px; left:0; right:0; background:rgba(0,0,0,0.8); color:white; padding:10px; z-index:200;">
+  ⏳ Sedang mengirim data...
 </div>
 
 <script>
@@ -298,8 +286,9 @@ function getLocation(){
   });
 }
 
-/* ================= FORM GENERATOR ================= */
+/* ================= FORM GENERATOR (UPDATED UI) ================= */
 
+// Helper untuk visual active state pada radio button
 function updateRadioVisual(name, val) {
   const labels = document.querySelectorAll(`label[data-group="${name}"]`);
   labels.forEach(l => {
@@ -310,10 +299,12 @@ function updateRadioVisual(name, val) {
 
 function toggle(id, show, radioName, radioVal){
   document.getElementById(id).classList.toggle("hidden", !show);
+  // Panggil visual update
   if(radioName) updateRadioVisual(radioName, radioVal);
 }
 
 function radioSection(title, id, withFoto=false, withTime=false){
+  // Struktur HTML diupdate untuk modern styling (tanpa mengubah ID input)
   return `
   <div class="section">
     <h4>${title}</h4>
@@ -333,9 +324,9 @@ function radioSection(title, id, withFoto=false, withTime=false){
     </div>
 
     <div id="${id}_d" class="hidden detail-area">
-      ${withTime ? `<label style="font-size:12px; opacity:0.7; display:block; margin-bottom:5px;">Waktu Pelaksanaan</label><input type="time" id="${id}_waktu">` : ""}
+      ${withTime ? `<label style="font-size:12px; opacity:0.7">Waktu Pelaksanaan</label><input type="time" id="${id}_waktu">` : ""}
       
-      ${withFoto ? `<label style="font-size:12px; opacity:0.7; display:block; margin-bottom:5px;">Bukti Foto</label><input type="file" id="${id}_foto" accept="image/*">` : ""}
+      ${withFoto ? `<label style="font-size:12px; opacity:0.7">Bukti Foto</label><input type="file" id="${id}_foto" accept="image/*">` : ""}
       
       <textarea id="${id}_ket" placeholder="Tulis catatan atau keterangan tambahan..."></textarea>
     </div>
@@ -343,6 +334,7 @@ function radioSection(title, id, withFoto=false, withTime=false){
   `;
 }
 
+/* ================= GENERATE ================= */
 function generateForm(){
   dynamicForm.innerHTML =
     radioSection("Makan Sahur","sahur",true,true)+
@@ -373,10 +365,12 @@ async function loadPembimbing(){
 btnKirim.onclick = kirim;
 
 async function kirim(){
+  // Simple validation visual
   if(!confirm("Apakah Anda yakin ingin mengirim laporan ini?")) return;
 
   loader.classList.remove("hidden");
   btnKirim.disabled = true;
+  btnKirim.innerText = "Mengirim...";
 
   let fd = new FormData();
   fd.append("action","simpan");
@@ -419,6 +413,7 @@ async function kirim(){
     alert("❌ Gagal mengirim laporan. Periksa koneksi internet.");
     loader.classList.add("hidden");
     btnKirim.disabled = false;
+    btnKirim.innerText = "KIRIM LAPORAN";
   }
 }
 
