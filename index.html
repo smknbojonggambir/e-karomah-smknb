@@ -2,9 +2,9 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>E-KAROMAH SMKNB</title>
+<title>Login E-KAROMAH</title>
 
 <style>
 body{
@@ -20,33 +20,29 @@ body{
 
 .card{
   background:rgba(255,255,255,.08);
-  padding:35px;
-  border-radius:20px;
-  text-align:center;
+  padding:30px;
+  border-radius:18px;
   width:320px;
+  text-align:center;
 }
 
-.logo{
-  width:90px;
-  background:white;
-  padding:6px;
-  border-radius:50%;
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
 }
 
-a{
-  display:block;
-  margin:15px 0;
-  padding:14px;
+button{
   background:#2563eb;
   color:white;
-  border-radius:12px;
-  text-decoration:none;
   font-weight:600;
-  transition:.2s;
 }
 
-a:hover{
-  opacity:.85;
+.msg{
+  color:#ff8080;
+  font-size:14px;
 }
 </style>
 </head>
@@ -55,18 +51,62 @@ a:hover{
 
 <div class="card">
 
-<img class="logo"
-src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
-
 <h2>E-KAROMAH</h2>
 
-<p>Pilih Login</p>
+<select id="role">
+  <option value="">Pilih Role</option>
+  <option value="siswa">Siswa</option>
+  <option value="pembimbing">Pembimbing</option>
+  <option value="admin">Admin</option>
+</select>
 
-<a href="login.html?role=siswa">Login Siswa</a>
-<a href="login.html?role=pembimbing">Login Pembimbing</a>
-<a href="login.html?role=admin">Login Admin</a>
+<input id="user" placeholder="Username">
+
+<input id="pass" type="password" placeholder="Password">
+
+<button onclick="login()">LOGIN</button>
+
+<div class="msg" id="msg"></div>
 
 </div>
+
+<script>
+
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+async function login(){
+
+  msg.innerText="";
+
+  if(!role.value||!user.value||!pass.value){
+    msg.innerText="Lengkapi data!";
+    return;
+  }
+
+  msg.innerText="Memeriksa...";
+
+  const url=WEB_APP_URL+
+  "?action=login"+
+  "&user="+user.value+
+  "&pass="+pass.value+
+  "&role="+role.value;
+
+  const r=await fetch(url);
+  const d=await r.json();
+
+  if(d.status=="ok"){
+
+    localStorage.setItem("user",JSON.stringify(d));
+
+    if(d.role=="siswa") location="siswa.html";
+    if(d.role=="pembimbing") location="pembimbing.html";
+    if(d.role=="admin") location="admin.html";
+
+  }else{
+    msg.innerText="Login gagal!";
+  }
+}
+</script>
 
 </body>
 </html>
