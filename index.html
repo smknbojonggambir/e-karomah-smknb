@@ -33,7 +33,7 @@ body{
 .navbar img{height:45px}
 
 .container{
-  max-width:900px;
+  max-width:1100px;
   margin:auto;
   padding:20px;
 }
@@ -52,7 +52,7 @@ body{
   gap:15px;
 }
 
-input,select{
+input,select,textarea{
   width:100%;
   padding:8px;
   margin-top:5px;
@@ -61,6 +61,8 @@ input,select{
   background:#0d1117;
   color:white;
 }
+
+textarea{resize:vertical}
 
 button{
   background:var(--accent);
@@ -85,32 +87,130 @@ button{
 <div class="container">
 
 <div class="card">
-<h3>Lokasi GPS</h3>
-<input type="text" id="lat" placeholder="Latitude" readonly>
-<input type="text" id="long" placeholder="Longitude" readonly>
+<h3>Data Siswa</h3>
+<div class="grid">
+<input type="text" id="Username" placeholder="Username">
+<input type="text" id="Nama" placeholder="Nama">
+<input type="text" id="Kelompok" placeholder="Kelompok">
+<input type="text" id="Pembimbing" placeholder="Pembimbing">
+</div>
 </div>
 
 <div class="card">
-<h3>Input Kegiatan Harian</h3>
+<h3>Lokasi</h3>
+<input type="text" id="Lat" placeholder="Latitude" readonly>
+<input type="text" id="Long" placeholder="Longitude" readonly>
+</div>
+
+<div class="card">
+<h3>Kegiatan Harian</h3>
 
 <div class="grid">
 
-<input type="time" id="sahur_waktu">
-
-<select id="subuh"><option>Ya</option><option>Tidak</option></select>
-<select id="dzuhur"><option>Ya</option><option>Tidak</option></select>
-<select id="ashar"><option>Ya</option><option>Tidak</option></select>
-<select id="magrib"><option>Ya</option><option>Tidak</option></select>
-<select id="isya"><option>Ya</option><option>Tidak</option></select>
-<select id="taraweh"><option>Ya</option><option>Tidak</option></select>
-
-<input type="time" id="tidur">
-
-<select id="sedekah"><option>Ya</option><option>Tidak</option></select>
-
+<!-- SAHUR -->
 <div>
-<label>Pesantren (Upload Foto)</label>
-<input type="file" id="pesantren">
+<label>Sahur Waktu</label>
+<input type="time" id="Sahur_Waktu">
+<input type="file" id="Sahur_Foto">
+<textarea id="Sahur_Keterangan" placeholder="Keterangan Sahur"></textarea>
+</div>
+
+<!-- SUBUH -->
+<div>
+<label>Subuh</label>
+<select id="Subuh_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Subuh_Keterangan" placeholder="Keterangan Subuh"></textarea>
+</div>
+
+<!-- OLAHRAGA -->
+<div>
+<label>Olahraga</label>
+<input type="file" id="Olahraga_Foto">
+<textarea id="Olahraga_Keterangan"></textarea>
+</div>
+
+<!-- AKTIVITAS KELUARGA -->
+<div>
+<label>Aktivitas Keluarga</label>
+<input type="file" id="AktivitasKeluarga_Foto">
+<textarea id="AktivitasKeluarga_Keterangan"></textarea>
+</div>
+
+<!-- DZUHUR -->
+<div>
+<label>Dzuhur</label>
+<select id="Dzuhur_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Dzuhur_Keterangan"></textarea>
+</div>
+
+<!-- PESANTREN -->
+<div>
+<label>Pesantren</label>
+<input type="file" id="Pesantren_Foto">
+<textarea id="Pesantren_Keterangan"></textarea>
+</div>
+
+<!-- ASHAR -->
+<div>
+<label>Ashar</label>
+<select id="Ashar_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Ashar_Keterangan"></textarea>
+</div>
+
+<!-- AKSI EKOLOGI -->
+<div>
+<label>Aksi Ekologi</label>
+<input type="file" id="AksiEkologi_Foto">
+<textarea id="AksiEkologi_Keterangan"></textarea>
+</div>
+
+<!-- BUKA -->
+<div>
+<label>Buka</label>
+<input type="file" id="Buka_Foto">
+<textarea id="Buka_Keterangan"></textarea>
+</div>
+
+<!-- MAGRIB -->
+<div>
+<label>Magrib</label>
+<select id="Magrib_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Magrib_Keterangan"></textarea>
+</div>
+
+<!-- ISYA -->
+<div>
+<label>Isya</label>
+<select id="Isya_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Isya_Keterangan"></textarea>
+</div>
+
+<!-- TARAWEH -->
+<div>
+<label>Taraweh</label>
+<select id="Taraweh_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Taraweh_Keterangan"></textarea>
+</div>
+
+<!-- TADARUS -->
+<div>
+<label>Tadarus</label>
+<input type="file" id="Tadarus_Foto">
+<textarea id="Tadarus_Keterangan"></textarea>
+</div>
+
+<!-- TIDUR -->
+<div>
+<label>Tidur Waktu</label>
+<input type="time" id="Tidur_Waktu">
+<textarea id="Tidur_Keterangan"></textarea>
+</div>
+
+<!-- SEDEKAH -->
+<div>
+<label>Sedekah</label>
+<select id="Sedekah_Status"><option>Ya</option><option>Tidak</option></select>
+<textarea id="Sedekah_Keterangan"></textarea>
 </div>
 
 </div>
@@ -123,40 +223,70 @@ button{
 <script>
 
 navigator.geolocation.getCurrentPosition(function(pos){
-  document.getElementById("lat").value = pos.coords.latitude;
-  document.getElementById("long").value = pos.coords.longitude;
+  Lat.value = pos.coords.latitude;
+  Long.value = pos.coords.longitude;
 });
+
+function toBase64(file){
+  return new Promise(resolve=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function ambilFile(id,obj){
+  const input = document.getElementById(id);
+  if(input.files.length > 0){
+    const file = input.files[0];
+    obj[id] = await toBase64(file);
+    obj[id+"_mime"] = file.type;
+  }
+}
 
 async function kirim(){
 
-  function toBase64(file){
-    return new Promise(resolve=>{
-      const reader = new FileReader();
-      reader.onload = ()=> resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
-  }
-
   let data = {
-    lat:lat.value,
-    long:long.value,
-    sahur_waktu:sahur_waktu.value,
-    subuh:subuh.value,
-    dzuhur:dzuhur.value,
-    ashar:ashar.value,
-    magrib:magrib.value,
-    isya:isya.value,
-    taraweh:taraweh.value,
-    tidur:tidur.value,
-    sedekah:sedekah.value
+    Tanggal: new Date().toLocaleDateString(),
+    Username: Username.value,
+    Nama: Nama.value,
+    Kelompok: Kelompok.value,
+    Pembimbing: Pembimbing.value,
+    Lat: Lat.value,
+    Long: Long.value,
+    Sahur_Waktu: Sahur_Waktu.value,
+    Sahur_Keterangan: Sahur_Keterangan.value,
+    Subuh_Status: Subuh_Status.value,
+    Subuh_Keterangan: Subuh_Keterangan.value,
+    Dzuhur_Status: Dzuhur_Status.value,
+    Dzuhur_Keterangan: Dzuhur_Keterangan.value,
+    Ashar_Status: Ashar_Status.value,
+    Ashar_Keterangan: Ashar_Keterangan.value,
+    Magrib_Status: Magrib_Status.value,
+    Magrib_Keterangan: Magrib_Keterangan.value,
+    Isya_Status: Isya_Status.value,
+    Isya_Keterangan: Isya_Keterangan.value,
+    Taraweh_Status: Taraweh_Status.value,
+    Taraweh_Keterangan: Taraweh_Keterangan.value,
+    Tidur_Waktu: Tidur_Waktu.value,
+    Tidur_Keterangan: Tidur_Keterangan.value,
+    Sedekah_Status: Sedekah_Status.value,
+    Sedekah_Keterangan: Sedekah_Keterangan.value,
+    Olahraga_Keterangan: Olahraga_Keterangan.value,
+    AktivitasKeluarga_Keterangan: AktivitasKeluarga_Keterangan.value,
+    Pesantren_Keterangan: Pesantren_Keterangan.value,
+    AksiEkologi_Keterangan: AksiEkologi_Keterangan.value,
+    Buka_Keterangan: Buka_Keterangan.value,
+    Tadarus_Keterangan: Tadarus_Keterangan.value
   };
 
-  let fileInput = document.getElementById("pesantren");
-  if(fileInput.files.length > 0){
-    let file = fileInput.files[0];
-    data.pesantren = await toBase64(file);
-    data.pesantren_mime = file.type;
-  }
+  await ambilFile("Sahur_Foto",data);
+  await ambilFile("Olahraga_Foto",data);
+  await ambilFile("AktivitasKeluarga_Foto",data);
+  await ambilFile("Pesantren_Foto",data);
+  await ambilFile("AksiEkologi_Foto",data);
+  await ambilFile("Buka_Foto",data);
+  await ambilFile("Tadarus_Foto",data);
 
   google.script.run.withSuccessHandler(function(res){
     alert(res);
