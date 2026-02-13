@@ -4,64 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard Admin Sekolah</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<title>Laporan Siswa Online</title>
 
 <style>
+
 body{
     font-family: Arial, sans-serif;
     background:#f4f6f9;
     margin:0;
 }
 
-header{
-    background:#2c3e50;
-    color:white;
-    padding:15px;
-    text-align:center;
-}
-
 .container{
-    padding:20px;
-}
-
-.card{
+    max-width:900px;
+    margin:auto;
     background:white;
-    padding:15px;
-    margin-bottom:20px;
+    padding:20px;
+    margin-top:30px;
     border-radius:8px;
-    box-shadow:0 0 5px rgba(0,0,0,0.1);
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 h2{
-    margin-top:0;
-}
-
-/* Table */
-table{
-    width:100%;
-    border-collapse: collapse;
-}
-
-th,td{
-    border:1px solid #ddd;
-    padding:8px;
     text-align:center;
 }
 
-th{
-    background:#3498db;
-    color:white;
-}
-
-input,button{
-    padding:8px;
-    margin:5px;
+input,select,textarea,button{
+    width:100%;
+    padding:10px;
+    margin:5px 0;
 }
 
 button{
@@ -75,211 +45,274 @@ button:hover{
     background:#2980b9;
 }
 
-.notif{
-    background:#27ae60;
-    color:white;
-    padding:10px;
-    border-radius:5px;
+.hidden{
     display:none;
 }
+
+.card{
+    border:1px solid #ddd;
+    padding:10px;
+    margin-bottom:15px;
+    border-radius:5px;
+}
+
+label{
+    font-weight:bold;
+}
+
+.status{
+    display:flex;
+    gap:10px;
+}
+
+img{
+    max-width:100%;
+    margin-top:5px;
+}
+
 </style>
 </head>
 
 <body>
 
-<header>
-<h1>📊 Dashboard Admin Sekolah</h1>
-</header>
-
 <div class="container">
 
-<!-- NOTIFIKASI -->
-<div id="notif" class="notif"></div>
+<!-- LOGIN -->
+<div id="loginBox">
 
-<!-- INPUT DATA -->
-<div class="card">
-<h2>➕ Input Data Siswa</h2>
+<h2>🔐 Login Siswa</h2>
 
-<input type="text" id="nama" placeholder="Nama Siswa">
-<input type="number" id="nilai" placeholder="Nilai">
-<input type="number" id="hadir" placeholder="Jumlah Hadir">
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
 
-<button onclick="tambahData()">Tambah</button>
-</div>
+<button onclick="login()">Login</button>
 
-
-<!-- DATA SISWA -->
-<div class="card">
-<h2>📋 Data Siswa</h2>
-
-<table id="tabel">
-<thead>
-<tr>
-<th>No</th>
-<th>Nama</th>
-<th>Nilai</th>
-<th>Hadir</th>
-<th>Ranking</th>
-</tr>
-</thead>
-
-<tbody></tbody>
-</table>
-
-<br>
-<button onclick="kirimWA()">📱 Kirim Rekap WA</button>
-<button onclick="exportPDF()">📄 Export PDF</button>
+<p id="loginMsg"></p>
 
 </div>
 
 
-<!-- GRAFIK -->
-<div class="card">
-<h2>📈 Grafik Perkembangan</h2>
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
 
-<canvas id="chart"></canvas>
+<h2>📋 Laporan Kegiatan Harian</h2>
+
+<p><b>Nama:</b> <span id="namaUser"></span></p>
+<p><b>Kelompok:</b> <span id="kelompokUser"></span></p>
+<p><b>Pembimbing:</b> <span id="pembimbing"></span></p>
+
+
+<label>Tanggal</label>
+<input type="date" id="tanggal">
+
+
+<div id="formKegiatan"></div>
+
+
+<button onclick="kirim()">📤 Kirim Laporan</button>
+
+<p id="status"></p>
 
 </div>
 
 </div>
+
 
 <script>
 
-let dataSiswa = [];
+/**************** KONFIG ****************/
 
-const notif = document.getElementById("notif");
+const API_URL = "PASTE_URL_SCRIPT_KAMU_DISINI"; 
+// contoh:
+// https://script.google.com/macros/s/AKfycbxxx/exec
 
-function tampilNotif(pesan){
-    notif.innerHTML = pesan;
-    notif.style.display="block";
+/**************** GLOBAL ****************/
 
-    setTimeout(()=>{
-        notif.style.display="none";
-    },3000);
-}
+let userData = {};
 
-// TAMBAH DATA
-function tambahData(){
+const kegiatanList = [
+ "sahur","subuh","olahraga","keluarga","dzuhur",
+ "pesantren","ashar","aksi","buka","magrib",
+ "isya","tarawih","tadarus","sedekah"
+];
 
-    let nama = document.getElementById("nama").value;
-    let nilai = document.getElementById("nilai").value;
-    let hadir = document.getElementById("hadir").value;
+const fotoKeys = [
+ "sahur","olahraga","keluarga",
+ "pesantren","aksi","buka","tadarus"
+];
 
-    if(nama=="" || nilai=="" || hadir==""){
-        alert("Lengkapi data!");
+
+/**************** LOGIN ****************/
+
+function login(){
+
+    let u = document.getElementById("username").value;
+    let p = document.getElementById("password").value;
+
+    if(!u || !p){
+        alert("Isi username & password");
         return;
     }
 
-    dataSiswa.push({
-        nama:nama,
-        nilai:parseInt(nilai),
-        hadir:parseInt(hadir)
+    fetch(`${API_URL}?action=login&username=${u}&password=${p}`)
+    .then(res=>res.json())
+    .then(res=>{
+
+        if(res.status=="success"){
+
+            userData = res;
+
+            document.getElementById("loginBox").classList.add("hidden");
+            document.getElementById("dashboard").classList.remove("hidden");
+
+            document.getElementById("namaUser").innerText = res.nama;
+            document.getElementById("kelompokUser").innerText = res.kelompok;
+
+            loadPembimbing();
+            buatForm();
+
+        }else{
+            document.getElementById("loginMsg").innerText="Login gagal!";
+        }
+
     });
 
-    urutkanRanking();
-    tampilkanData();
-    updateChart();
-
-    tampilNotif("✅ Data berhasil ditambahkan");
-
-    document.getElementById("nama").value="";
-    document.getElementById("nilai").value="";
-    document.getElementById("hadir").value="";
 }
 
 
-// SORT RANKING
-function urutkanRanking(){
-    dataSiswa.sort((a,b)=>b.nilai - a.nilai);
+/**************** PEMBIMBING ****************/
+
+function loadPembimbing(){
+
+    fetch(`${API_URL}?action=getPembimbing&kelompok=${userData.kelompok}`)
+    .then(r=>r.text())
+    .then(t=>{
+        document.getElementById("pembimbing").innerText = t;
+        userData.pembimbing = t;
+    });
+
 }
 
 
-// TAMPILKAN DATA
-function tampilkanData(){
+/**************** FORM ****************/
 
-    let tbody = document.querySelector("#tabel tbody");
-    tbody.innerHTML="";
+function buatForm(){
 
-    dataSiswa.forEach((siswa,index)=>{
+    let html="";
 
-        let tr = document.createElement("tr");
+    kegiatanList.forEach(k=>{
 
-        tr.innerHTML=`
-            <td>${index+1}</td>
-            <td>${siswa.nama}</td>
-            <td>${siswa.nilai}</td>
-            <td>${siswa.hadir}</td>
-            <td>${index+1}</td>
+        html+=`
+
+        <div class="card">
+
+        <label>${k.toUpperCase()}</label>
+
+        <div class="status">
+            <select id="status_${k}">
+                <option value="Tidak">Tidak</option>
+                <option value="Ya">Ya</option>
+            </select>
+
+            <input type="time" id="waktu_${k}">
+        </div>
+
+        <textarea id="ket_${k}" placeholder="Keterangan"></textarea>
+
+        ${
+            fotoKeys.includes(k)
+            ?
+            `<input type="file" accept="image/*" id="foto_${k}">`
+            :
+            ""
+        }
+
+        </div>
+
         `;
 
-        tbody.appendChild(tr);
+    });
+
+    document.getElementById("formKegiatan").innerHTML = html;
+
+}
+
+
+/**************** BASE64 ****************/
+
+function toBase64(file){
+    return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload=()=>resolve(reader.result);
+        reader.onerror=e=>reject(e);
     });
 }
 
 
-// SIMULASI KIRIM WA
-function kirimWA(){
+/**************** KIRIM ****************/
 
-    let pesan="REKAP SISWA:\n\n";
+async function kirim(){
 
-    dataSiswa.forEach((s,i)=>{
-        pesan += `${i+1}. ${s.nama} | Nilai:${s.nilai} | Hadir:${s.hadir}\n`;
-    });
-
-    alert("Simulasi Kirim WA:\n\n"+pesan);
-
-    tampilNotif("📱 Rekap berhasil dikirim ke WA Pembimbing");
-}
-
-
-// EXPORT PDF
-function exportPDF(){
-
-    const { jsPDF } = window.jspdf;
-
-    let doc = new jsPDF();
-
-    doc.text("LAPORAN DATA SISWA",70,10);
-
-    let y=25;
-
-    dataSiswa.forEach((s,i)=>{
-
-        doc.text(
-        `${i+1}. ${s.nama} | Nilai:${s.nilai} | Hadir:${s.hadir}`,
-        10,y);
-
-        y+=8;
-    });
-
-    doc.save("laporan_siswa.pdf");
-
-    tampilNotif("📄 PDF berhasil dibuat");
-}
+    let data = {
+        action:"kirim",
+        tanggal: document.getElementById("tanggal").value,
+        username:userData.username,
+        nama:userData.nama,
+        kelompok:userData.kelompok,
+        pembimbing:userData.pembimbing,
+        kegiatan:{}
+    };
 
 
-// CHART
-let chart;
+    for(let k of kegiatanList){
 
-function updateChart(){
+        let status = document.getElementById(`status_${k}`).value;
+        let waktu = document.getElementById(`waktu_${k}`).value;
+        let ket   = document.getElementById(`ket_${k}`).value;
 
-    let nama = dataSiswa.map(s=>s.nama);
-    let nilai = dataSiswa.map(s=>s.nilai);
+        let item = {
+            status:status,
+            waktu:waktu,
+            ket:ket
+        };
 
-    if(chart) chart.destroy();
 
-    let ctx = document.getElementById("chart");
+        if(fotoKeys.includes(k)){
 
-    chart = new Chart(ctx,{
-        type:"bar",
-        data:{
-            labels:nama,
-            datasets:[{
-                label:"Nilai Siswa",
-                data:nilai,
-                backgroundColor:"#3498db"
-            }]
+            let file = document.getElementById(`foto_${k}`).files[0];
+
+            if(file){
+
+                let base64 = await toBase64(file);
+
+                item.foto = base64.split(",")[1];
+                item.fotoName = file.name;
+
+            }
+
         }
+
+        data.kegiatan[k]=item;
+
+    }
+
+
+    document.getElementById("status").innerText="Mengirim...";
+
+    fetch(API_URL,{
+        method:"POST",
+        body:JSON.stringify(data)
+    })
+    .then(r=>r.text())
+    .then(res=>{
+
+        if(res=="OK"){
+            document.getElementById("status").innerText="✅ Berhasil dikirim";
+        }else{
+            document.getElementById("status").innerText="❌ Gagal: "+res;
+        }
+
     });
 
 }
