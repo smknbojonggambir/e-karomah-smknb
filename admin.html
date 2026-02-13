@@ -1,119 +1,300 @@
+Berikut adalah perbaikan kode untuk halaman **Admin**.
+
+Saya telah melakukan perubahan berikut agar sesuai dengan standar modern dan sistem sebelumnya:
+
+1. **Desain Visual (UI):** Menyesuaikan dengan tema "Glassmorphism" (efek kaca) dan warna biru/slate yang sama dengan halaman Login dan Siswa.
+2. **Responsif:** Tabel kini memiliki *scroll* horizontal otomatis jika dibuka di HP, sehingga data tidak berantakan.
+3. **Perbaikan Logika Login:** Saya memperbarui pengecekan `localStorage` agar sesuai dengan cara data disimpan di halaman `index.html` (yaitu berupa objek JSON, bukan string biasa).
+4. **Fitur Tambahan:** Menambahkan indikator "Loading" saat mengambil data.
+
+Silakan gunakan kode lengkap di bawah ini:
+
+### File: `admin.html`
+
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>Admin - E-KAROMAH</title>
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
-body{
-  background:#020617;
-  color:white;
-  font-family:system-ui;
+:root {
+  --primary: #3b82f6;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --glass: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #f8fafc;
+  --success: #10b981;
+  --danger: #ef4444;
 }
-header{
-  background:#1e293b;
-  padding:15px;
-  text-align:center;
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
 }
-.header-btn{
-  margin-top:10px;
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
+
+/* Header Section */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  gap: 15px;
 }
-th,td{
-  border:1px solid #334155;
-  padding:7px;
-  text-align:center;
+
+h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--primary);
 }
-th{background:#0ea5e9;}
-button{
-  padding:10px 14px;
-  border:none;
-  color:white;
-  border-radius:8px;
-  cursor:pointer;
-  margin:3px;
+
+.header-btn {
+  display: flex;
+  gap: 10px;
 }
-button.export-btn{ background:#22c55e; }
-button.logout-btn{ background:#ef4444; }
-a{
-  text-decoration:none;
-  font-weight:600;
+
+button {
+  padding: 10px 16px;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: inherit;
+  font-size: 14px;
+  transition: transform 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+button:hover { opacity: 0.9; transform: translateY(-2px); }
+button:active { transform: scale(0.98); }
+
+.export-btn { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+.logout-btn { background: var(--danger); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+.refresh-btn { background: var(--primary); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+
+/* Table Section */
+.table-wrapper {
+  overflow-x: auto; /* Agar bisa discroll di HP */
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* Mencegah tabel terlalu gepeng di HP */
+}
+
+thead {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+th {
+  font-weight: 600;
+  color: #93c5fd;
+  white-space: nowrap;
+}
+
+tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+/* Status Badge (Opsional: Jika ada data status) */
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Loading Spinner */
+#loader {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: var(--text);
+  display: none; /* Hidden by default */
+}
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  header { flex-direction: column; align-items: flex-start; }
+  .header-btn { width: 100%; }
+  button { flex: 1; justify-content: center; }
 }
 </style>
 </head>
 <body>
 
-<header>
-<h2>Admin Panel</h2>
-<div class="header-btn">
-<button class="export-btn" onclick="exportPDF()">📄 Export PDF</button>
-<a href="dashboard.html" style="color:#38bdf8">📊 Dashboard</a>
-<button class="logout-btn" onclick="logout()">🚪 Logout</button>
-</div>
-</header>
+<div class="container">
+  
+  <header>
+    <div>
+      <h2>Admin Panel</h2>
+      <small style="opacity:0.6">Rekap Laporan E-KAROMAH</small>
+    </div>
+    <div class="header-btn">
+      <button class="refresh-btn" onclick="load()">🔄 Refresh</button>
+      <button class="export-btn" onclick="exportPDF()">📄 PDF</button>
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </header>
 
-<div id="data" style="padding:15px">
-<table>
-<thead>
-<tr>
-<th>Tanggal</th>
-<th>Nama</th>
-<th>Kelompok</th>
-<th>Pembimbing</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody id="tb"></tbody>
-</table>
+  <div id="loader">
+    <div class="spinner"></div>
+    Memuat Data...
+  </div>
+
+  <div id="data" class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Nama Siswa</th>
+          <th>Kelompok</th>
+          <th>Pembimbing</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tb">
+        </tbody>
+    </table>
+  </div>
+
 </div>
 
 <script>
 /* ================= PROTEKSI LOGIN ================= */
-if(localStorage.getItem("login") !== "admin"){
+// Mengambil data user yang disimpan saat login di index.html
+const user = JSON.parse(localStorage.getItem("user"));
+
+// Cek apakah user ada dan rolenya admin
+if(!user || user.role !== "admin"){
+  alert("Akses Ditolak! Anda bukan Admin.");
   location.href = "index.html";
 }
 
 /* ================= CONFIG ================= */
+// Pastikan URL ini sesuai dengan Web App Google Script Anda
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
 
 /* ================= LOAD DATA ================= */
 async function load(){
+  const tb = document.getElementById("tb");
+  const loader = document.getElementById("loader");
+  const wrapper = document.getElementById("data");
+  
+  // Tampilkan loader, sembunyikan tabel
+  loader.style.display = "block";
+  wrapper.style.opacity = "0.5";
+  tb.innerHTML = "";
+
   try{
+    // Mengambil data dengan action=rekapAdmin
     const r = await fetch(WEB_APP_URL + "?action=rekapAdmin");
+    
+    if(!r.ok) throw new Error("Gagal mengambil data");
+    
     const d = await r.json();
 
-    let tb = document.getElementById("tb");
-    tb.innerHTML = "";
+    // Jika data kosong
+    if(d.length === 0){
+      tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data laporan.</td></tr>`;
+    } else {
+      // Loop data
+      d.forEach(x => {
+        tb.innerHTML += `
+        <tr>
+          <td>${x.tanggal || "-"}</td>
+          <td><b>${x.nama || "-"}</b></td>
+          <td>${x.kelompok || "-"}</td>
+          <td>${x.pembimbing || "-"}</td>
+          <td>${x.status || "✔️ Lapor"}</td>
+        </tr>`;
+      });
+    }
 
-    d.forEach(x => {
-      tb.innerHTML += `
-      <tr>
-        <td>${x.tanggal}</td>
-        <td>${x.nama}</td>
-        <td>${x.kelompok}</td>
-        <td>${x.pembimbing}</td>
-        <td>${x.status}</td>
-      </tr>`;
-    });
   }catch(e){
     console.error(e);
-    alert("Gagal memuat data! Cek console.");
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">❌ Gagal memuat data. Periksa koneksi internet.</td></tr>`;
+  }finally{
+    // Sembunyikan loader
+    loader.style.display = "none";
+    wrapper.style.opacity = "1";
   }
 }
 
 /* ================= EXPORT PDF ================= */
 function exportPDF(){
-  html2pdf().from(document.getElementById("data")).save("rekap-ekaromah.pdf");
+  const element = document.getElementById("data");
+  const opt = {
+    margin:       10,
+    filename:     'Rekap-Ekaromah-' + new Date().toISOString().slice(0,10) + '.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  };
+
+  // Ubah style sementara agar tabel terlihat bagus di PDF (putih)
+  const originalColor = element.style.color;
+  element.style.color = "black";
+  element.style.background = "white";
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    // Kembalikan style
+    element.style.color = originalColor;
+    element.style.background = "transparent";
+  });
 }
 
 /* ================= LOGOUT ================= */
 function logout(){
-  if(confirm("Yakin ingin logout?")){
+  if(confirm("Apakah Anda yakin ingin keluar?")){
     localStorage.clear();
     location.href = "index.html";
   }
@@ -125,3 +306,5 @@ load();
 
 </body>
 </html>
+
+```
