@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Pembimbing - E-KAROMAH</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 body{
   font-family:system-ui;
@@ -12,61 +11,49 @@ body{
   color:white;
   margin:0;
 }
-
 header{
   background:#1e293b;
   padding:15px;
   text-align:center;
 }
-
 .header-btn{
   margin-top:10px;
 }
-
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:15px;
 }
-
 th,td{
   border:1px solid #334155;
   padding:8px;
   text-align:center;
 }
-
 th{background:#2563eb;}
-
 button{
   padding:10px 15px;
-  background:#22c55e;
   border:none;
   color:white;
   border-radius:8px;
   cursor:pointer;
   margin:3px;
 }
-
-.btn-logout{
-  background:#ef4444;
-}
+button.print-btn{ background:#22c55e; }
+button.logout-btn{ background:#ef4444; }
 </style>
 </head>
-
 <body>
 
 <header>
 <h2>Rekap Pembimbing</h2>
-
 <div class="header-btn">
-<button onclick="window.print()">🖨 Cetak</button>
-<button onclick="logout()" class="btn-logout">🚪 Logout</button>
+<button class="print-btn" onclick="window.print()">🖨 Cetak</button>
+<button class="logout-btn" onclick="logout()">🚪 Logout</button>
 </div>
 </header>
 
 <div style="padding:15px">
-
-<table id="tabel">
+<table>
 <thead>
 <tr>
 <th>Tanggal</th>
@@ -76,33 +63,29 @@ button{
 <th>Kegiatan</th>
 </tr>
 </thead>
-
 <tbody></tbody>
 </table>
-
 </div>
 
 <script>
-
 /* ================= PROTEKSI LOGIN ================= */
-if(localStorage.getItem("login")!=="pembimbing"){
-  location.href="index.html";
+if(localStorage.getItem("login") !== "pembimbing"){
+  location.href = "index.html";
 }
 
 /* ================= CONFIG ================= */
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
 
 /* ================= LOAD DATA ================= */
 async function loadData(){
-
   try{
-    const r = await fetch(WEB_APP_URL+"?action=rekapPembimbing");
+    const r = await fetch(WEB_APP_URL + "?action=rekapPembimbing");
     const d = await r.json();
 
     let tb = document.querySelector("tbody");
     tb.innerHTML = "";
 
-    d.forEach(x=>{
+    d.forEach(x => {
       tb.innerHTML += `
       <tr>
         <td>${x.tanggal}</td>
@@ -112,24 +95,22 @@ async function loadData(){
         <td>${x.kegiatan}</td>
       </tr>`;
     });
-
   }catch(e){
-    alert("Gagal memuat data!");
+    console.error(e);
+    alert("Gagal memuat data! Cek console.");
   }
-
 }
 
 /* ================= LOGOUT ================= */
 function logout(){
   if(confirm("Yakin ingin logout?")){
     localStorage.clear();
-    location.href="index.html";
+    location.href = "index.html";
   }
 }
 
 /* ================= INIT ================= */
 loadData();
-
 </script>
 
 </body>
