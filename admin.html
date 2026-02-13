@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin - E-KAROMAH</title>
+<meta name="viewport" content="width=device-width">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body{
+  background:#020617;
+  color:white;
+  font-family:system-ui;
+}
+
+header{
+  background:#1e293b;
+  padding:15px;
+  text-align:center;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border:1px solid #334155;
+  padding:7px;
+  text-align:center;
+}
+
+th{background:#0ea5e9;}
+
+button{
+  padding:10px;
+  background:#22c55e;
+  border:none;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Admin Panel</h2>
+
+<button onclick="exportPDF()">📄 Export PDF</button>
+
+<a href="dashboard.html" style="color:#38bdf8">📊 Dashboard</a>
+</header>
+
+<div id="data" style="padding:15px">
+
+<table>
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Nama</th>
+<th>Kelompok</th>
+<th>Pembimbing</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="tb"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+async function load(){
+
+ const r=await fetch(WEB_APP_URL+"?action=rekapAdmin");
+ const d=await r.json();
+
+ let tb=document.getElementById("tb");
+
+ d.forEach(x=>{
+
+  tb.innerHTML+=`
+  <tr>
+   <td>${x.tanggal}</td>
+   <td>${x.nama}</td>
+   <td>${x.kelompok}</td>
+   <td>${x.pembimbing}</td>
+   <td>${x.status}</td>
+  </tr>`;
+ });
+
+}
+
+function exportPDF(){
+
+ html2pdf()
+ .from(document.getElementById("data"))
+ .save("rekap-ekaromah.pdf");
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>
