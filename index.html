@@ -1,33 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-KAROMAH SMKNB</title>
+
 <style>
 body{
-  font-family:Arial;
-  background:linear-gradient(135deg,#1e3c72,#2a5298);
-  margin:0;padding:20px;
+    margin:0;
+    font-family:Segoe UI, sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+}
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
 }
 .card{
-  background:white;
-  max-width:600px;
-  margin:auto;
-  padding:20px;
-  border-radius:15px;
+    background:white;
+    color:#333;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
-select,input,textarea,button{
-  width:100%;padding:10px;margin:8px 0;
+h1{
+    text-align:center;
+}
+select,input,textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
 }
 button{
-  background:#2a5298;color:white;border:none;
+    width:100%;
+    padding:12px;
+    background:#2c5364;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:hover{
+    background:#1e3c72;
 }
 .hidden{display:none;}
+.loader{
+    text-align:center;
+    display:none;
+}
 </style>
 </head>
 <body>
 
+<div class="container">
+<h1>E-KAROMAH SMKNB</h1>
+
 <div class="card">
-<h2>E-KAROMAH SMKNB</h2>
 
 <select id="kelompok" onchange="loadNama()">
 <option value="">Pilih Kelompok</option>
@@ -37,111 +69,155 @@ button{
 <option value="">Pilih Nama</option>
 </select>
 
-<input type="text" id="pembimbing" readonly>
+<input type="text" id="pembimbing" placeholder="Pembimbing" readonly>
 
 <div id="formInput" class="hidden">
 
+<label>Waktu Sahur</label>
 <input type="time" id="sahur_waktu">
+
+<label>Foto Sahur</label>
 <input type="file" id="sahur_foto" required>
 
+<label>Foto Olahraga</label>
 <input type="file" id="olahraga_foto" required>
+
+<label>Foto Aktivitas Keluarga</label>
 <input type="file" id="aktivitas_foto" required>
+
+<label>Foto Pesantren</label>
 <input type="file" id="pesantren_foto" required>
+
+<label>Foto Aksi Ekologi</label>
 <input type="file" id="aksi_foto" required>
+
+<label>Foto Buka Puasa</label>
 <input type="file" id="buka_foto" required>
+
+<label>Foto Tadarus</label>
 <input type="file" id="tadarus_foto" required>
 
+<hr>
+
+<label>Subuh</label>
 <select id="subuh_status"><option>Ya</option><option>Tidak</option></select>
+
+<label>Dzuhur</label>
 <select id="dzuhur_status"><option>Ya</option><option>Tidak</option></select>
+
+<label>Ashar</label>
 <select id="ashar_status"><option>Ya</option><option>Tidak</option></select>
+
+<label>Magrib</label>
 <select id="magrib_status"><option>Ya</option><option>Tidak</option></select>
+
+<label>Isya</label>
 <select id="isya_status"><option>Ya</option><option>Tidak</option></select>
+
+<label>Taraweh</label>
 <select id="taraweh_status"><option>Ya</option><option>Tidak</option></select>
+
+<label>Sedekah</label>
 <select id="sedekah_status"><option>Ya</option><option>Tidak</option></select>
 
-<button onclick="kirim()">Simpan</button>
+<button onclick="kirim()">Simpan Data</button>
 
+<div class="loader" id="loader">Mengirim data...</div>
+
+</div>
 </div>
 </div>
 
 <script>
 
-function loadKelompok(){
-google.script.run.withSuccessHandler(function(data){
+// GANTI DENGAN URL WEB APP DEPLOY ANDA
+const WEB_APP_URL = "ISI_DENGAN_URL_WEB_APP_ANDA";
+
+// =========================
+// LOAD KELOMPOK
+// =========================
+async function loadKelompok(){
+const res = await fetch(WEB_APP_URL + "?action=getKelompok");
+const data = await res.json();
 let s=document.getElementById("kelompok");
 data.forEach(k=>{
 let o=document.createElement("option");
-o.value=k;o.text=k;s.appendChild(o);
+o.value=k;
+o.text=k;
+s.appendChild(o);
 });
-}).getKelompok();
 }
 
-function loadNama(){
+// =========================
+// LOAD NAMA
+// =========================
+async function loadNama(){
 let k=document.getElementById("kelompok").value;
-google.script.run.withSuccessHandler(function(data){
+const res = await fetch(WEB_APP_URL + "?action=getNama&kelompok="+k);
+const data = await res.json();
+
 let s=document.getElementById("nama");
-s.innerHTML='<option>Pilih Nama</option>';
+s.innerHTML='<option value="">Pilih Nama</option>';
 data.forEach(n=>{
 let o=document.createElement("option");
-o.value=n;o.text=n;s.appendChild(o);
+o.value=n;
+o.text=n;
+s.appendChild(o);
 });
 s.disabled=false;
-}).getNamaByKelompok(k);
 }
 
-function tampilForm(){
+// =========================
+// TAMPIL FORM
+// =========================
+async function tampilForm(){
 let k=document.getElementById("kelompok").value;
-google.script.run.withSuccessHandler(function(p){
-document.getElementById("pembimbing").value=p;
+const res = await fetch(WEB_APP_URL + "?action=getPembimbing&kelompok="+k);
+const pembimbing = await res.text();
+document.getElementById("pembimbing").value=pembimbing;
 document.getElementById("formInput").classList.remove("hidden");
-}).getPembimbingByKelompok(k);
 }
 
+// =========================
+// KIRIM DATA
+// =========================
 async function kirim(){
 
-function getBase64(id){
-return new Promise(resolve=>{
-let file=document.getElementById(id).files[0];
-let reader=new FileReader();
-reader.onload=()=>resolve(reader.result);
-reader.readAsDataURL(file);
+document.getElementById("loader").style.display="block";
+
+let formData = new FormData();
+formData.append("action","simpan");
+
+formData.append("kelompok",kelompok.value);
+formData.append("nama",nama.value);
+formData.append("pembimbing",pembimbing.value);
+
+formData.append("subuh_status",subuh_status.value);
+formData.append("dzuhur_status",dzuhur_status.value);
+formData.append("ashar_status",ashar_status.value);
+formData.append("magrib_status",magrib_status.value);
+formData.append("isya_status",isya_status.value);
+formData.append("taraweh_status",taraweh_status.value);
+formData.append("sedekah_status",sedekah_status.value);
+
+formData.append("sahur_waktu",sahur_waktu.value);
+
+formData.append("sahur_foto",sahur_foto.files[0]);
+formData.append("olahraga_foto",olahraga_foto.files[0]);
+formData.append("aktivitas_foto",aktivitas_foto.files[0]);
+formData.append("pesantren_foto",pesantren_foto.files[0]);
+formData.append("aksi_foto",aksi_foto.files[0]);
+formData.append("buka_foto",buka_foto.files[0]);
+formData.append("tadarus_foto",tadarus_foto.files[0]);
+
+await fetch(WEB_APP_URL,{
+method:"POST",
+body:formData
 });
-}
 
-navigator.geolocation.getCurrentPosition(async function(pos){
-
-let data={
-nama:document.getElementById("nama").value,
-kelompok:document.getElementById("kelompok").value,
-pembimbing:document.getElementById("pembimbing").value,
-lat:pos.coords.latitude,
-long:pos.coords.longitude,
-
-sahur_waktu:document.getElementById("sahur_waktu").value,
-
-sahur_foto:await getBase64("sahur_foto"),
-olahraga_foto:await getBase64("olahraga_foto"),
-aktivitas_foto:await getBase64("aktivitas_foto"),
-pesantren_foto:await getBase64("pesantren_foto"),
-aksi_foto:await getBase64("aksi_foto"),
-buka_foto:await getBase64("buka_foto"),
-tadarus_foto:await getBase64("tadarus_foto"),
-
-subuh_status:document.getElementById("subuh_status").value,
-dzuhur_status:document.getElementById("dzuhur_status").value,
-ashar_status:document.getElementById("ashar_status").value,
-magrib_status:document.getElementById("magrib_status").value,
-isya_status:document.getElementById("isya_status").value,
-taraweh_status:document.getElementById("taraweh_status").value,
-sedekah_status:document.getElementById("sedekah_status").value
-};
-
-google.script.run.withSuccessHandler(function(res){
-alert(res);
+alert("Data berhasil dikirim!");
+document.getElementById("loader").style.display="none";
 location.reload();
-}).simpanData(data);
-
-});
 }
 
 loadKelompok();
