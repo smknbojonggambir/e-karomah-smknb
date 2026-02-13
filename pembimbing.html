@@ -26,7 +26,7 @@ body {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: auto;
   background: var(--glass);
   backdrop-filter: blur(20px);
@@ -80,6 +80,7 @@ button:active { transform: scale(0.98); }
 .print-btn { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 .logout-btn { background: var(--danger); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
 .refresh-btn { background: var(--primary); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+.save-btn { background: #f59e0b; color:#fff; box-shadow:0 4px 15px rgba(245,158,11,0.3); }
 
 .table-wrapper {
   overflow-x: auto;
@@ -90,7 +91,7 @@ button:active { transform: scale(0.98); }
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 800px;
 }
 
 thead {
@@ -112,6 +113,16 @@ th {
 
 tr:hover {
   background: rgba(255,255,255,0.03);
+}
+
+textarea {
+  width: 100%;
+  border-radius: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  resize: vertical;
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
 }
 
 #loader {
@@ -147,7 +158,7 @@ tr:hover {
 <header>
   <div>
     <h2>Rekap Pembimbing</h2>
-    <small style="opacity:0.6">Laporan harian siswa</small>
+    <small style="opacity:0.6">Laporan harian siswa + Penilaian</small>
   </div>
   <div class="header-btn">
     <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
@@ -170,6 +181,8 @@ tr:hover {
         <th>Kelompok</th>
         <th>Hadir</th>
         <th>Kegiatan</th>
+        <th>Catatan Pembimbing</th>
+        <th>Aksi</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -205,9 +218,9 @@ async function loadData(){
     const d = await r.json();
 
     if(d.length === 0){
-      tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data laporan.</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Belum ada data laporan.</td></tr>`;
     } else {
-      d.forEach(x => {
+      d.forEach((x,i) => {
         tb.innerHTML += `
         <tr>
           <td>${x.tanggal || "-"}</td>
@@ -215,15 +228,44 @@ async function loadData(){
           <td>${x.kelompok || "-"}</td>
           <td>${x.hadir || "✔️"}</td>
           <td>${x.kegiatan || "-"}</td>
+          <td>
+            <textarea id="catatan_${i}" placeholder="Tulis catatan...">${x.catatan||""}</textarea>
+          </td>
+          <td>
+            <button class="save-btn" onclick="simpanCatatan('${x.id}', ${i})">💾 Simpan</button>
+          </td>
         </tr>`;
       });
     }
   }catch(e){
     console.error(e);
-    tb.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">❌ Gagal memuat data. Periksa koneksi internet.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ef4444;">❌ Gagal memuat data. Periksa koneksi internet.</td></tr>`;
   }finally{
     loader.style.display = "none";
     wrapper.style.opacity = "1";
+  }
+}
+
+/* ================= SIMPAN CATATAN ================= */
+async function simpanCatatan(id,row){
+  const catatan = document.getElementById(`catatan_${row}`).value;
+  
+  try{
+    const fd = new FormData();
+    fd.append("action","simpanCatatan");
+    fd.append("id",id);
+    fd.append("catatan",catatan);
+
+    const r = await fetch(WEB_APP_URL,{
+      method:"POST",
+      body:fd
+    });
+
+    if(!r.ok) throw new Error("Gagal simpan");
+    alert("Catatan berhasil disimpan ✅");
+  }catch(e){
+    console.error(e);
+    alert("❌ Gagal menyimpan catatan");
   }
 }
 
