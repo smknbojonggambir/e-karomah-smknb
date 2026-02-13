@@ -2,137 +2,127 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Siswa</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E-KAROMAH SMKNB - Siswa</title>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f9;
+  margin:0;
+  font-family:system-ui;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  min-height:100vh;
   padding:20px;
 }
 
-h2{text-align:center;}
-
-.box{
+.container{
   max-width:900px;
   margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,.1);
 }
 
-input,select,textarea,button{
+.card{
+  background:rgba(255,255,255,.08);
+  padding:25px;
+  border-radius:18px;
+}
+
+.section{
+  background:rgba(255,255,255,.05);
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+}
+
+input,textarea,button{
   width:100%;
-  padding:8px;
-  margin:5px 0;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin:8px 0;
 }
 
 button{
-  background:#2196F3;
+  background:#2563eb;
   color:white;
-  border:none;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:.9;
+  font-weight:600;
 }
 
 .hidden{display:none}
 
-.section{
-  border:1px solid #ddd;
-  padding:10px;
-  margin:10px 0;
-  border-radius:5px;
-}
-
-.radio-group label{
-  margin-right:15px;
-}
-
-#loader{
-  display:none;
-  text-align:center;
-  font-weight:bold;
-  color:green;
+.radio-group{
+  display:flex;
+  gap:20px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="container">
 
-<h2>📋 Form Kegiatan Harian Siswa</h2>
+<h2>E-KAROMAH SMKNB</h2>
 
-<!-- IDENTITAS -->
-<div>
-  <label>Kelompok</label>
-  <select id="kelompok" onchange="loadNama()">
-    <option value="">-- Pilih Kelompok --</option>
-  </select>
+<div class="card">
 
-  <label>Nama</label>
-  <select id="nama" disabled></select>
+<p id="info"></p>
 
-  <label>Pembimbing</label>
-  <input type="text" id="pembimbing" readonly>
+<p>
+<b>Pembimbing:</b><br>
+<input type="text" id="pembimbing" readonly>
+</p>
 
-  <button onclick="tampilForm()">Tampilkan Form</button>
-</div>
-
-<hr>
-
-<!-- FORM -->
-<div id="formInput" class="hidden">
-
-<h3>Input Kegiatan</h3>
-
-<div id="dynamicForm"></div>
-
+<!-- GPS -->
 <input type="hidden" id="lat">
 <input type="hidden" id="long">
 
-<div id="loader">⏳ Mengirim data...</div>
+<div id="dynamicForm"></div>
 
-<button onclick="kirim()">Kirim Laporan</button>
+<button onclick="kirim()">KIRIM</button>
+
+<p id="loader" class="hidden">⏳ Mengirim...</p>
+
+<button onclick="logout()">Logout</button>
 
 </div>
-
 </div>
 
 
 <script>
 
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzG_JwpZBfC5-e_wMGf5mhufKbxJIpXE97LdGFknRkFBNAhgI6tF_d1zM1v4gyGmVmOfA/exec";
+
+
+/* ================= CEK LOGIN ================= */
+
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user || user.role!="siswa"){
+  location.href="index.html";
+}
+
+const nama = user.nama;
+const kelompok = user.kelompok;
+
+
+/* ================= INFO ================= */
+
+info.innerHTML=`
+<b>Nama:</b> ${nama}<br>
+<b>Kelompok:</b> ${kelompok}
+`;
 
 
 /* ================= GPS ================= */
 
 function getLocation(){
 
-  if(!navigator.geolocation){
-    alert("GPS tidak didukung");
-    return;
-  }
+  if(!navigator.geolocation) return;
 
-  navigator.geolocation.getCurrentPosition(
+  navigator.geolocation.getCurrentPosition(pos=>{
+    lat.value=pos.coords.latitude;
+    long.value=pos.coords.longitude;
+  });
 
-    pos=>{
-      lat.value  = pos.coords.latitude;
-      long.value = pos.coords.longitude;
-    },
-
-    err=>{
-      alert("Aktifkan GPS!");
-    },
-
-    {enableHighAccuracy:true}
-
-  );
 }
 
 
@@ -141,6 +131,7 @@ function getLocation(){
 function toggle(id,show){
   document.getElementById(id).classList.toggle("hidden",!show);
 }
+
 
 function radioSection(title,id,withFoto=false,withTime=false){
 
@@ -167,64 +158,13 @@ onclick="toggle('${id}_d',false)"> Tidak
 
 ${withTime?`<input type="time" id="${id}_waktu">`:""}
 
-${withFoto?`<input type="file" id="${id}_foto" accept="image/*">`:""}
+${withFoto?`<input type="file" id="${id}_foto">`:""}
 
-<textarea id="${id}_ket" placeholder="Keterangan..."></textarea>
+<textarea id="${id}_ket"></textarea>
 
 </div>
 </div>
 `;
-}
-
-
-/* ================= LOAD ================= */
-
-async function loadKelompok(){
-
-  const r=await fetch(WEB_APP_URL+"?action=getKelompok");
-  const d=await r.json();
-
-  d.forEach(x=>{
-    kelompok.innerHTML+=`<option>${x}</option>`;
-  });
-
-}
-
-async function loadNama(){
-
-  if(!kelompok.value) return;
-
-  const r=await fetch(
-    WEB_APP_URL+"?action=getNama&kelompok="+kelompok.value
-  );
-
-  const d=await r.json();
-
-  nama.innerHTML='<option></option>';
-
-  d.forEach(x=>{
-    nama.innerHTML+=`<option>${x}</option>`;
-  });
-
-  nama.disabled=false;
-}
-
-async function tampilForm(){
-
-  if(!kelompok.value || !nama.value){
-    alert("Lengkapi data dulu!");
-    return;
-  }
-
-  const r=await fetch(
-    WEB_APP_URL+"?action=getPembimbing&kelompok="+kelompok.value
-  );
-
-  pembimbing.value=await r.text();
-
-  formInput.classList.remove("hidden");
-
-  generateForm();
 }
 
 
@@ -252,28 +192,43 @@ function generateForm(){
 }
 
 
+/* ================= LOAD PEMBIMBING ================= */
+
+async function loadPembimbing(){
+
+  const r = await fetch(
+    WEB_APP_URL+"?action=getPembimbing&kelompok="+kelompok
+  );
+
+  pembimbing.value = await r.text();
+
+}
+
+
 /* ================= SUBMIT ================= */
 
 async function kirim(){
 
-  loader.style.display="block";
+  loader.classList.remove("hidden");
 
   let fd=new FormData();
 
   fd.append("action","simpan");
 
-  fd.append("kelompok",kelompok.value);
-  fd.append("nama",nama.value);
+  fd.append("nama",nama);
+  fd.append("kelompok",kelompok);
   fd.append("pembimbing",pembimbing.value);
 
   fd.append("lat",lat.value);
   fd.append("long",long.value);
+
 
   const list=[
     "sahur","subuh","olahraga","keluarga","dzuhur",
     "pesantren","ashar","aksi","buka","magrib",
     "isya","tarawih","tadarus","tidur"
   ];
+
 
   for(let id of list){
 
@@ -287,45 +242,36 @@ async function kirim(){
     let k=document.getElementById(id+"_ket");
     if(k) fd.append(id+"_ket",k.value);
 
-    let f=document.getElementById(id+"_foto");
-
-    if(f && f.files[0]){
-
-      let reader=new FileReader();
-
-      await new Promise(r=>{
-
-        reader.onload=()=>{
-
-          fd.append(id+"_foto",reader.result);
-          r();
-
-        };
-
-        reader.readAsDataURL(f.files[0]);
-
-      });
-
-    }
-
   }
+
 
   await fetch(WEB_APP_URL,{
     method:"POST",
     body:fd
   });
 
-  alert("Laporan berhasil dikirim!");
 
-  loader.style.display="none";
+  alert("Berhasil dikirim!");
+
+  loader.classList.add("hidden");
 
   location.reload();
+
+}
+
+
+/* ================= LOGOUT ================= */
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
 }
 
 
 /* ================= INIT ================= */
 
-loadKelompok();
+generateForm();
+loadPembimbing();
 getLocation();
 
 </script>
