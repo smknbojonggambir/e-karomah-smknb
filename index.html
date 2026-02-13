@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>E-KAROMAH SMKNB</title>
+<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
@@ -11,7 +10,7 @@ body{
   background:#f4f6f9;
   padding:20px;
 }
-.container{
+.card{
   max-width:800px;
   margin:auto;
   background:white;
@@ -19,103 +18,152 @@ body{
   border-radius:10px;
   box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
+.logo{
+  text-align:center;
+}
+.logo img{
+  width:100px;
+}
+h2{text-align:center;}
 label{font-weight:bold; display:block; margin-top:10px;}
 input,select,textarea{
   width:100%;
   padding:8px;
   margin-top:5px;
-  border:1px solid #ccc;
-  border-radius:6px;
 }
 button{
   margin-top:20px;
   padding:12px;
+  width:100%;
   background:#2c3e50;
   color:white;
   border:none;
-  border-radius:6px;
-  width:100%;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
+<div class="card">
 
+<div class="logo">
+<img src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
 <h2>E-KAROMAH SMKNB</h2>
+</div>
+
+<label>Kelompok</label>
+<select id="kelompok" onchange="loadUsers()">
+<option value="">-- Pilih Kelompok --</option>
+</select>
+
+<label>Nama</label>
+<select id="nama" onchange="setUser()">
+<option value="">-- Pilih Nama --</option>
+</select>
+
+<label>Pembimbing</label>
+<input type="text" id="pembimbing" readonly>
+
+<div id="formArea" style="display:none">
 
 <label>Tanggal</label>
 <input type="date" id="Tanggal">
 
-<label>Username</label>
-<input type="text" id="Username">
+<label>Sahur Waktu</label>
+<input type="time" id="Sahur_Waktu">
 
-<label>Nama</label>
-<input type="text" id="Nama">
+<label>Foto Sahur</label>
+<input type="file" id="Sahur_Foto">
 
-<label>Kelompok</label>
-<select id="Kelompok" onchange="setPembimbing()">
-  <option value="">-- Pilih Kelompok --</option>
-</select>
+<label>Keterangan</label>
+<textarea id="Sahur_Keterangan"></textarea>
 
-<label>Pembimbing</label>
-<input type="text" id="Pembimbing" readonly>
-
-<input type="hidden" id="Lat">
-<input type="hidden" id="Long">
-
-<button onclick="kirim()">SIMPAN LAPORAN</button>
+<button onclick="kirim()">Simpan Laporan</button>
 
 <div id="hasil"></div>
 
 </div>
 
+</div>
+
 <script>
 
-let kelompokData = [];
+let kelompokData=[];
+let selectedUser="";
 
 google.script.run.withSuccessHandler(function(data){
 
-  kelompokData = data;
-  const select = document.getElementById("Kelompok");
-
-  data.forEach(item=>{
-    let opt = document.createElement("option");
-    opt.value = item.kelompok;
-    opt.textContent = item.kelompok;
-    select.appendChild(opt);
+  kelompokData=data;
+  data.forEach(k=>{
+    let opt=document.createElement("option");
+    opt.value=k.kelompok;
+    opt.textContent=k.kelompok;
+    kelompok.appendChild(opt);
   });
 
-}).getKelompokData();
+}).getKelompok();
 
-function setPembimbing(){
-  const kelompok = Kelompok.value;
-  const found = kelompokData.find(k=>k.kelompok===kelompok);
-  Pembimbing.value = found ? found.pembimbing : "";
+function loadUsers(){
+
+  let k=kelompok.value;
+  let found=kelompokData.find(x=>x.kelompok===k);
+
+  pembimbing.value=found?found.pembimbing:"";
+
+  google.script.run.withSuccessHandler(function(users){
+
+    nama.innerHTML='<option value="">-- Pilih Nama --</option>';
+    users.forEach(u=>{
+      let opt=document.createElement("option");
+      opt.value=u.username;
+      opt.textContent=u.nama;
+      nama.appendChild(opt);
+    });
+
+  }).getUsersByKelompok(k);
+}
+
+function setUser(){
+  selectedUser=nama.value;
+  formArea.style.display="block";
 }
 
 navigator.geolocation.getCurrentPosition(function(pos){
-  Lat.value = pos.coords.latitude;
-  Long.value = pos.coords.longitude;
+  window.lat=pos.coords.latitude;
+  window.long=pos.coords.longitude;
 });
 
-function kirim(){
+function toBase64(file){
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=e=>resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
 
-  let data = {
-    Tanggal: Tanggal.value,
-    Username: Username.value,
-    Nama: Nama.value,
-    Kelompok: Kelompok.value,
-    Pembimbing: Pembimbing.value,
-    Lat: Lat.value,
-    Long: Long.value
+async function kirim(){
+
+  let file=Sahur_Foto.files[0];
+  let base64=file?await toBase64(file):"";
+
+  let data={
+    Tanggal:Tanggal.value,
+    Username:selectedUser,
+    Nama:nama.options[nama.selectedIndex].text,
+    Kelompok:kelompok.value,
+    Pembimbing:pembimbing.value,
+    Lat:window.lat,
+    Long:window.long,
+    Sahur_Waktu:Sahur_Waktu.value,
+    Sahur_Foto:base64,
+    Sahur_Foto_mime:file?file.type:"",
+    Sahur_Keterangan:Sahur_Keterangan.value
   };
 
   google.script.run.withSuccessHandler(function(res){
-    hasil.innerHTML = res;
+    hasil.innerHTML=res;
   }).saveLaporan(data);
 }
-</script>
 
+</script>
 </body>
 </html>
