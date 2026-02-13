@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+<style>
+body{
+  background:#0f172a;
+  font-family:system-ui;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.box{
+  background:#1e293b;
+  padding:30px;
+  border-radius:15px;
+  width:280px;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  background:#2563eb;
+  color:white;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h3>Login</h3>
+
+<input id="u" placeholder="Username">
+<input id="p" type="password" placeholder="Password">
+
+<button onclick="login()">Masuk</button>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbyu33np9t611Jzxh6EBCYuw5lH2n4iUyttlDuEznKsr_mgudPpLjAk0Uoiqlk6gkJjRwA/exec";
+
+const role=new URLSearchParams(location.search).get("role");
+
+async function login(){
+
+  let r=await fetch(
+    `${API}?action=login&u=${u.value}&p=${p.value}`
+  );
+
+  let d=await r.json();
+
+  if(d.status!="ok"){
+    alert("Login gagal");
+    return;
+  }
+
+  if(d.role.toLowerCase()!=role){
+    alert("Akses ditolak");
+    return;
+  }
+
+  localStorage.setItem("user",JSON.stringify(d));
+
+  location.href=role+".html";
+}
+</script>
+
+</body>
+</html>
