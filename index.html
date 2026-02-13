@@ -2,101 +2,63 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>E-KAROMAH SMKNB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
-:root{
-  --bg1:#0f172a;
-  --bg2:#1e293b;
-  --primary:#2563eb;
-}
-
 body{
   margin:0;
   font-family:system-ui;
-  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  background:linear-gradient(135deg,#0f172a,#1e293b);
   color:white;
-  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-}
-
-.container{
-  text-align:center;
-  max-width:400px;
-  width:100%;
-  padding:20px;
-}
-
-.logo{
-  width:100px;
-  background:white;
-  padding:8px;
-  border-radius:50%;
-  margin-bottom:15px;
+  height:100vh;
 }
 
 .card{
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(15px);
-  padding:30px;
-  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  padding:35px;
+  border-radius:20px;
+  text-align:center;
+  width:320px;
 }
 
-h2{
-  margin-bottom:25px;
+.logo{
+  width:90px;
+  background:white;
+  padding:6px;
+  border-radius:50%;
 }
 
-.btn{
+a{
   display:block;
-  width:100%;
+  margin:15px 0;
   padding:14px;
-  margin:12px 0;
-  border:none;
-  border-radius:12px;
-  background:var(--primary);
+  background:#2563eb;
   color:white;
-  font-weight:600;
-  cursor:pointer;
+  border-radius:12px;
   text-decoration:none;
-  transition:.2s;
-}
-
-.btn:hover{
-  background:#1d4ed8;
-  transform:scale(1.03);
+  font-weight:600;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
-  <div class="card">
+<img class="logo"
+src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
 
-    <img class="logo"
-    src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
+<h2>E-KAROMAH</h2>
 
-    <h2>E-KAROMAH SMKNB</h2>
+<p>Pilih Login</p>
 
-    <p>Silakan pilih login</p>
-
-    <a href="login.html?role=siswa" class="btn">
-      👨‍🎓 Login Siswa
-    </a>
-
-    <a href="login.html?role=pembimbing" class="btn">
-      👩‍🏫 Login Pembimbing
-    </a>
-
-    <a href="login.html?role=admin" class="btn">
-      🛠️ Login Admin
-    </a>
-
-  </div>
+<a href="login.html?role=siswa">Login Siswa</a>
+<a href="login.html?role=pembimbing">Login Pembimbing</a>
+<a href="login.html?role=admin">Login Admin</a>
 
 </div>
 
