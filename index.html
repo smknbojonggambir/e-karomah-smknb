@@ -13,12 +13,14 @@
   --accent:#2ea043;
   --text:#e6edf3;
 }
+
 body{
   margin:0;
   font-family:Segoe UI;
   background:var(--bg);
   color:var(--text);
 }
+
 .navbar{
   background:var(--card);
   padding:15px 25px;
@@ -27,12 +29,15 @@ body{
   gap:15px;
   border-bottom:1px solid var(--border);
 }
+
 .navbar img{height:45px}
+
 .container{
   max-width:1100px;
   margin:auto;
   padding:20px;
 }
+
 .card{
   background:var(--card);
   padding:20px;
@@ -40,11 +45,13 @@ body{
   border:1px solid var(--border);
   margin-bottom:20px;
 }
+
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:15px;
 }
+
 input,select{
   width:100%;
   padding:8px;
@@ -54,6 +61,7 @@ input,select{
   background:#0d1117;
   color:white;
 }
+
 button{
   background:var(--accent);
   padding:12px;
@@ -87,142 +95,92 @@ button{
 
 <div class="grid">
 
-<div>
-<label>Sahur (Waktu)</label>
 <input type="time" id="sahur_waktu">
-<label>Foto Sahur</label>
-<input type="text" id="sahur_foto" placeholder="Link foto">
-</div>
+<input type="file" id="sahur_foto">
 
-<div>
-<label>Shalat Subuh</label>
-<select id="subuh">
-<option value="">--</option>
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
+<select id="subuh"><option>Ya</option><option>Tidak</option></select>
 
-<div>
-<label>Olahraga (Link Foto)</label>
-<input type="text" id="olahraga">
-</div>
+<input type="file" id="olahraga">
+<input type="file" id="keluarga">
 
-<div>
-<label>Aktivitas Keluarga (Link Foto)</label>
-<input type="text" id="keluarga">
-</div>
+<select id="dzuhur"><option>Ya</option><option>Tidak</option></select>
 
-<div>
-<label>Shalat Dzuhur</label>
-<select id="dzuhur">
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
+<input type="file" id="pesantren">
 
-<div>
-<label>Pesantren (Link Foto)</label>
-<input type="text" id="pesantren">
-</div>
+<select id="ashar"><option>Ya</option><option>Tidak</option></select>
 
-<div>
-<label>Shalat Ashar</label>
-<select id="ashar">
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
+<input type="file" id="aksi">
+<input type="file" id="buka">
 
-<div>
-<label>Aksi Ekologi (Link Foto)</label>
-<input type="text" id="aksi">
-</div>
+<select id="magrib"><option>Ya</option><option>Tidak</option></select>
+<select id="isya"><option>Ya</option><option>Tidak</option></select>
+<select id="taraweh"><option>Ya</option><option>Tidak</option></select>
 
-<div>
-<label>Buka Bersama (Link Foto)</label>
-<input type="text" id="buka">
-</div>
+<input type="file" id="tadarus">
 
-<div>
-<label>Shalat Magrib</label>
-<select id="magrib">
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
-
-<div>
-<label>Shalat Isya</label>
-<select id="isya">
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
-
-<div>
-<label>Taraweh</label>
-<select id="taraweh">
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
-
-<div>
-<label>Tadarus (Link Foto)</label>
-<input type="text" id="tadarus">
-</div>
-
-<div>
-<label>Tidur Cepat (Waktu)</label>
 <input type="time" id="tidur">
-</div>
 
-<div>
-<label>Sedekah</label>
-<select id="sedekah">
-<option>Ya</option>
-<option>Tidak</option>
-</select>
-</div>
+<select id="sedekah"><option>Ya</option><option>Tidak</option></select>
 
 </div>
 
-<button onclick="kirim()">SIMPAN</button>
+<button onclick="kirim()">SIMPAN LAPORAN</button>
 
 </div>
 </div>
 
 <script>
+
 navigator.geolocation.getCurrentPosition(function(pos){
   document.getElementById("lat").value = pos.coords.latitude;
   document.getElementById("long").value = pos.coords.longitude;
 });
 
-function kirim(){
+async function kirim(){
+
+  function toBase64(file){
+    return new Promise(resolve=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
   let data = {
+    tanggal:new Date().toLocaleDateString(),
     lat:lat.value,
     long:long.value,
     sahur_waktu:sahur_waktu.value,
-    sahur_foto:sahur_foto.value,
     subuh:subuh.value,
-    olahraga:olahraga.value,
-    keluarga:keluarga.value,
     dzuhur:dzuhur.value,
-    pesantren:pesantren.value,
     ashar:ashar.value,
-    aksi:aksi.value,
-    buka:buka.value,
     magrib:magrib.value,
     isya:isya.value,
     taraweh:taraweh.value,
-    tadarus:tadarus.value,
     tidur:tidur.value,
     sedekah:sedekah.value
   };
 
-  google.script.run.withSuccessHandler(function(res){
+  async function handleFile(id,name){
+    let fileInput = document.getElementById(id);
+    if(fileInput.files.length>0){
+      let file = fileInput.files[0];
+      data[name] = await toBase64(file);
+      data[name+"_mime"] = file.type;
+    }
+  }
+
+  await handleFile("sahur_foto","sahur_foto");
+  await handleFile("olahraga","olahraga");
+  await handleFile("keluarga","keluarga");
+  await handleFile("pesantren","pesantren");
+  await handleFile("aksi","aksi");
+  await handleFile("buka","buka");
+  await handleFile("tadarus","tadarus");
+
+  google.script.run.withSuccessHandler(res=>{
     alert(res);
+    location.reload();
   }).saveLaporan(data);
 }
 </script>
