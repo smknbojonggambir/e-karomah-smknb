@@ -13,14 +13,15 @@ body{
 }
 
 .card{
-  max-width:400px;
+  max-width:420px;
   margin:auto;
   background:rgba(255,255,255,.08);
   padding:25px;
   border-radius:12px;
+  margin-bottom:20px;
 }
 
-input,select,button{
+input,textarea,button{
   width:100%;
   padding:10px;
   margin:8px 0;
@@ -32,91 +33,129 @@ button{
   background:#2563eb;
   color:white;
   font-weight:bold;
+  cursor:pointer;
 }
 
 .hidden{display:none}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+td,th{
+  border:1px solid white;
+  padding:5px;
+  text-align:center;
+}
 </style>
 </head>
 
 <body>
 
+<h2 align="center">E-KAROMAH SMKNB</h2>
+
+
 <!-- LOGIN -->
 <div id="loginBox" class="card">
-  <h3>Login E-KAROMAH</h3>
 
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
+<h3>Login</h3>
 
-  <button onclick="login()">Login</button>
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
 
-  <p id="loginMsg"></p>
+<button onclick="login()">Login</button>
+
+<p id="msg"></p>
+
 </div>
 
+
 <!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
+<div id="dashBox" class="hidden">
 
-  <div class="card">
-    <h3 id="welcome"></h3>
-    <p id="roleInfo"></p>
+<!-- INFO -->
+<div class="card">
 
-    <button onclick="logout()">Logout</button>
-  </div>
+<h3 id="welcome"></h3>
+<p id="roleInfo"></p>
 
-  <!-- FORM SISWA -->
-  <div id="formSiswa" class="card hidden">
+<button onclick="logout()">Logout</button>
 
-    <h4>Input Laporan Harian</h4>
+</div>
 
-    <textarea id="laporan" placeholder="Isi kegiatan hari ini"></textarea>
 
-    <button onclick="kirimLaporan()">Kirim</button>
+<!-- FORM SISWA -->
+<div id="formSiswa" class="card hidden">
 
-  </div>
+<h3>Input Laporan Harian</h3>
 
-  <!-- MONITOR -->
-  <div id="monitorBox" class="card hidden">
+<textarea id="laporan" rows="5"
+placeholder="Tulis kegiatan hari ini..."></textarea>
 
-    <h4>Monitoring Laporan</h4>
+<button onclick="kirim()">Kirim</button>
 
-    <button onclick="loadLaporan()">Refresh</button>
+</div>
 
-    <div id="dataLaporan"></div>
 
-  </div>
+<!-- MONITOR -->
+<div id="monitorBox" class="card hidden">
+
+<h3>Monitoring Laporan</h3>
+
+<button onclick="loadData()">Refresh</button>
+
+<div id="tabel"></div>
+
+</div>
 
 </div>
 
 
 <script>
 
-const URL="https://script.google.com/macros/s/AKfycbyP_1V27hyUaNhBohvn02Rft-X3Q6qjdwbuTDuG0ctnrfKrkNm5Ux30juEcMnO5diLojQ/exec";
+// =============================
+// GANTI URL WEB APP ANDA
+// =============================
+const URL="PASTE_WEBAPP_URL_DISINI";
 
-/**************** LOGIN *****************/
+
+// =============================
+// LOGIN
+// =============================
 async function login(){
 
-  let u=username.value;
-  let p=password.value;
+  let u=encodeURIComponent(username.value.trim());
+  let p=encodeURIComponent(password.value.trim());
 
-  let res=await fetch(`${URL}?action=login&username=${u}&password=${p}`);
+  let res=await fetch(
+    `${URL}?action=login&username=${u}&password=${p}`
+  );
+
   let data=await res.json();
+
+  console.log(data);
 
   if(data.status=="success"){
 
     localStorage.setItem("user",JSON.stringify(data));
 
-    showDashboard(data);
+    showDash(data);
 
   }else{
-    loginMsg.innerHTML="❌ Login gagal";
+    msg.innerHTML="❌ Login gagal";
   }
 }
 
 
-/**************** DASHBOARD *****************/
-function showDashboard(user){
+// =============================
+// TAMPIL DASHBOARD
+// =============================
+function showDash(user){
 
   loginBox.classList.add("hidden");
-  dashboard.classList.remove("hidden");
+  dashBox.classList.remove("hidden");
 
   welcome.innerHTML="Halo, "+user.nama;
   roleInfo.innerHTML="Role: "+user.role;
@@ -127,20 +166,24 @@ function showDashboard(user){
 
   if(user.role=="Pembimbing" || user.role=="Admin"){
     monitorBox.classList.remove("hidden");
-    loadLaporan();
+    loadData();
   }
 }
 
 
-/**************** LOGOUT *****************/
+// =============================
+// LOGOUT
+// =============================
 function logout(){
   localStorage.clear();
   location.reload();
 }
 
 
-/**************** KIRIM *****************/
-async function kirimLaporan(){
+// =============================
+// KIRIM LAPORAN (SISWA)
+// =============================
+async function kirim(){
 
   let user=JSON.parse(localStorage.getItem("user"));
 
@@ -158,42 +201,60 @@ async function kirimLaporan(){
   });
 
   alert("Berhasil dikirim");
+
   laporan.value="";
 }
 
 
-/**************** MONITOR *****************/
-async function loadLaporan(){
+// =============================
+// LOAD DATA (PEMBIMBING / ADMIN)
+// =============================
+async function loadData(){
 
-  let res=await fetch(`${URL}?action=getLaporan`);
+  let user=JSON.parse(localStorage.getItem("user"));
+
+  let res=await fetch(
+    `${URL}?action=getData&role=${user.role}&kelompok=${user.kelompok}`
+  );
+
   let data=await res.json();
 
-  let html="<table border=1 width=100%>";
+  let html="<table>";
 
-  html+="<tr><th>Nama</th><th>Kelompok</th><th>Laporan</th><th>Tanggal</th></tr>";
+  html+=`
+    <tr>
+      <th>Tanggal</th>
+      <th>Nama</th>
+      <th>Kelompok</th>
+      <th>Laporan</th>
+    </tr>
+  `;
 
   data.forEach(d=>{
+
     html+=`
       <tr>
+        <td>${d.tgl}</td>
         <td>${d.nama}</td>
         <td>${d.kelompok}</td>
         <td>${d.laporan}</td>
-        <td>${d.tgl}</td>
       </tr>
     `;
   });
 
   html+="</table>";
 
-  dataLaporan.innerHTML=html;
+  tabel.innerHTML=html;
 }
 
 
-/**************** AUTO LOGIN *****************/
-let user=localStorage.getItem("user");
+// =============================
+// AUTO LOGIN
+// =============================
+let u=localStorage.getItem("user");
 
-if(user){
-  showDashboard(JSON.parse(user));
+if(u){
+  showDash(JSON.parse(u));
 }
 
 </script>
