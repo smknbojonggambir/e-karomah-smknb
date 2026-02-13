@@ -213,7 +213,9 @@ async function loadData(){
   tb.innerHTML = "";
 
   try{
-    const r = await fetch(WEB_APP_URL + "?action=rekapPembimbing");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const r = await fetch(WEB_APP_URL + `?action=rekapPembimbing&kelompok=${user.kelompok}`);
     if(!r.ok) throw new Error("Gagal fetch");
     const d = await r.json();
 
@@ -245,6 +247,7 @@ async function loadData(){
     wrapper.style.opacity = "1";
   }
 }
+
 
 /* ================= SIMPAN CATATAN ================= */
 async function simpanCatatan(id,row){
