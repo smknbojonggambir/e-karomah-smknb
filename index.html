@@ -2,262 +2,412 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>E-KAROMAH SMKNB</title>
 
 <style>
+:root{
+  --primary:#2563eb;
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --glass:rgba(255,255,255,0.08);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
 body{
-  font-family:Arial;
-  background:#0f172a;
-  color:white;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:#fff;
+  min-height:100vh;
   padding:20px;
 }
 
-.card{
-  max-width:420px;
+.container{
+  max-width:900px;
   margin:auto;
-  background:rgba(255,255,255,.08);
-  padding:25px;
-  border-radius:12px;
-  margin-bottom:20px;
 }
 
-input,textarea,button{
+.header{
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.logo{
+  width:100px;
+  background:#fff;
+  padding:8px;
+  border-radius:50%;
+  margin-bottom:10px;
+}
+
+h1{
+  font-size:22px;
+  font-weight:600;
+}
+
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(14px);
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
+
+select,input,textarea{
   width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:8px;
+  padding:11px;
+  margin:8px 0 15px;
+  border-radius:10px;
   border:none;
+  font-size:14px;
+}
+
+textarea{resize:vertical}
+
+.section{
+  background:rgba(255,255,255,0.05);
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  transition:.3s;
+}
+
+.section h3{
+  font-size:14px;
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.radio-group{
+  display:flex;
+  gap:20px;
+  margin-bottom:10px;
+}
+
+.radio-group label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+input[type="radio"]{
+  accent-color:var(--primary);
 }
 
 button{
-  background:#2563eb;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:var(--primary);
   color:white;
-  font-weight:bold;
+  font-weight:600;
   cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 15px rgba(37,99,235,.5);
 }
 
 .hidden{display:none}
 
-table{
-  width:100%;
-  border-collapse:collapse;
+.loader{
+  text-align:center;
+  margin-top:15px;
+  display:none;
   font-size:14px;
 }
 
-td,th{
-  border:1px solid white;
-  padding:5px;
-  text-align:center;
+@media(max-width:600px){
+  body{padding:12px}
+  .card{padding:18px}
 }
 </style>
 </head>
 
 <body>
 
-<h2 align="center">E-KAROMAH SMKNB</h2>
+<div class="container">
 
-
-<!-- LOGIN -->
-<div id="loginBox" class="card">
-
-<h3>Login</h3>
-
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-
-<p id="msg"></p>
-
+<div class="header">
+<img class="logo"
+src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
+<h1>E-KAROMAH SMKNB</h1>
 </div>
 
-
-<!-- DASHBOARD -->
-<div id="dashBox" class="hidden">
-
-<!-- INFO -->
 <div class="card">
 
-<h3 id="welcome"></h3>
-<p id="roleInfo"></p>
+<select id="kelompok" onchange="loadNama()">
+<option value="">Pilih Kelompok</option>
+</select>
 
-<button onclick="logout()">Logout</button>
+<select id="nama" onchange="tampilForm()" disabled>
+<option value="">Pilih Nama</option>
+</select>
 
-</div>
+<input type="text" id="pembimbing" placeholder="Pembimbing" readonly>
 
+<div id="formInput" class="hidden">
+<div id="dynamicForm"></div>
 
-<!-- FORM SISWA -->
-<div id="formSiswa" class="card hidden">
-
-<h3>Input Laporan Harian</h3>
-
-<textarea id="laporan" rows="5"
-placeholder="Tulis kegiatan hari ini..."></textarea>
-
-<button onclick="kirim()">Kirim</button>
-
-</div>
-
-
-<!-- MONITOR -->
-<div id="monitorBox" class="card hidden">
-
-<h3>Monitoring Laporan</h3>
-
-<button onclick="loadData()">Refresh</button>
-
-<div id="tabel"></div>
-
+<button onclick="kirim()">Simpan Data</button>
+<div class="loader" id="loader">Mengirim data...</div>
 </div>
 
 </div>
-
+</div>
 
 <script>
 
-// =============================
-// GANTI URL WEB APP ANDA
-// =============================
-const URL="PASTE_WEBAPP_URL_DISINI";
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycby8Ff6Z2SgLx0qt2Ex6GORwwkkMk6r5f8eJ34mz15AD70pXo9m2aZ5BNjK7JmZC2vzx/exec";
 
 
-// =============================
-// LOGIN
-// =============================
-async function login(){
+function toggle(id,show){
+  document.getElementById(id).classList.toggle("hidden",!show);
+}
 
-  let u=encodeURIComponent(username.value.trim());
-  let p=encodeURIComponent(password.value.trim());
 
-  let res=await fetch(
-    `${URL}?action=login&username=${u}&password=${p}`
+/* ================= FORM SECTION ================= */
+
+function radioSection(title,id,withFoto=false,withTime=false){
+
+return `
+<div class="section">
+
+<h3>${title}</h3>
+
+<div class="radio-group">
+
+<label>
+<input type="radio" name="${id}" value="Ya"
+onclick="toggle('${id}_detail',true)"> Ya
+</label>
+
+<label>
+<input type="radio" name="${id}" value="Tidak"
+onclick="toggle('${id}_detail',false)"> Tidak
+</label>
+
+</div>
+
+
+<div id="${id}_detail" class="hidden">
+
+${withTime ? `<input type="time" id="${id}_waktu">` : ""}
+
+${withFoto ? `<input type="file" id="${id}_foto" accept="image/*">` : ""}
+
+<textarea id="${id}_ket"
+placeholder="Keterangan (opsional)"></textarea>
+
+</div>
+
+</div>
+`;
+}
+
+
+
+/* ================= LOAD DATA ================= */
+
+async function loadKelompok(){
+
+  const res=await fetch(WEB_APP_URL+"?action=getKelompok");
+  const data=await res.json();
+
+  let select=document.getElementById("kelompok");
+
+  data.forEach(k=>{
+
+    let opt=document.createElement("option");
+
+    opt.value=k;
+    opt.textContent=k;
+
+    select.appendChild(opt);
+
+  });
+}
+
+
+
+async function loadNama(){
+
+  let kelompok=document.getElementById("kelompok").value;
+
+  if(!kelompok) return;
+
+
+  const res=await fetch(
+    WEB_APP_URL+
+    "?action=getNama&kelompok="+
+    encodeURIComponent(kelompok)
   );
 
-  let data=await res.json();
 
-  console.log(data);
+  const data=await res.json();
 
-  if(data.status=="success"){
+  let select=document.getElementById("nama");
 
-    localStorage.setItem("user",JSON.stringify(data));
+  select.innerHTML='<option value="">Pilih Nama</option>';
 
-    showDash(data);
+  data.forEach(n=>{
 
-  }else{
-    msg.innerHTML="❌ Login gagal";
-  }
+    let opt=document.createElement("option");
+
+    opt.value=n;
+    opt.textContent=n;
+
+    select.appendChild(opt);
+
+  });
+
+  select.disabled=false;
 }
 
 
-// =============================
-// TAMPIL DASHBOARD
-// =============================
-function showDash(user){
 
-  loginBox.classList.add("hidden");
-  dashBox.classList.remove("hidden");
+async function tampilForm(){
 
-  welcome.innerHTML="Halo, "+user.nama;
-  roleInfo.innerHTML="Role: "+user.role;
+  let kelompok=document.getElementById("kelompok").value;
 
-  if(user.role=="Siswa"){
-    formSiswa.classList.remove("hidden");
-  }
 
-  if(user.role=="Pembimbing" || user.role=="Admin"){
-    monitorBox.classList.remove("hidden");
-    loadData();
-  }
+  const res=await fetch(
+    WEB_APP_URL+
+    "?action=getPembimbing&kelompok="+
+    encodeURIComponent(kelompok)
+  );
+
+
+  document.getElementById("pembimbing").value=
+    await res.text();
+
+
+  document.getElementById("formInput")
+  .classList.remove("hidden");
+
+
+  generateForm();
 }
 
 
-// =============================
-// LOGOUT
-// =============================
-function logout(){
-  localStorage.clear();
-  location.reload();
+
+/* ================= GENERATE ================= */
+
+function generateForm(){
+
+  const f=document.getElementById("dynamicForm");
+
+  f.innerHTML=
+
+  radioSection("1) Bangun Pagi & Sahur","sahur",true,true)+
+  radioSection("2) Shalat Subuh","subuh")+
+  radioSection("3) Olahraga","olahraga",true)+
+  radioSection("4) Aktivitas Keluarga","keluarga",true)+
+  radioSection("5) Shalat Dzuhur","dzuhur")+
+  radioSection("6) Pesantren Ekologi","pesantren",true)+
+  radioSection("7) Shalat Ashar","ashar")+
+  radioSection("8) Aksi Sosial","aksi",true)+
+  radioSection("9) Buka Bersama","buka",true)+
+  radioSection("10) Magrib","magrib")+
+  radioSection("11) Isya","isya")+
+  radioSection("12) Tarawih","tarawih")+
+  radioSection("13) Tadarus","tadarus",true)+
+  radioSection("14) Tidur Cepat","tidur",false,true);
+
 }
 
 
-// =============================
-// KIRIM LAPORAN (SISWA)
-// =============================
+
+/* ================= SUBMIT ================= */
+
 async function kirim(){
 
-  let user=JSON.parse(localStorage.getItem("user"));
+  document.getElementById("loader").style.display="block";
 
-  let data={
-    action:"kirim",
-    username:user.username,
-    nama:user.nama,
-    kelompok:user.kelompok,
-    laporan:laporan.value
-  };
 
-  await fetch(URL,{
+  let fd=new FormData();
+
+  fd.append("action","simpan");
+
+  fd.append("kelompok",kelompok.value);
+  fd.append("nama",nama.value);
+  fd.append("pembimbing",pembimbing.value);
+
+
+  let kegiatan=[
+
+    "sahur","subuh","olahraga","keluarga","dzuhur",
+    "pesantren","ashar","aksi","buka","magrib",
+    "isya","tarawih","tadarus","tidur"
+
+  ];
+
+
+  kegiatan.forEach(id=>{
+
+
+    let status=document.querySelector(
+      `input[name="${id}"]:checked`
+    );
+
+
+    fd.append(
+      id+"_status",
+      status ? status.value : "Tidak"
+    );
+
+
+    let waktu=document.getElementById(id+"_waktu");
+    if(waktu) fd.append(id+"_waktu",waktu.value||"");
+
+
+    let ket=document.getElementById(id+"_ket");
+    if(ket) fd.append(id+"_ket",ket.value||"");
+
+
+    let foto=document.getElementById(id+"_foto");
+
+    if(foto && foto.files[0]){
+
+      fd.append(id+"_foto",foto.files[0]);
+
+    }
+
+  });
+
+
+  await fetch(WEB_APP_URL,{
+
     method:"POST",
-    body:JSON.stringify(data)
+    body:fd
+
   });
 
-  alert("Berhasil dikirim");
 
-  laporan.value="";
+  alert("Data berhasil dikirim");
+
+
+  document.getElementById("loader").style.display="none";
+
+
+  location.reload();
+
 }
 
 
-// =============================
-// LOAD DATA (PEMBIMBING / ADMIN)
-// =============================
-async function loadData(){
 
-  let user=JSON.parse(localStorage.getItem("user"));
+/* ================= INIT ================= */
 
-  let res=await fetch(
-    `${URL}?action=getData&role=${user.role}&kelompok=${user.kelompok}`
-  );
-
-  let data=await res.json();
-
-  let html="<table>";
-
-  html+=`
-    <tr>
-      <th>Tanggal</th>
-      <th>Nama</th>
-      <th>Kelompok</th>
-      <th>Laporan</th>
-    </tr>
-  `;
-
-  data.forEach(d=>{
-
-    html+=`
-      <tr>
-        <td>${d.tgl}</td>
-        <td>${d.nama}</td>
-        <td>${d.kelompok}</td>
-        <td>${d.laporan}</td>
-      </tr>
-    `;
-  });
-
-  html+="</table>";
-
-  tabel.innerHTML=html;
-}
-
-
-// =============================
-// AUTO LOGIN
-// =============================
-let u=localStorage.getItem("user");
-
-if(u){
-  showDash(JSON.parse(u));
-}
+loadKelompok();
 
 </script>
+
 
 </body>
 </html>
