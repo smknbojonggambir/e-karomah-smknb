@@ -3,321 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Laporan Siswa Online</title>
+<title>E-KAROMAH SMKNB</title>
 
 <style>
-
 body{
-    font-family: Arial, sans-serif;
-    background:#f4f6f9;
-    margin:0;
-}
-
-.container{
-    max-width:900px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    margin-top:30px;
-    border-radius:8px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-h2{
-    text-align:center;
-}
-
-input,select,textarea,button{
-    width:100%;
-    padding:10px;
-    margin:5px 0;
-}
-
-button{
-    background:#3498db;
-    color:white;
-    border:none;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#2980b9;
-}
-
-.hidden{
-    display:none;
+font-family:system-ui;
+background:#0f172a;
+color:#fff;
+padding:20px;
 }
 
 .card{
-    border:1px solid #ddd;
-    padding:10px;
-    margin-bottom:15px;
-    border-radius:5px;
+max-width:420px;
+margin:auto;
+background:#1e293b;
+padding:25px;
+border-radius:12px;
 }
 
-label{
-    font-weight:bold;
+input,select,button,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:8px;
+border:none;
 }
 
-.status{
-    display:flex;
-    gap:10px;
+button{
+background:#2563eb;
+color:white;
+font-weight:bold;
+cursor:pointer;
 }
 
-img{
-    max-width:100%;
-    margin-top:5px;
-}
-
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
 <!-- LOGIN -->
-<div id="loginBox">
+<div class="card" id="loginBox">
 
-<h2>🔐 Login Siswa</h2>
+<h3>Login E-KAROMAH</h3>
 
-<input type="text" id="username" placeholder="Username">
-<input type="password" id="password" placeholder="Password">
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
-<p id="loginMsg"></p>
+<p id="msg"></p>
+
+</div>
+
+
+<!-- FORM SISWA -->
+<div class="card hidden" id="siswaBox">
+
+<h3>Input Harian</h3>
+
+<p id="info"></p>
+
+<textarea id="kegiatan" placeholder="Kegiatan Hari Ini"></textarea>
+
+<button onclick="kirim()">Kirim</button>
 
 </div>
 
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
+<div class="card hidden" id="monitorBox">
 
-<h2>📋 Laporan Kegiatan Harian</h2>
+<h3>Dashboard Monitoring</h3>
 
-<p><b>Nama:</b> <span id="namaUser"></span></p>
-<p><b>Kelompok:</b> <span id="kelompokUser"></span></p>
-<p><b>Pembimbing:</b> <span id="pembimbing"></span></p>
+<p id="monitorInfo"></p>
 
+<a href="https://docs.google.com/spreadsheets/d/1Ho7CWJj0bevgYCzQHs2T6jYi_vjjncM3XRiZvyF8INE"
+target="_blank">
 
-<label>Tanggal</label>
-<input type="date" id="tanggal">
+<button>Buka Data Laporan</button>
 
-
-<div id="formKegiatan"></div>
-
-
-<button onclick="kirim()">📤 Kirim Laporan</button>
-
-<p id="status"></p>
-
-</div>
+</a>
 
 </div>
 
 
 <script>
 
-/**************** KONFIG ****************/
+const API="PASTE_WEBAPP_URL_DISINI";
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwfs7YBPx6od8EcffIriJ7LMvjtGrlUyjwJHRt6c6vd1N0PqLBoJm23qrHXQFcmCt7uCQ/exec"; 
-// contoh:
-// https://script.google.com/macros/s/AKfycbxxx/exec
+/* LOGIN */
+async function login(){
 
-/**************** GLOBAL ****************/
+let u=user.value;
+let p=pass.value;
 
-let userData = {};
+let res=await fetch(`${API}?action=login&username=${u}&password=${p}`);
+let data=await res.json();
 
-const kegiatanList = [
- "sahur","subuh","olahraga","keluarga","dzuhur",
- "pesantren","ashar","aksi","buka","magrib",
- "isya","tarawih","tadarus","sedekah"
-];
+if(data.status!=="success"){
+msg.innerHTML="❌ Login gagal";
+return;
+}
 
-const fotoKeys = [
- "sahur","olahraga","keluarga",
- "pesantren","aksi","buka","tadarus"
-];
+/* SIMPAN SESSION */
+sessionStorage.setItem("user",JSON.stringify(data));
 
+loginBox.classList.add("hidden");
 
-/**************** LOGIN ****************/
-
-function login(){
-
-    let u = document.getElementById("username").value;
-    let p = document.getElementById("password").value;
-
-    if(!u || !p){
-        alert("Isi username & password");
-        return;
-    }
-
-    fetch(`${API_URL}?action=login&username=${u}&password=${p}`)
-    .then(res=>res.json())
-    .then(res=>{
-
-        if(res.status=="success"){
-
-            userData = res;
-
-            document.getElementById("loginBox").classList.add("hidden");
-            document.getElementById("dashboard").classList.remove("hidden");
-
-            document.getElementById("namaUser").innerText = res.nama;
-            document.getElementById("kelompokUser").innerText = res.kelompok;
-
-            loadPembimbing();
-            buatForm();
-
-        }else{
-            document.getElementById("loginMsg").innerText="Login gagal!";
-        }
-
-    });
+/* ROLE */
+if(data.role==="Siswa"){
+tampilSiswa(data);
+}else{
+tampilMonitor(data);
+}
 
 }
 
 
-/**************** PEMBIMBING ****************/
+/* SISWA */
+function tampilSiswa(d){
 
-function loadPembimbing(){
+siswaBox.classList.remove("hidden");
 
-    fetch(`${API_URL}?action=getPembimbing&kelompok=${userData.kelompok}`)
-    .then(r=>r.text())
-    .then(t=>{
-        document.getElementById("pembimbing").innerText = t;
-        userData.pembimbing = t;
-    });
-
-}
-
-
-/**************** FORM ****************/
-
-function buatForm(){
-
-    let html="";
-
-    kegiatanList.forEach(k=>{
-
-        html+=`
-
-        <div class="card">
-
-        <label>${k.toUpperCase()}</label>
-
-        <div class="status">
-            <select id="status_${k}">
-                <option value="Tidak">Tidak</option>
-                <option value="Ya">Ya</option>
-            </select>
-
-            <input type="time" id="waktu_${k}">
-        </div>
-
-        <textarea id="ket_${k}" placeholder="Keterangan"></textarea>
-
-        ${
-            fotoKeys.includes(k)
-            ?
-            `<input type="file" accept="image/*" id="foto_${k}">`
-            :
-            ""
-        }
-
-        </div>
-
-        `;
-
-    });
-
-    document.getElementById("formKegiatan").innerHTML = html;
+info.innerHTML=`
+Nama : ${d.nama}<br>
+Kelompok : ${d.kelompok}<br>
+Pembimbing : ${d.pembimbing||"-"}
+`;
 
 }
 
 
-/**************** BASE64 ****************/
+/* MONITOR */
+function tampilMonitor(d){
 
-function toBase64(file){
-    return new Promise((resolve,reject)=>{
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload=()=>resolve(reader.result);
-        reader.onerror=e=>reject(e);
-    });
+monitorBox.classList.remove("hidden");
+
+monitorInfo.innerHTML=`
+Login sebagai : <b>${d.role}</b><br>
+Nama : ${d.nama}
+`;
+
 }
 
 
-/**************** KIRIM ****************/
-
+/* KIRIM */
 async function kirim(){
 
-    let data = {
-        action:"kirim",
-        tanggal: document.getElementById("tanggal").value,
-        username:userData.username,
-        nama:userData.nama,
-        kelompok:userData.kelompok,
-        pembimbing:userData.pembimbing,
-        kegiatan:{}
-    };
+let d=JSON.parse(sessionStorage.getItem("user"));
 
+let data={
+action:"kirim",
+username:d.username,
+nama:d.nama,
+kelompok:d.kelompok,
+kegiatan:kegiatan.value
+};
 
-    for(let k of kegiatanList){
+await fetch(API,{
+method:"POST",
+body:JSON.stringify(data)
+});
 
-        let status = document.getElementById(`status_${k}`).value;
-        let waktu = document.getElementById(`waktu_${k}`).value;
-        let ket   = document.getElementById(`ket_${k}`).value;
+alert("Berhasil disimpan");
 
-        let item = {
-            status:status,
-            waktu:waktu,
-            ket:ket
-        };
-
-
-        if(fotoKeys.includes(k)){
-
-            let file = document.getElementById(`foto_${k}`).files[0];
-
-            if(file){
-
-                let base64 = await toBase64(file);
-
-                item.foto = base64.split(",")[1];
-                item.fotoName = file.name;
-
-            }
-
-        }
-
-        data.kegiatan[k]=item;
-
-    }
-
-
-    document.getElementById("status").innerText="Mengirim...";
-
-    fetch(API_URL,{
-        method:"POST",
-        body:JSON.stringify(data)
-    })
-    .then(r=>r.text())
-    .then(res=>{
-
-        if(res=="OK"){
-            document.getElementById("status").innerText="✅ Berhasil dikirim";
-        }else{
-            document.getElementById("status").innerText="❌ Gagal: "+res;
-        }
-
-    });
+kegiatan.value="";
 
 }
 
 </script>
-
 </body>
 </html>
