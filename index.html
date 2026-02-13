@@ -113,7 +113,9 @@ src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LO
 
 <script>
 
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
+
 
 async function login(){
 
@@ -129,34 +131,49 @@ async function login(){
 
   msg.innerHTML="⏳ Memproses...";
 
-  let r = await fetch(WEB_APP_URL+
-    "?action=login"+
-    "&user="+encodeURIComponent(user.value)+
-    "&pass="+encodeURIComponent(pass.value)+
-    "&role="+role.value
-  );
+  try{
 
-  let d = await r.json();
+    const url =
+      WEB_APP_URL+
+      "?action=login"+
+      "&user="+encodeURIComponent(user.value.trim())+
+      "&pass="+encodeURIComponent(pass.value.trim())+
+      "&role="+encodeURIComponent(role.value);
 
-  if(d.status=="ok"){
+    const r = await fetch(url);
+    const d = await r.json();
 
-    sessionStorage.setItem("user",d.user);
-    sessionStorage.setItem("role",d.role);
-    sessionStorage.setItem("kelompok",d.kelompok||"");
+    if(d.status==="ok"){
 
-    if(d.role=="siswa") location="siswa.html";
-    if(d.role=="pembimbing") location="pembimbing.html";
-    if(d.role=="admin") location="admin.html";
+      // SIMPAN DATA LOGIN
+      localStorage.setItem("user",JSON.stringify({
+        nama: d.nama,
+        role: d.role,
+        kelompok: d.kelompok
+      }));
 
-  }else{
+      // REDIRECT
+      if(d.role==="siswa") location="siswa.html";
+      if(d.role==="pembimbing") location="pembimbing.html";
+      if(d.role==="admin") location="admin.html";
 
-    msg.innerHTML="❌ Login gagal. Periksa data!";
+    }else{
+
+      msg.innerHTML="❌ Username / Password salah";
+
+    }
+
+  }catch(err){
+
+    msg.innerHTML="❌ Koneksi gagal";
+    console.error(err);
 
   }
 
 }
 
 </script>
+
 
 </body>
 </html>
