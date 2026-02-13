@@ -4,88 +4,60 @@
 <meta charset="UTF-8">
 <title>Admin - E-KAROMAH</title>
 <meta name="viewport" content="width=device-width">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 <style>
 body{
   background:#020617;
   color:white;
   font-family:system-ui;
 }
-
 header{
   background:#1e293b;
   padding:15px;
   text-align:center;
 }
-
 .header-btn{
   margin-top:10px;
 }
-
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:15px;
 }
-
 th,td{
   border:1px solid #334155;
   padding:7px;
   text-align:center;
 }
-
-th{
-  background:#0ea5e9;
-}
-
+th{background:#0ea5e9;}
 button{
   padding:10px 14px;
-  background:#22c55e;
   border:none;
   color:white;
   border-radius:8px;
   cursor:pointer;
   margin:3px;
 }
-
-.btn-logout{
-  background:#ef4444;
-}
-
+button.export-btn{ background:#22c55e; }
+button.logout-btn{ background:#ef4444; }
 a{
   text-decoration:none;
   font-weight:600;
 }
 </style>
 </head>
-
 <body>
 
 <header>
-
 <h2>Admin Panel</h2>
-
 <div class="header-btn">
-
-<button onclick="exportPDF()">📄 Export PDF</button>
-
-<a href="dashboard.html" style="color:#38bdf8">
-📊 Dashboard
-</a>
-
-<button onclick="logout()" class="btn-logout">
-🚪 Logout
-</button>
-
+<button class="export-btn" onclick="exportPDF()">📄 Export PDF</button>
+<a href="dashboard.html" style="color:#38bdf8">📊 Dashboard</a>
+<button class="logout-btn" onclick="logout()">🚪 Logout</button>
 </div>
-
 </header>
 
-
 <div id="data" style="padding:15px">
-
 <table>
 <thead>
 <tr>
@@ -96,93 +68,59 @@ a{
 <th>Status</th>
 </tr>
 </thead>
-
 <tbody id="tb"></tbody>
 </table>
-
 </div>
 
-
 <script>
-
 /* ================= PROTEKSI LOGIN ================= */
-
-if(localStorage.getItem("login")!=="admin"){
-  location.href="index.html";
+if(localStorage.getItem("login") !== "admin"){
+  location.href = "index.html";
 }
-
 
 /* ================= CONFIG ================= */
-
-const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
-
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
 
 /* ================= LOAD DATA ================= */
-
 async function load(){
+  try{
+    const r = await fetch(WEB_APP_URL + "?action=rekapAdmin");
+    const d = await r.json();
 
- try{
+    let tb = document.getElementById("tb");
+    tb.innerHTML = "";
 
-  const r = await fetch(WEB_APP_URL+"?action=rekapAdmin");
-  const d = await r.json();
-
-  let tb = document.getElementById("tb");
-
-  tb.innerHTML = "";
-
-  d.forEach(x=>{
-
-    tb.innerHTML += `
-    <tr>
-      <td>${x.tanggal}</td>
-      <td>${x.nama}</td>
-      <td>${x.kelompok}</td>
-      <td>${x.pembimbing}</td>
-      <td>${x.status}</td>
-    </tr>`;
-
-  });
-
- }catch(e){
-
-  alert("Gagal memuat data!");
-
- }
-
+    d.forEach(x => {
+      tb.innerHTML += `
+      <tr>
+        <td>${x.tanggal}</td>
+        <td>${x.nama}</td>
+        <td>${x.kelompok}</td>
+        <td>${x.pembimbing}</td>
+        <td>${x.status}</td>
+      </tr>`;
+    });
+  }catch(e){
+    console.error(e);
+    alert("Gagal memuat data! Cek console.");
+  }
 }
-
 
 /* ================= EXPORT PDF ================= */
-
 function exportPDF(){
-
- html2pdf()
- .from(document.getElementById("data"))
- .save("rekap-ekaromah.pdf");
-
+  html2pdf().from(document.getElementById("data")).save("rekap-ekaromah.pdf");
 }
-
 
 /* ================= LOGOUT ================= */
-
 function logout(){
-
- if(confirm("Yakin ingin logout?")){
-
-  localStorage.clear();
-
-  location.href="index.html";
-
- }
-
+  if(confirm("Yakin ingin logout?")){
+    localStorage.clear();
+    location.href = "index.html";
+  }
 }
 
-
 /* ================= INIT ================= */
-
 load();
-
 </script>
 
 </body>
