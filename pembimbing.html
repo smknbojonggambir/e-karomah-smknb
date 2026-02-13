@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Pembimbing - E-KAROMAH</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  font-family:system-ui;
+  background:#0f172a;
+  color:white;
+  margin:0;
+}
+
+header{
+  background:#1e293b;
+  padding:15px;
+  text-align:center;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border:1px solid #334155;
+  padding:8px;
+  text-align:center;
+}
+
+th{background:#2563eb;}
+
+button{
+  padding:10px 15px;
+  background:#22c55e;
+  border:none;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Rekap Pembimbing</h2>
+<button onclick="window.print()">🖨 Cetak</button>
+</header>
+
+<div style="padding:15px">
+
+<table id="tabel">
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Nama</th>
+<th>Kelompok</th>
+<th>Hadir</th>
+<th>Kegiatan</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+</table>
+
+</div>
+
+<script>
+
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+async function loadData(){
+
+  const r=await fetch(WEB_APP_URL+"?action=rekapPembimbing");
+  const d=await r.json();
+
+  let tb=document.querySelector("tbody");
+
+  d.forEach(x=>{
+
+    tb.innerHTML+=`
+    <tr>
+      <td>${x.tanggal}</td>
+      <td>${x.nama}</td>
+      <td>${x.kelompok}</td>
+      <td>${x.hadir}</td>
+      <td>${x.kegiatan}</td>
+    </tr>`;
+  });
+
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
