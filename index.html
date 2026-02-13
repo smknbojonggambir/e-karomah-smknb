@@ -33,7 +33,7 @@ body{
 .navbar img{height:45px}
 
 .container{
-  max-width:1100px;
+  max-width:900px;
   margin:auto;
   padding:20px;
 }
@@ -96,31 +96,22 @@ button{
 <div class="grid">
 
 <input type="time" id="sahur_waktu">
-<input type="file" id="sahur_foto">
 
 <select id="subuh"><option>Ya</option><option>Tidak</option></select>
-
-<input type="file" id="olahraga">
-<input type="file" id="keluarga">
-
 <select id="dzuhur"><option>Ya</option><option>Tidak</option></select>
-
-<input type="file" id="pesantren">
-
 <select id="ashar"><option>Ya</option><option>Tidak</option></select>
-
-<input type="file" id="aksi">
-<input type="file" id="buka">
-
 <select id="magrib"><option>Ya</option><option>Tidak</option></select>
 <select id="isya"><option>Ya</option><option>Tidak</option></select>
 <select id="taraweh"><option>Ya</option><option>Tidak</option></select>
 
-<input type="file" id="tadarus">
-
 <input type="time" id="tidur">
 
 <select id="sedekah"><option>Ya</option><option>Tidak</option></select>
+
+<div>
+<label>Pesantren (Upload Foto)</label>
+<input type="file" id="pesantren">
+</div>
 
 </div>
 
@@ -147,7 +138,6 @@ async function kirim(){
   }
 
   let data = {
-    tanggal:new Date().toLocaleDateString(),
     lat:lat.value,
     long:long.value,
     sahur_waktu:sahur_waktu.value,
@@ -161,24 +151,14 @@ async function kirim(){
     sedekah:sedekah.value
   };
 
-  async function handleFile(id,name){
-    let fileInput = document.getElementById(id);
-    if(fileInput.files.length>0){
-      let file = fileInput.files[0];
-      data[name] = await toBase64(file);
-      data[name+"_mime"] = file.type;
-    }
+  let fileInput = document.getElementById("pesantren");
+  if(fileInput.files.length > 0){
+    let file = fileInput.files[0];
+    data.pesantren = await toBase64(file);
+    data.pesantren_mime = file.type;
   }
 
-  await handleFile("sahur_foto","sahur_foto");
-  await handleFile("olahraga","olahraga");
-  await handleFile("keluarga","keluarga");
-  await handleFile("pesantren","pesantren");
-  await handleFile("aksi","aksi");
-  await handleFile("buka","buka");
-  await handleFile("tadarus","tadarus");
-
-  google.script.run.withSuccessHandler(res=>{
+  google.script.run.withSuccessHandler(function(res){
     alert(res);
     location.reload();
   }).saveLaporan(data);
