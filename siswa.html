@@ -68,7 +68,7 @@ button{
 <p id="info"></p>
 
 <p>
-<b>Pembimbing:</b><br>
+<b>Pembimbing</b><br>
 <input type="text" id="pembimbing" readonly>
 </p>
 
@@ -77,7 +77,7 @@ button{
 
 <div id="dynamicForm"></div>
 
-<button id="btnKirim">KIRIM</button>
+<button id="btnKirim">KIRIM LAPORAN</button>
 
 <p id="loader" class="hidden">⏳ Mengirim...</p>
 
@@ -89,16 +89,20 @@ button{
 
 <script>
 
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzG_JwpZBfC5-e_wMGf5mhufKbxJIpXE97LdGFknRkFBNAhgI6tF_d1zM1v4gyGmVmOfA/exec";
+/* ================= CONFIG ================= */
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbzG_JwpZBfC5-e_wMGf5mhufKbxJIpXE97LdGFknRkFBNAhgI6tF_d1zM1v4gyGmVmOfA/exec";
+
 
 /* ================= ELEMENT ================= */
 
 const info        = document.getElementById("info");
+const pembimbing  = document.getElementById("pembimbing");
 const lat         = document.getElementById("lat");
 const longi       = document.getElementById("long");
-const loader      = document.getElementById("loader");
-const pembimbing  = document.getElementById("pembimbing");
 const dynamicForm = document.getElementById("dynamicForm");
+const loader      = document.getElementById("loader");
 const btnKirim    = document.getElementById("btnKirim");
 
 
@@ -129,8 +133,10 @@ function getLocation(){
   if(!navigator.geolocation) return;
 
   navigator.geolocation.getCurrentPosition(pos=>{
+
     lat.value   = pos.coords.latitude;
     longi.value = pos.coords.longitude;
+
   });
 
 }
@@ -168,8 +174,6 @@ onclick="toggle('${id}_d',false)"> Tidak
 
 ${withTime?`<input type="time" id="${id}_waktu">`:""}
 
-${withFoto?`<input type="file" id="${id}_foto">`:""}
-
 <textarea id="${id}_ket" placeholder="Keterangan..."></textarea>
 
 </div>
@@ -178,7 +182,7 @@ ${withFoto?`<input type="file" id="${id}_foto">`:""}
 }
 
 
-/* ================= GENERATE ================= */
+/* ================= GENERATE FORM ================= */
 
 function generateForm(){
 
@@ -186,17 +190,17 @@ dynamicForm.innerHTML =
 
   radioSection("Sahur","sahur",true,true)+
   radioSection("Subuh","subuh")+
-  radioSection("Olahraga","olahraga",true)+
-  radioSection("Keluarga","keluarga",true)+
+  radioSection("Olahraga","olahraga")+
+  radioSection("Keluarga","keluarga")+
   radioSection("Dzuhur","dzuhur")+
-  radioSection("Pesantren","pesantren",true)+
+  radioSection("Pesantren","pesantren")+
   radioSection("Ashar","ashar")+
-  radioSection("Aksi","aksi",true)+
-  radioSection("Buka","buka",true)+
+  radioSection("Aksi","aksi")+
+  radioSection("Buka","buka")+
   radioSection("Magrib","magrib")+
   radioSection("Isya","isya")+
   radioSection("Tarawih","tarawih")+
-  radioSection("Tadarus","tadarus",true)+
+  radioSection("Tadarus","tadarus")+
   radioSection("Tidur","tidur",false,true);
 
 }
@@ -209,14 +213,16 @@ async function loadPembimbing(){
   try{
 
     const r = await fetch(
-      WEB_APP_URL+"?action=getPembimbing&kelompok="+encodeURIComponent(kelompok)
+      WEB_APP_URL+
+      "?action=getPembimbing&kelompok="+
+      encodeURIComponent(kelompok)
     );
 
     pembimbing.value = await r.text();
 
-  }catch(err){
+  }catch{
 
-    pembimbing.value = "-";
+    pembimbing.value="-";
 
   }
 
@@ -235,22 +241,23 @@ function validasi(){
 
   for(let id of list){
 
-    let st=document.querySelector(`input[name="${id}"]:checked`);
+    if(!document.querySelector(`input[name="${id}"]:checked`)){
 
-    if(!st){
-      alert("⚠️ Semua kegiatan harus diisi!");
+      alert("⚠️ Semua kegiatan wajib diisi!");
       return false;
+
     }
 
   }
 
   return true;
+
 }
 
 
 /* ================= SUBMIT ================= */
 
-btnKirim.addEventListener("click",kirim);
+btnKirim.onclick = kirim;
 
 async function kirim(){
 
@@ -259,7 +266,7 @@ async function kirim(){
   loader.classList.remove("hidden");
   btnKirim.disabled = true;
 
-  let fd=new FormData();
+  let fd = new FormData();
 
   fd.append("action","simpan");
 
@@ -285,10 +292,10 @@ async function kirim(){
     fd.append(id+"_status",st.value);
 
     let w=document.getElementById(id+"_waktu");
-    if(w) fd.append(id+"_waktu",w.value || "-");
+    if(w) fd.append(id+"_waktu",w.value||"");
 
     let k=document.getElementById(id+"_ket");
-    if(k) fd.append(id+"_ket",k.value || "-");
+    if(k) fd.append(id+"_ket",k.value||"");
 
   }
 
@@ -300,13 +307,13 @@ async function kirim(){
       body:fd
     });
 
-    alert("✅ Data berhasil dikirim!");
+    alert("✅ Laporan berhasil dikirim");
 
     location.reload();
 
   }catch(e){
 
-    alert("❌ Gagal mengirim data!");
+    alert("❌ Gagal mengirim data");
 
   }
 
@@ -319,8 +326,10 @@ async function kirim(){
 /* ================= LOGOUT ================= */
 
 function logout(){
+
   localStorage.clear();
   location.href="index.html";
+
 }
 
 
