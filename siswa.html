@@ -45,6 +45,7 @@ button{
   background:#2563eb;
   color:white;
   font-weight:600;
+  cursor:pointer;
 }
 
 .hidden{display:none}
@@ -71,13 +72,12 @@ button{
 <input type="text" id="pembimbing" readonly>
 </p>
 
-<!-- GPS -->
 <input type="hidden" id="lat">
 <input type="hidden" id="long">
 
 <div id="dynamicForm"></div>
 
-<button onclick="kirim()">KIRIM</button>
+<button id="btnKirim">KIRIM</button>
 
 <p id="loader" class="hidden">⏳ Mengirim...</p>
 
@@ -91,22 +91,32 @@ button{
 
 const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzG_JwpZBfC5-e_wMGf5mhufKbxJIpXE97LdGFknRkFBNAhgI6tF_d1zM1v4gyGmVmOfA/exec";
 
+/* ================= ELEMENT ================= */
+
+const info        = document.getElementById("info");
+const lat         = document.getElementById("lat");
+const longi       = document.getElementById("long");
+const loader      = document.getElementById("loader");
+const pembimbing  = document.getElementById("pembimbing");
+const dynamicForm = document.getElementById("dynamicForm");
+const btnKirim    = document.getElementById("btnKirim");
+
 
 /* ================= CEK LOGIN ================= */
 
 let user = JSON.parse(localStorage.getItem("user"));
 
-if(!user || user.role!="siswa"){
+if(!user || user.role !== "siswa"){
   location.href="index.html";
 }
 
-const nama = user.nama;
+const nama     = user.nama;
 const kelompok = user.kelompok;
 
 
 /* ================= INFO ================= */
 
-info.innerHTML=`
+info.innerHTML = `
 <b>Nama:</b> ${nama}<br>
 <b>Kelompok:</b> ${kelompok}
 `;
@@ -119,8 +129,8 @@ function getLocation(){
   if(!navigator.geolocation) return;
 
   navigator.geolocation.getCurrentPosition(pos=>{
-    lat.value=pos.coords.latitude;
-    long.value=pos.coords.longitude;
+    lat.value   = pos.coords.latitude;
+    longi.value = pos.coords.longitude;
   });
 
 }
@@ -160,7 +170,7 @@ ${withTime?`<input type="time" id="${id}_waktu">`:""}
 
 ${withFoto?`<input type="file" id="${id}_foto">`:""}
 
-<textarea id="${id}_ket"></textarea>
+<textarea id="${id}_ket" placeholder="Keterangan..."></textarea>
 
 </div>
 </div>
@@ -172,7 +182,7 @@ ${withFoto?`<input type="file" id="${id}_foto">`:""}
 
 function generateForm(){
 
-  dynamicForm.innerHTML=
+dynamicForm.innerHTML =
 
   radioSection("Sahur","sahur",true,true)+
   radioSection("Subuh","subuh")+
@@ -192,24 +202,62 @@ function generateForm(){
 }
 
 
-/* ================= LOAD PEMBIMBING ================= */
+/* ================= PEMBIMBING ================= */
 
 async function loadPembimbing(){
 
-  const r = await fetch(
-    WEB_APP_URL+"?action=getPembimbing&kelompok="+kelompok
-  );
+  try{
 
-  pembimbing.value = await r.text();
+    const r = await fetch(
+      WEB_APP_URL+"?action=getPembimbing&kelompok="+encodeURIComponent(kelompok)
+    );
 
+    pembimbing.value = await r.text();
+
+  }catch(err){
+
+    pembimbing.value = "-";
+
+  }
+
+}
+
+
+/* ================= VALIDASI ================= */
+
+function validasi(){
+
+  const list=[
+    "sahur","subuh","olahraga","keluarga","dzuhur",
+    "pesantren","ashar","aksi","buka","magrib",
+    "isya","tarawih","tadarus","tidur"
+  ];
+
+  for(let id of list){
+
+    let st=document.querySelector(`input[name="${id}"]:checked`);
+
+    if(!st){
+      alert("⚠️ Semua kegiatan harus diisi!");
+      return false;
+    }
+
+  }
+
+  return true;
 }
 
 
 /* ================= SUBMIT ================= */
 
+btnKirim.addEventListener("click",kirim);
+
 async function kirim(){
 
+  if(!validasi()) return;
+
   loader.classList.remove("hidden");
+  btnKirim.disabled = true;
 
   let fd=new FormData();
 
@@ -220,7 +268,7 @@ async function kirim(){
   fd.append("pembimbing",pembimbing.value);
 
   fd.append("lat",lat.value);
-  fd.append("long",long.value);
+  fd.append("long",longi.value);
 
 
   const list=[
@@ -234,28 +282,36 @@ async function kirim(){
 
     let st=document.querySelector(`input[name="${id}"]:checked`);
 
-    fd.append(id+"_status",st?st.value:"Tidak");
+    fd.append(id+"_status",st.value);
 
     let w=document.getElementById(id+"_waktu");
-    if(w) fd.append(id+"_waktu",w.value);
+    if(w) fd.append(id+"_waktu",w.value || "-");
 
     let k=document.getElementById(id+"_ket");
-    if(k) fd.append(id+"_ket",k.value);
+    if(k) fd.append(id+"_ket",k.value || "-");
 
   }
 
 
-  await fetch(WEB_APP_URL,{
-    method:"POST",
-    body:fd
-  });
+  try{
 
+    await fetch(WEB_APP_URL,{
+      method:"POST",
+      body:fd
+    });
 
-  alert("Berhasil dikirim!");
+    alert("✅ Data berhasil dikirim!");
+
+    location.reload();
+
+  }catch(e){
+
+    alert("❌ Gagal mengirim data!");
+
+  }
 
   loader.classList.add("hidden");
-
-  location.reload();
+  btnKirim.disabled = false;
 
 }
 
