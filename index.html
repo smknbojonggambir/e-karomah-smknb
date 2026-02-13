@@ -1,93 +1,242 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>E-KAROMAH SMKNB</title>
+
 <style>
-body{font-family:Arial;background:#0f172a;color:#fff;padding:20px}
-.card{background:#1e293b;padding:20px;border-radius:12px;max-width:600px;margin:auto}
-select,input,textarea,button{width:100%;margin:8px 0;padding:10px;border-radius:8px;border:none}
-button{background:#2563eb;color:#fff;font-weight:bold}
+:root{
+  --primary:#2563eb;
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --glass:rgba(255,255,255,0.08);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:#fff;
+  min-height:100vh;
+  padding:20px;
+}
+
+.container{max-width:900px;margin:auto}
+.header{text-align:center;margin-bottom:25px}
+.logo{
+  width:100px;background:#fff;padding:8px;
+  border-radius:50%;margin-bottom:10px;
+}
+h1{font-size:22px;font-weight:600}
+
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(14px);
+  padding:25px;border-radius:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
+
+select,input,textarea{
+  width:100%;padding:11px;
+  margin:8px 0 15px;
+  border-radius:10px;border:none;
+  font-size:14px;
+}
+
+textarea{resize:vertical}
+
+.section{
+  background:rgba(255,255,255,0.05);
+  padding:15px;border-radius:12px;
+  margin-bottom:15px;
+}
+
+.section h3{font-size:14px;margin-bottom:8px;font-weight:600}
+
+.radio-group{display:flex;gap:20px;margin-bottom:10px}
+
+button{
+  width:100%;padding:14px;border:none;
+  border-radius:12px;background:var(--primary);
+  color:white;font-weight:600;cursor:pointer;
+}
+
+.hidden{display:none}
+.loader{text-align:center;margin-top:15px;display:none;font-size:14px}
 </style>
 </head>
+
 <body>
 
+<div class="container">
+
+<div class="header">
+<img class="logo"
+src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
+<h1>E-KAROMAH SMKNB</h1>
+</div>
+
 <div class="card">
-<h2>E-KAROMAH SMKNB</h2>
+
+<input type="date" id="tanggal">
 
 <select id="kelompok" onchange="loadNama()">
 <option value="">Pilih Kelompok</option>
 </select>
 
-<select id="nama" disabled></select>
+<select id="nama" disabled>
+<option value="">Pilih Nama</option>
+</select>
+
+<input type="text" id="pembimbing" placeholder="Pembimbing" readonly>
 
 <input type="hidden" id="lat">
 <input type="hidden" id="long">
 
-<input type="time" id="sahur_waktu">
-<input type="file" id="sahur_foto">
-<textarea id="sahur_ket"></textarea>
+<div id="formInput" class="hidden">
+<div id="dynamicForm"></div>
 
-<label>Subuh</label>
-<select id="subuh_status">
-<option value="Ya">Ya</option>
-<option value="Tidak">Tidak</option>
-</select>
+<button onclick="kirim()">Simpan Data</button>
+<div class="loader" id="loader">Mengirim data...</div>
+</div>
 
-<button onclick="kirim()">Kirim</button>
+</div>
 </div>
 
 <script>
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbyRrs16PVP3CujhHMI_GG0z8MIgx9gCQ1ZNiDG0dqG3zyDukpWjZk8CrbGEnrMEyQ6fxw/exec";
 
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbx9r-pH1k48cs0eo2WBZrSKW_iNnRLrXnD-BEvYWDwAIIVjqOmwnM1sgAs9p_uWchbKCA/exec";
+
+/* ================= GPS ================= */
 navigator.geolocation.getCurrentPosition(pos=>{
-document.getElementById("lat").value=pos.coords.latitude;
-document.getElementById("long").value=pos.coords.longitude;
+lat.value=pos.coords.latitude;
+long.value=pos.coords.longitude;
 });
 
+/* ================= UI ================= */
+function toggle(id,show){
+document.getElementById(id).classList.toggle("hidden",!show);
+}
+
+function radioSection(title,id,withFoto=false,withTime=false){
+return `
+<div class="section">
+<h3>${title}</h3>
+<div class="radio-group">
+<label><input type="radio" name="${id}" value="Ya" onclick="toggle('${id}_detail',true)"> Ya</label>
+<label><input type="radio" name="${id}" value="Tidak" onclick="toggle('${id}_detail',false)"> Tidak</label>
+</div>
+
+<div id="${id}_detail" class="hidden">
+${withTime?'<input type="time" id="'+id+'_waktu">':''}
+${withFoto?'<input type="file" id="'+id+'_foto">':''}
+<textarea id="${id}_ket" placeholder="Keterangan (opsional)"></textarea>
+</div>
+</div>
+`;
+}
+
+/* ================= LOAD DATA ================= */
 async function loadKelompok(){
 const res=await fetch(WEB_APP_URL+"?action=getKelompok");
 const data=await res.json();
-let s=document.getElementById("kelompok");
 data.forEach(k=>{
-let o=document.createElement("option");
-o.value=k;o.textContent=k;s.appendChild(o);
+let opt=document.createElement("option");
+opt.value=k;
+opt.textContent=k;
+kelompok.appendChild(opt);
 });
 }
 
 async function loadNama(){
-let k=document.getElementById("kelompok").value;
-const res=await fetch(WEB_APP_URL+"?action=getNama&kelompok="+k);
+if(!kelompok.value)return;
+
+const res=await fetch(WEB_APP_URL+
+"?action=getNama&kelompok="+encodeURIComponent(kelompok.value));
 const data=await res.json();
-let s=document.getElementById("nama");
-s.innerHTML="";
+
+nama.innerHTML='<option value="">Pilih Nama</option>';
 data.forEach(n=>{
-let o=document.createElement("option");
-o.value=n;o.textContent=n;s.appendChild(o);
+let opt=document.createElement("option");
+opt.value=n;
+opt.textContent=n;
+nama.appendChild(opt);
 });
-s.disabled=false;
+nama.disabled=false;
+
+const pemb=await fetch(WEB_APP_URL+
+"?action=getPembimbing&kelompok="+encodeURIComponent(kelompok.value));
+pembimbing.value=await pemb.text();
+
+formInput.classList.remove("hidden");
+generateForm();
 }
 
-async function kirim(){
-let fd=new FormData();
-fd.append("tanggal",new Date().toLocaleDateString());
-fd.append("username",document.getElementById("nama").value);
-fd.append("nama",document.getElementById("nama").value);
-fd.append("kelompok",document.getElementById("kelompok").value);
-fd.append("lat",document.getElementById("lat").value);
-fd.append("long",document.getElementById("long").value);
+/* ================= GENERATE FORM ================= */
+function generateForm(){
+dynamicForm.innerHTML=
+radioSection("1) Bangun Pagi & Sahur","sahur",true,true)+
+radioSection("2) Shalat Subuh","subuh")+
+radioSection("3) Olahraga","olahraga",true)+
+radioSection("4) Aktivitas Keluarga","keluarga",true)+
+radioSection("5) Shalat Dzuhur","dzuhur")+
+radioSection("6) Pesantren Ekologi","pesantren",true)+
+radioSection("7) Shalat Ashar","ashar")+
+radioSection("8) Aksi Ekologi","aksi",true)+
+radioSection("9) Buka Bersama","buka",true)+
+radioSection("10) Shalat Magrib","magrib")+
+radioSection("11) Shalat Isya","isya")+
+radioSection("12) Tarawih","tarawih")+
+radioSection("13) Tadarus","tadarus",true)+
+radioSection("14) Sedekah","sedekah");
+}
 
-fd.append("sahur_waktu",sahur_waktu.value);
-fd.append("sahur_foto",sahur_foto.files[0]);
-fd.append("sahur_ket",sahur_ket.value);
-fd.append("subuh_status",subuh_status.value);
+/* ================= KIRIM ================= */
+async function kirim(){
+
+loader.style.display="block";
+
+let fd=new FormData();
+
+fd.append("tanggal",tanggal.value);
+fd.append("username",nama.value);
+fd.append("nama",nama.value);
+fd.append("kelompok",kelompok.value);
+fd.append("pembimbing",pembimbing.value);
+fd.append("lat",lat.value);
+fd.append("long",long.value);
+
+let kegiatan=[
+"sahur","subuh","olahraga","keluarga","dzuhur",
+"pesantren","ashar","aksi","buka",
+"magrib","isya","tarawih","tadarus","sedekah"
+];
+
+kegiatan.forEach(id=>{
+let status=document.querySelector('input[name="'+id+'"]:checked');
+fd.append(id+"_status",status?status.value:"Tidak");
+
+let waktu=document.getElementById(id+"_waktu");
+if(waktu)fd.append(id+"_waktu",waktu.value||"");
+
+let ket=document.getElementById(id+"_ket");
+if(ket)fd.append(id+"_ket",ket.value||"");
+
+let foto=document.getElementById(id+"_foto");
+if(foto && foto.files[0])fd.append(id+"_foto",foto.files[0]);
+});
 
 await fetch(WEB_APP_URL,{method:"POST",body:fd});
-alert("Berhasil!");
+
+alert("Data berhasil dikirim!");
+loader.style.display="none";
 location.reload();
 }
 
 loadKelompok();
+
 </script>
 </body>
 </html>
