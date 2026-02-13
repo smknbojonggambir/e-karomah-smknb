@@ -2,9 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Login E-KAROMAH</title>
+<title>E-KAROMAH SMKNB - Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
@@ -20,28 +19,66 @@ body{
 
 .card{
   background:rgba(255,255,255,.08);
-  padding:30px;
-  border-radius:18px;
-  width:320px;
+  padding:35px 25px;
+  border-radius:20px;
   text-align:center;
+  width:320px;
+  backdrop-filter:blur(10px);
 }
 
-input,select,button{
+.logo{
+  width:90px;
+  background:white;
+  padding:6px;
+  border-radius:50%;
+  margin-bottom:10px;
+}
+
+h2{
+  margin:10px 0 5px;
+}
+
+p{
+  margin:0 0 15px;
+  font-size:14px;
+  opacity:.8;
+}
+
+input{
   width:100%;
   padding:12px;
-  margin:10px 0;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#1d4ed8;
+}
+
+select{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
   border:none;
   border-radius:10px;
 }
 
-button{
-  background:#2563eb;
-  color:white;
-  font-weight:600;
-}
-
-.msg{
-  color:#ff8080;
+#msg{
+  margin-top:10px;
   font-size:14px;
 }
 </style>
@@ -51,7 +88,11 @@ button{
 
 <div class="card">
 
-<h2>E-KAROMAH</h2>
+<img class="logo"
+src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
+
+<h2>E-KAROMAH SMKNB</h2>
+<p>Silakan Login</p>
 
 <select id="role">
   <option value="">Pilih Role</option>
@@ -61,51 +102,60 @@ button{
 </select>
 
 <input id="user" placeholder="Username">
-
 <input id="pass" type="password" placeholder="Password">
 
-<button onclick="login()">LOGIN</button>
+<button onclick="login()">Login</button>
 
-<div class="msg" id="msg"></div>
+<div id="msg"></div>
 
 </div>
 
+
 <script>
 
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwWAJa96XoNwOoZ8BH1wEInRMOdDg5zigwB7HB_h2_FhLAjCPJZTRWkh0ja6u8gD1Y1HQ/exec";
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
 
 async function login(){
 
-  msg.innerText="";
-
-  if(!role.value||!user.value||!pass.value){
-    msg.innerText="Lengkapi data!";
+  if(!role.value){
+    msg.innerHTML="⚠️ Pilih role terlebih dahulu";
     return;
   }
 
-  msg.innerText="Memeriksa...";
+  if(!user.value || !pass.value){
+    msg.innerHTML="⚠️ Username & Password wajib diisi";
+    return;
+  }
 
-  const url=WEB_APP_URL+
-  "?action=login"+
-  "&user="+user.value+
-  "&pass="+pass.value+
-  "&role="+role.value;
+  msg.innerHTML="⏳ Memproses...";
 
-  const r=await fetch(url);
-  const d=await r.json();
+  let r = await fetch(WEB_APP_URL+
+    "?action=login"+
+    "&user="+encodeURIComponent(user.value)+
+    "&pass="+encodeURIComponent(pass.value)+
+    "&role="+role.value
+  );
+
+  let d = await r.json();
 
   if(d.status=="ok"){
 
-    localStorage.setItem("user",JSON.stringify(d));
+    sessionStorage.setItem("user",d.user);
+    sessionStorage.setItem("role",d.role);
+    sessionStorage.setItem("kelompok",d.kelompok||"");
 
     if(d.role=="siswa") location="siswa.html";
     if(d.role=="pembimbing") location="pembimbing.html";
     if(d.role=="admin") location="admin.html";
 
   }else{
-    msg.innerText="Login gagal!";
+
+    msg.innerHTML="❌ Login gagal. Periksa data!";
+
   }
+
 }
+
 </script>
 
 </body>
