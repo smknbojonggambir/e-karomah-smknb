@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Siswa</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f9;
+  padding:20px;
+}
+
+h2{text-align:center;}
+
+.box{
+  max-width:900px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+input,select,textarea,button{
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+}
+
+button{
+  background:#2196F3;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+.hidden{display:none}
+
+.section{
+  border:1px solid #ddd;
+  padding:10px;
+  margin:10px 0;
+  border-radius:5px;
+}
+
+.radio-group label{
+  margin-right:15px;
+}
+
+#loader{
+  display:none;
+  text-align:center;
+  font-weight:bold;
+  color:green;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>📋 Form Kegiatan Harian Siswa</h2>
+
+<!-- IDENTITAS -->
+<div>
+  <label>Kelompok</label>
+  <select id="kelompok" onchange="loadNama()">
+    <option value="">-- Pilih Kelompok --</option>
+  </select>
+
+  <label>Nama</label>
+  <select id="nama" disabled></select>
+
+  <label>Pembimbing</label>
+  <input type="text" id="pembimbing" readonly>
+
+  <button onclick="tampilForm()">Tampilkan Form</button>
+</div>
+
+<hr>
+
+<!-- FORM -->
+<div id="formInput" class="hidden">
+
+<h3>Input Kegiatan</h3>
+
+<div id="dynamicForm"></div>
+
+<input type="hidden" id="lat">
+<input type="hidden" id="long">
+
+<div id="loader">⏳ Mengirim data...</div>
+
+<button onclick="kirim()">Kirim Laporan</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+
+/* ================= GPS ================= */
+
+function getLocation(){
+
+  if(!navigator.geolocation){
+    alert("GPS tidak didukung");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+
+    pos=>{
+      lat.value  = pos.coords.latitude;
+      long.value = pos.coords.longitude;
+    },
+
+    err=>{
+      alert("Aktifkan GPS!");
+    },
+
+    {enableHighAccuracy:true}
+
+  );
+}
+
+
+/* ================= FORM ================= */
+
+function toggle(id,show){
+  document.getElementById(id).classList.toggle("hidden",!show);
+}
+
+function radioSection(title,id,withFoto=false,withTime=false){
+
+return `
+<div class="section">
+
+<h4>${title}</h4>
+
+<div class="radio-group">
+
+<label>
+<input type="radio" name="${id}" value="Ya"
+onclick="toggle('${id}_d',true)"> Ya
+</label>
+
+<label>
+<input type="radio" name="${id}" value="Tidak"
+onclick="toggle('${id}_d',false)"> Tidak
+</label>
+
+</div>
+
+<div id="${id}_d" class="hidden">
+
+${withTime?`<input type="time" id="${id}_waktu">`:""}
+
+${withFoto?`<input type="file" id="${id}_foto" accept="image/*">`:""}
+
+<textarea id="${id}_ket" placeholder="Keterangan..."></textarea>
+
+</div>
+</div>
+`;
+}
+
+
+/* ================= LOAD ================= */
+
+async function loadKelompok(){
+
+  const r=await fetch(WEB_APP_URL+"?action=getKelompok");
+  const d=await r.json();
+
+  d.forEach(x=>{
+    kelompok.innerHTML+=`<option>${x}</option>`;
+  });
+
+}
+
+async function loadNama(){
+
+  if(!kelompok.value) return;
+
+  const r=await fetch(
+    WEB_APP_URL+"?action=getNama&kelompok="+kelompok.value
+  );
+
+  const d=await r.json();
+
+  nama.innerHTML='<option></option>';
+
+  d.forEach(x=>{
+    nama.innerHTML+=`<option>${x}</option>`;
+  });
+
+  nama.disabled=false;
+}
+
+async function tampilForm(){
+
+  if(!kelompok.value || !nama.value){
+    alert("Lengkapi data dulu!");
+    return;
+  }
+
+  const r=await fetch(
+    WEB_APP_URL+"?action=getPembimbing&kelompok="+kelompok.value
+  );
+
+  pembimbing.value=await r.text();
+
+  formInput.classList.remove("hidden");
+
+  generateForm();
+}
+
+
+/* ================= GENERATE ================= */
+
+function generateForm(){
+
+  dynamicForm.innerHTML=
+
+  radioSection("Sahur","sahur",true,true)+
+  radioSection("Subuh","subuh")+
+  radioSection("Olahraga","olahraga",true)+
+  radioSection("Keluarga","keluarga",true)+
+  radioSection("Dzuhur","dzuhur")+
+  radioSection("Pesantren","pesantren",true)+
+  radioSection("Ashar","ashar")+
+  radioSection("Aksi","aksi",true)+
+  radioSection("Buka","buka",true)+
+  radioSection("Magrib","magrib")+
+  radioSection("Isya","isya")+
+  radioSection("Tarawih","tarawih")+
+  radioSection("Tadarus","tadarus",true)+
+  radioSection("Tidur","tidur",false,true);
+
+}
+
+
+/* ================= SUBMIT ================= */
+
+async function kirim(){
+
+  loader.style.display="block";
+
+  let fd=new FormData();
+
+  fd.append("action","simpan");
+
+  fd.append("kelompok",kelompok.value);
+  fd.append("nama",nama.value);
+  fd.append("pembimbing",pembimbing.value);
+
+  fd.append("lat",lat.value);
+  fd.append("long",long.value);
+
+  const list=[
+    "sahur","subuh","olahraga","keluarga","dzuhur",
+    "pesantren","ashar","aksi","buka","magrib",
+    "isya","tarawih","tadarus","tidur"
+  ];
+
+  for(let id of list){
+
+    let st=document.querySelector(`input[name="${id}"]:checked`);
+
+    fd.append(id+"_status",st?st.value:"Tidak");
+
+    let w=document.getElementById(id+"_waktu");
+    if(w) fd.append(id+"_waktu",w.value);
+
+    let k=document.getElementById(id+"_ket");
+    if(k) fd.append(id+"_ket",k.value);
+
+    let f=document.getElementById(id+"_foto");
+
+    if(f && f.files[0]){
+
+      let reader=new FileReader();
+
+      await new Promise(r=>{
+
+        reader.onload=()=>{
+
+          fd.append(id+"_foto",reader.result);
+          r();
+
+        };
+
+        reader.readAsDataURL(f.files[0]);
+
+      });
+
+    }
+
+  }
+
+  await fetch(WEB_APP_URL,{
+    method:"POST",
+    body:fd
+  });
+
+  alert("Laporan berhasil dikirim!");
+
+  loader.style.display="none";
+
+  location.reload();
+}
+
+
+/* ================= INIT ================= */
+
+loadKelompok();
+getLocation();
+
+</script>
+
+</body>
+</html>
