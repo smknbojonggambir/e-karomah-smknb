@@ -1,248 +1,289 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-KAROMAH SMKNB</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Admin Sekolah</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-/* CSS STYLE SAMA SEPERTI SEBELUMNYA, DIPERSINGKAT AGAR RAPI */
-:root{ --primary: #3b82f6; --bg1: #0f172a; --bg2: #1e293b; --glass: rgba(255, 255, 255, 0.1); --border: rgba(255, 255, 255, 0.1); --text: #f8fafc; }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left, var(--bg2), var(--bg1)); color: var(--text); min-height: 100vh; padding: 20px 15px; }
-.container { max-width: 600px; margin: auto; }
-.header { text-align: center; margin-bottom: 30px; animation: fadeIn 1s ease; }
-.logo { width: 90px; height: 90px; background: rgba(255,255,255,0.95); padding: 5px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); object-fit: contain; }
-.card { background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 25px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); margin-bottom: 20px; }
-label { font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px; display: block; }
-input, textarea { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0, 0, 0, 0.3); color: white; font-size: 1rem; transition: 0.3s; }
-input:focus, textarea:focus { outline: none; border-color: var(--primary); background: rgba(0, 0, 0, 0.5); }
-.section { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid transparent; }
-.section h4 { margin-bottom: 10px; font-weight: 600; color: #60a5fa; }
-.radio-group { display: flex; gap: 15px; margin-bottom: 10px; }
-.radio-btn { flex: 1; position: relative; }
-.radio-btn input { position: absolute; opacity: 0; cursor: pointer; }
-.radio-tile { display: flex; justify-content: center; align-items: center; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); cursor: pointer; transition: 0.3s; font-weight: 600; font-size: 0.9rem; }
-input:checked + .radio-tile { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
-button { width: 100%; padding: 16px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary), #2563eb); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-.hidden { display: none; }
-.loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-.spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+}
+
+header{
+    background:#2c3e50;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+
+.container{
+    padding:20px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    margin-bottom:20px;
+    border-radius:8px;
+    box-shadow:0 0 5px rgba(0,0,0,0.1);
+}
+
+h2{
+    margin-top:0;
+}
+
+/* Table */
+table{
+    width:100%;
+    border-collapse: collapse;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#3498db;
+    color:white;
+}
+
+input,button{
+    padding:8px;
+    margin:5px;
+}
+
+button{
+    background:#3498db;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#2980b9;
+}
+
+.notif{
+    background:#27ae60;
+    color:white;
+    padding:10px;
+    border-radius:5px;
+    display:none;
+}
 </style>
 </head>
 
 <body>
 
+<header>
+<h1>📊 Dashboard Admin Sekolah</h1>
+</header>
+
 <div class="container">
-  <div class="header">
-    <img class="logo" src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png" alt="Logo">
-    <h1>E-KAROMAH SMKNB</h1>
-  </div>
 
-  <div class="card" id="loginBox">
-    <h3 style="margin-bottom:15px;">🔐 Login Siswa</h3>
-    <label>Username</label>
-    <input type="text" id="username" placeholder="Contoh: SISWA001">
-    <label>Password</label>
-    <input type="password" id="password" placeholder="Masukkan Password">
-    <button onclick="handleLogin()">MASUK APLIKASI</button>
-  </div>
+<!-- NOTIFIKASI -->
+<div id="notif" class="notif"></div>
 
-  <div class="card hidden" id="formBox">
-    <div class="info-box" id="infoUser" style="text-align:center; padding:10px; color:#6ee7b7; background:rgba(16, 185, 129, 0.2); border-radius:10px; margin-bottom:15px;"></div>
+<!-- INPUT DATA -->
+<div class="card">
+<h2>➕ Input Data Siswa</h2>
 
-    <label>Tanggal Laporan</label>
-    <input type="date" id="tanggal">
+<input type="text" id="nama" placeholder="Nama Siswa">
+<input type="number" id="nilai" placeholder="Nilai">
+<input type="number" id="hadir" placeholder="Jumlah Hadir">
 
-    <label>Pembimbing</label>
-    <input type="text" id="pembimbing" readonly style="background:rgba(255,255,255,0.05); color:#94a3b8;">
-
-    <input type="hidden" id="lat"><input type="hidden" id="long">
-    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-    
-    <div id="dynamicForm"></div>
-    <button onclick="kirimData()">KIRIM LAPORAN</button>
-  </div>
+<button onclick="tambahData()">Tambah</button>
 </div>
 
-<div class="loader-overlay hidden" id="loader">
-  <div class="spinner"></div>
-  <p style="color:white; font-weight:600;">Sedang Mengirim Data...</p>
+
+<!-- DATA SISWA -->
+<div class="card">
+<h2>📋 Data Siswa</h2>
+
+<table id="tabel">
+<thead>
+<tr>
+<th>No</th>
+<th>Nama</th>
+<th>Nilai</th>
+<th>Hadir</th>
+<th>Ranking</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+</table>
+
+<br>
+<button onclick="kirimWA()">📱 Kirim Rekap WA</button>
+<button onclick="exportPDF()">📄 Export PDF</button>
+
+</div>
+
+
+<!-- GRAFIK -->
+<div class="card">
+<h2>📈 Grafik Perkembangan</h2>
+
+<canvas id="chart"></canvas>
+
+</div>
+
 </div>
 
 <script>
-// =================================================================
-// ⚠️ TEMPEL URL DEPLOYMENT HASIL LANGKAH 2 DI BAWAH INI
-// =================================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxAA6BzWyiFTswI3tJmM1W1MaNCB3vcga8PZNfHW9kBW3e2bCIoguDeaGRU65X2Np7nQQ/exec"; 
-// =================================================================
 
-let userData = {};
+let dataSiswa = [];
 
-window.onload = () => {
-  document.getElementById('tanggal').valueAsDate = new Date();
-  getLocation();
-};
+const notif = document.getElementById("notif");
 
-async function handleLogin() {
-  const u = document.getElementById('username').value;
-  const p = document.getElementById('password').value;
-  const btn = document.querySelector('#loginBox button');
+function tampilNotif(pesan){
+    notif.innerHTML = pesan;
+    notif.style.display="block";
 
-  if(!u || !p) return alert("Username dan Password harus diisi!");
-
-  btn.innerText = "Memeriksa..."; btn.disabled = true;
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
-    const data = await res.json();
-
-    if(data.status === "success") {
-      userData = data;
-      document.getElementById('loginBox').classList.add('hidden');
-      document.getElementById('formBox').classList.remove('hidden');
-      document.getElementById('infoUser').innerHTML = `Halo, <b>${data.nama}</b><br>Kelompok: ${data.kelompok}`;
-      
-      loadPembimbing(data.kelompok);
-      generateForm();
-    } else {
-      alert("Login Gagal! Cek Username/Password atau koneksi internet.");
-    }
-  } catch (err) {
-    alert("Gagal terhubung. Pastikan URL Script sudah diganti dan Deployment diset 'Anyone'.");
-    console.error(err);
-  } finally {
-    btn.innerText = "MASUK APLIKASI"; btn.disabled = false;
-  }
+    setTimeout(()=>{
+        notif.style.display="none";
+    },3000);
 }
 
-async function loadPembimbing(kelompok) {
-  try {
-    const res = await fetch(`${WEB_APP_URL}?action=getPembimbing&kelompok=${encodeURIComponent(kelompok)}`);
-    document.getElementById('pembimbing').value = await res.text();
-  } catch (e) {}
-}
+// TAMBAH DATA
+function tambahData(){
 
-const listKegiatan = [
-  {id:"sahur", label:"1. Makan Sahur", time:true, photo:true},
-  {id:"subuh", label:"2. Sholat Subuh"},
-  {id:"olahraga", label:"3. Olahraga Pagi", photo:true},
-  {id:"keluarga", label:"4. Membantu Orang Tua", photo:true},
-  {id:"dzuhur", label:"5. Sholat Dzuhur"},
-  {id:"pesantren", label:"6. Kegiatan Pesantren", photo:true},
-  {id:"ashar", label:"7. Sholat Ashar"},
-  {id:"aksi", label:"8. Aksi Ekologi (Lingkungan)", photo:true},
-  {id:"buka", label:"9. Buka Puasa", photo:true},
-  {id:"magrib", label:"10. Sholat Magrib"},
-  {id:"isya", label:"11. Sholat Isya"},
-  {id:"tarawih", label:"12. Sholat Tarawih"},
-  {id:"tadarus", label:"13. Tadarus Al-Quran", photo:true},
-  {id:"sedekah", label:"14. Sedekah Harian"}
-];
+    let nama = document.getElementById("nama").value;
+    let nilai = document.getElementById("nilai").value;
+    let hadir = document.getElementById("hadir").value;
 
-function generateForm() {
-  const container = document.getElementById('dynamicForm');
-  let html = '';
-  listKegiatan.forEach(item => {
-    html += `
-      <div class="section">
-        <h4>${item.label}</h4>
-        <div class="radio-group">
-          <label class="radio-btn"><input type="radio" name="${item.id}" value="Ya" onchange="toggleDetail('${item.id}', true)"><span class="radio-tile">Ya</span></label>
-          <label class="radio-btn"><input type="radio" name="${item.id}" value="Tidak" onchange="toggleDetail('${item.id}', false)" checked><span class="radio-tile">Tidak</span></label>
-        </div>
-        <div id="${item.id}_detail" class="hidden" style="margin-top:10px;">
-          ${item.time ? `<input type="time" id="${item.id}_waktu">` : ''}
-          ${item.photo ? `<input type="file" id="${item.id}_foto" accept="image/*">` : ''}
-          <textarea id="${item.id}_ket" rows="2" placeholder="Catatan tambahan..."></textarea>
-        </div>
-      </div>`;
-  });
-  container.innerHTML = html;
-}
-
-function toggleDetail(id, isShow) {
-  document.getElementById(id + '_detail').classList.toggle('hidden', !isShow);
-}
-
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        document.getElementById('lat').value = pos.coords.latitude;
-        document.getElementById('long').value = pos.coords.longitude;
-      },
-      () => alert("Mohon aktifkan GPS!")
-    );
-  }
-}
-
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = error => reject(error);
-});
-
-async function kirimData() {
-  const loader = document.getElementById('loader');
-  loader.classList.remove('hidden');
-
-  let payload = {
-    action: "kirim",
-    tanggal: document.getElementById('tanggal').value,
-    username: userData.username,
-    nama: userData.nama,
-    kelompok: userData.kelompok,
-    pembimbing: document.getElementById('pembimbing').value,
-    lat: document.getElementById('lat').value,
-    long: document.getElementById('long').value,
-    kegiatan: {}
-  };
-
-  try {
-    for (const item of listKegiatan) {
-      const status = document.querySelector(`input[name="${item.id}"]:checked`).value;
-      let dataKegiatan = { status: status, ket: "", waktu: "", foto: "", fotoName: "" };
-
-      if (status === "Ya") {
-        const ketEl = document.getElementById(`${item.id}_ket`);
-        const waktuEl = document.getElementById(`${item.id}_waktu`);
-        const fotoEl = document.getElementById(`${item.id}_foto`);
-
-        if (ketEl) dataKegiatan.ket = ketEl.value;
-        if (waktuEl) dataKegiatan.waktu = waktuEl.value;
-        if (fotoEl && fotoEl.files.length > 0) {
-          dataKegiatan.fotoName = `img_${item.id}_${Date.now()}.jpg`;
-          dataKegiatan.foto = await toBase64(fotoEl.files[0]);
-        }
-      }
-      payload.kegiatan[item.id] = dataKegiatan;
+    if(nama=="" || nilai=="" || hadir==""){
+        alert("Lengkapi data!");
+        return;
     }
 
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      body: JSON.stringify(payload)
+    dataSiswa.push({
+        nama:nama,
+        nilai:parseInt(nilai),
+        hadir:parseInt(hadir)
     });
-    
-    const result = await res.text();
-    
-    if(result.includes("OK")) {
-      alert("✅ Data Berhasil Disimpan!");
-      location.reload();
-    } else {
-      alert("Gagal menyimpan: " + result);
-    }
 
-  } catch (err) {
-    alert("Error: " + err);
-  } finally {
-    loader.classList.add('hidden');
-  }
+    urutkanRanking();
+    tampilkanData();
+    updateChart();
+
+    tampilNotif("✅ Data berhasil ditambahkan");
+
+    document.getElementById("nama").value="";
+    document.getElementById("nilai").value="";
+    document.getElementById("hadir").value="";
 }
+
+
+// SORT RANKING
+function urutkanRanking(){
+    dataSiswa.sort((a,b)=>b.nilai - a.nilai);
+}
+
+
+// TAMPILKAN DATA
+function tampilkanData(){
+
+    let tbody = document.querySelector("#tabel tbody");
+    tbody.innerHTML="";
+
+    dataSiswa.forEach((siswa,index)=>{
+
+        let tr = document.createElement("tr");
+
+        tr.innerHTML=`
+            <td>${index+1}</td>
+            <td>${siswa.nama}</td>
+            <td>${siswa.nilai}</td>
+            <td>${siswa.hadir}</td>
+            <td>${index+1}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+// SIMULASI KIRIM WA
+function kirimWA(){
+
+    let pesan="REKAP SISWA:\n\n";
+
+    dataSiswa.forEach((s,i)=>{
+        pesan += `${i+1}. ${s.nama} | Nilai:${s.nilai} | Hadir:${s.hadir}\n`;
+    });
+
+    alert("Simulasi Kirim WA:\n\n"+pesan);
+
+    tampilNotif("📱 Rekap berhasil dikirim ke WA Pembimbing");
+}
+
+
+// EXPORT PDF
+function exportPDF(){
+
+    const { jsPDF } = window.jspdf;
+
+    let doc = new jsPDF();
+
+    doc.text("LAPORAN DATA SISWA",70,10);
+
+    let y=25;
+
+    dataSiswa.forEach((s,i)=>{
+
+        doc.text(
+        `${i+1}. ${s.nama} | Nilai:${s.nilai} | Hadir:${s.hadir}`,
+        10,y);
+
+        y+=8;
+    });
+
+    doc.save("laporan_siswa.pdf");
+
+    tampilNotif("📄 PDF berhasil dibuat");
+}
+
+
+// CHART
+let chart;
+
+function updateChart(){
+
+    let nama = dataSiswa.map(s=>s.nama);
+    let nilai = dataSiswa.map(s=>s.nilai);
+
+    if(chart) chart.destroy();
+
+    let ctx = document.getElementById("chart");
+
+    chart = new Chart(ctx,{
+        type:"bar",
+        data:{
+            labels:nama,
+            datasets:[{
+                label:"Nilai Siswa",
+                data:nilai,
+                backgroundColor:"#3498db"
+            }]
+        }
+    });
+
+}
+
 </script>
 
 </body>
