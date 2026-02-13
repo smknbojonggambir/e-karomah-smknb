@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - E-KAROMAH</title>
+<meta name="viewport" content="width=device-width">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  background:#020617;
+  color:white;
+  font-family:system-ui;
+}
+
+header{
+  background:#1e293b;
+  padding:15px;
+  text-align:center;
+}
+
+.card{
+  background:#1e293b;
+  margin:15px;
+  padding:15px;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>📊 Dashboard Statistik</h2>
+<a href="admin.html" style="color:#38bdf8">⬅️ Kembali</a>
+</header>
+
+<div class="card">
+
+<canvas id="chart1"></canvas>
+
+</div>
+
+<div class="card">
+
+<canvas id="chart2"></canvas>
+
+</div>
+
+<script>
+
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+async function loadChart(){
+
+ const r=await fetch(WEB_APP_URL+"?action=statistik");
+ const d=await r.json();
+
+
+ new Chart(chart1,{
+  type:"bar",
+  data:{
+    labels:d.kelompok,
+    datasets:[{
+      label:"Jumlah Siswa",
+      data:d.jumlah
+    }]
+  }
+ });
+
+
+ new Chart(chart2,{
+  type:"pie",
+  data:{
+    labels:d.status,
+    datasets:[{
+      data:d.total
+    }]
+  }
+ });
+
+}
+
+loadChart();
+
+</script>
+
+</body>
+</html>
