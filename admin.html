@@ -20,6 +20,10 @@ header{
   text-align:center;
 }
 
+.header-btn{
+  margin-top:10px;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
@@ -32,15 +36,27 @@ th,td{
   text-align:center;
 }
 
-th{background:#0ea5e9;}
+th{
+  background:#0ea5e9;
+}
 
 button{
-  padding:10px;
+  padding:10px 14px;
   background:#22c55e;
   border:none;
   color:white;
   border-radius:8px;
   cursor:pointer;
+  margin:3px;
+}
+
+.btn-logout{
+  background:#ef4444;
+}
+
+a{
+  text-decoration:none;
+  font-weight:600;
 }
 </style>
 </head>
@@ -48,12 +64,25 @@ button{
 <body>
 
 <header>
+
 <h2>Admin Panel</h2>
+
+<div class="header-btn">
 
 <button onclick="exportPDF()">📄 Export PDF</button>
 
-<a href="dashboard.html" style="color:#38bdf8">📊 Dashboard</a>
+<a href="dashboard.html" style="color:#38bdf8">
+📊 Dashboard
+</a>
+
+<button onclick="logout()" class="btn-logout">
+🚪 Logout
+</button>
+
+</div>
+
 </header>
+
 
 <div id="data" style="padding:15px">
 
@@ -73,30 +102,58 @@ button{
 
 </div>
 
+
 <script>
 
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+/* ================= PROTEKSI LOGIN ================= */
+
+if(localStorage.getItem("login")!=="admin"){
+  location.href="index.html";
+}
+
+
+/* ================= CONFIG ================= */
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
+
+
+/* ================= LOAD DATA ================= */
 
 async function load(){
 
- const r=await fetch(WEB_APP_URL+"?action=rekapAdmin");
- const d=await r.json();
+ try{
 
- let tb=document.getElementById("tb");
+  const r = await fetch(WEB_APP_URL+"?action=rekapAdmin");
+  const d = await r.json();
 
- d.forEach(x=>{
+  let tb = document.getElementById("tb");
 
-  tb.innerHTML+=`
-  <tr>
-   <td>${x.tanggal}</td>
-   <td>${x.nama}</td>
-   <td>${x.kelompok}</td>
-   <td>${x.pembimbing}</td>
-   <td>${x.status}</td>
-  </tr>`;
- });
+  tb.innerHTML = "";
+
+  d.forEach(x=>{
+
+    tb.innerHTML += `
+    <tr>
+      <td>${x.tanggal}</td>
+      <td>${x.nama}</td>
+      <td>${x.kelompok}</td>
+      <td>${x.pembimbing}</td>
+      <td>${x.status}</td>
+    </tr>`;
+
+  });
+
+ }catch(e){
+
+  alert("Gagal memuat data!");
+
+ }
 
 }
+
+
+/* ================= EXPORT PDF ================= */
 
 function exportPDF(){
 
@@ -105,6 +162,24 @@ function exportPDF(){
  .save("rekap-ekaromah.pdf");
 
 }
+
+
+/* ================= LOGOUT ================= */
+
+function logout(){
+
+ if(confirm("Yakin ingin logout?")){
+
+  localStorage.clear();
+
+  location.href="index.html";
+
+ }
+
+}
+
+
+/* ================= INIT ================= */
 
 load();
 
