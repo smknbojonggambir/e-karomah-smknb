@@ -2,295 +2,117 @@
 <html>
 <head>
   <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>E-KAROMAH SMKNB</title>
 
 <style>
-:root{
-  --bg:#0d1117;
-  --card:#161b22;
-  --border:#30363d;
-  --accent:#2ea043;
-  --text:#e6edf3;
-}
-
 body{
-  margin:0;
-  font-family:Segoe UI;
-  background:var(--bg);
-  color:var(--text);
+  font-family:Arial;
+  background:#f4f6f9;
+  padding:20px;
 }
-
-.navbar{
-  background:var(--card);
-  padding:15px 25px;
-  display:flex;
-  align-items:center;
-  gap:15px;
-  border-bottom:1px solid var(--border);
-}
-
-.navbar img{height:45px}
-
 .container{
-  max-width:1100px;
+  max-width:800px;
   margin:auto;
+  background:white;
   padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
-
-.card{
-  background:var(--card);
-  padding:20px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  margin-bottom:20px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:15px;
-}
-
+label{font-weight:bold; display:block; margin-top:10px;}
 input,select,textarea{
   width:100%;
   padding:8px;
   margin-top:5px;
-  border-radius:8px;
-  border:1px solid var(--border);
-  background:#0d1117;
-  color:white;
+  border:1px solid #ccc;
+  border-radius:6px;
 }
-
-textarea{resize:vertical}
-
 button{
-  background:var(--accent);
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  color:white;
-  font-weight:bold;
   margin-top:20px;
+  padding:12px;
+  background:#2c3e50;
+  color:white;
+  border:none;
+  border-radius:6px;
   width:100%;
 }
 </style>
 </head>
 
 <body>
-
-<div class="navbar">
-  <img src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
-  <h2>E-KAROMAH SMKNB</h2>
-</div>
-
 <div class="container">
 
-<div class="card">
-<h3>Data Siswa</h3>
-<div class="grid">
-<input type="text" id="Username" placeholder="Username">
-<input type="text" id="Nama" placeholder="Nama">
-<input type="text" id="Kelompok" placeholder="Kelompok">
-<input type="text" id="Pembimbing" placeholder="Pembimbing">
-</div>
-</div>
+<h2>E-KAROMAH SMKNB</h2>
 
-<div class="card">
-<h3>Lokasi</h3>
-<input type="text" id="Lat" placeholder="Latitude" readonly>
-<input type="text" id="Long" placeholder="Longitude" readonly>
-</div>
+<label>Tanggal</label>
+<input type="date" id="Tanggal">
 
-<div class="card">
-<h3>Kegiatan Harian</h3>
+<label>Username</label>
+<input type="text" id="Username">
 
-<div class="grid">
+<label>Nama</label>
+<input type="text" id="Nama">
 
-<!-- SAHUR -->
-<div>
-<label>Sahur Waktu</label>
-<input type="time" id="Sahur_Waktu">
-<input type="file" id="Sahur_Foto">
-<textarea id="Sahur_Keterangan" placeholder="Keterangan Sahur"></textarea>
-</div>
+<label>Kelompok</label>
+<select id="Kelompok" onchange="setPembimbing()">
+  <option value="">-- Pilih Kelompok --</option>
+</select>
 
-<!-- SUBUH -->
-<div>
-<label>Subuh</label>
-<select id="Subuh_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Subuh_Keterangan" placeholder="Keterangan Subuh"></textarea>
-</div>
+<label>Pembimbing</label>
+<input type="text" id="Pembimbing" readonly>
 
-<!-- OLAHRAGA -->
-<div>
-<label>Olahraga</label>
-<input type="file" id="Olahraga_Foto">
-<textarea id="Olahraga_Keterangan"></textarea>
-</div>
-
-<!-- AKTIVITAS KELUARGA -->
-<div>
-<label>Aktivitas Keluarga</label>
-<input type="file" id="AktivitasKeluarga_Foto">
-<textarea id="AktivitasKeluarga_Keterangan"></textarea>
-</div>
-
-<!-- DZUHUR -->
-<div>
-<label>Dzuhur</label>
-<select id="Dzuhur_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Dzuhur_Keterangan"></textarea>
-</div>
-
-<!-- PESANTREN -->
-<div>
-<label>Pesantren</label>
-<input type="file" id="Pesantren_Foto">
-<textarea id="Pesantren_Keterangan"></textarea>
-</div>
-
-<!-- ASHAR -->
-<div>
-<label>Ashar</label>
-<select id="Ashar_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Ashar_Keterangan"></textarea>
-</div>
-
-<!-- AKSI EKOLOGI -->
-<div>
-<label>Aksi Ekologi</label>
-<input type="file" id="AksiEkologi_Foto">
-<textarea id="AksiEkologi_Keterangan"></textarea>
-</div>
-
-<!-- BUKA -->
-<div>
-<label>Buka</label>
-<input type="file" id="Buka_Foto">
-<textarea id="Buka_Keterangan"></textarea>
-</div>
-
-<!-- MAGRIB -->
-<div>
-<label>Magrib</label>
-<select id="Magrib_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Magrib_Keterangan"></textarea>
-</div>
-
-<!-- ISYA -->
-<div>
-<label>Isya</label>
-<select id="Isya_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Isya_Keterangan"></textarea>
-</div>
-
-<!-- TARAWEH -->
-<div>
-<label>Taraweh</label>
-<select id="Taraweh_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Taraweh_Keterangan"></textarea>
-</div>
-
-<!-- TADARUS -->
-<div>
-<label>Tadarus</label>
-<input type="file" id="Tadarus_Foto">
-<textarea id="Tadarus_Keterangan"></textarea>
-</div>
-
-<!-- TIDUR -->
-<div>
-<label>Tidur Waktu</label>
-<input type="time" id="Tidur_Waktu">
-<textarea id="Tidur_Keterangan"></textarea>
-</div>
-
-<!-- SEDEKAH -->
-<div>
-<label>Sedekah</label>
-<select id="Sedekah_Status"><option>Ya</option><option>Tidak</option></select>
-<textarea id="Sedekah_Keterangan"></textarea>
-</div>
-
-</div>
+<input type="hidden" id="Lat">
+<input type="hidden" id="Long">
 
 <button onclick="kirim()">SIMPAN LAPORAN</button>
 
-</div>
+<div id="hasil"></div>
+
 </div>
 
 <script>
+
+let kelompokData = [];
+
+google.script.run.withSuccessHandler(function(data){
+
+  kelompokData = data;
+  const select = document.getElementById("Kelompok");
+
+  data.forEach(item=>{
+    let opt = document.createElement("option");
+    opt.value = item.kelompok;
+    opt.textContent = item.kelompok;
+    select.appendChild(opt);
+  });
+
+}).getKelompokData();
+
+function setPembimbing(){
+  const kelompok = Kelompok.value;
+  const found = kelompokData.find(k=>k.kelompok===kelompok);
+  Pembimbing.value = found ? found.pembimbing : "";
+}
 
 navigator.geolocation.getCurrentPosition(function(pos){
   Lat.value = pos.coords.latitude;
   Long.value = pos.coords.longitude;
 });
 
-function toBase64(file){
-  return new Promise(resolve=>{
-    const reader = new FileReader();
-    reader.onload = ()=> resolve(reader.result);
-    reader.readAsDataURL(file);
-  });
-}
-
-async function ambilFile(id,obj){
-  const input = document.getElementById(id);
-  if(input.files.length > 0){
-    const file = input.files[0];
-    obj[id] = await toBase64(file);
-    obj[id+"_mime"] = file.type;
-  }
-}
-
-async function kirim(){
+function kirim(){
 
   let data = {
-    Tanggal: new Date().toLocaleDateString(),
+    Tanggal: Tanggal.value,
     Username: Username.value,
     Nama: Nama.value,
     Kelompok: Kelompok.value,
     Pembimbing: Pembimbing.value,
     Lat: Lat.value,
-    Long: Long.value,
-    Sahur_Waktu: Sahur_Waktu.value,
-    Sahur_Keterangan: Sahur_Keterangan.value,
-    Subuh_Status: Subuh_Status.value,
-    Subuh_Keterangan: Subuh_Keterangan.value,
-    Dzuhur_Status: Dzuhur_Status.value,
-    Dzuhur_Keterangan: Dzuhur_Keterangan.value,
-    Ashar_Status: Ashar_Status.value,
-    Ashar_Keterangan: Ashar_Keterangan.value,
-    Magrib_Status: Magrib_Status.value,
-    Magrib_Keterangan: Magrib_Keterangan.value,
-    Isya_Status: Isya_Status.value,
-    Isya_Keterangan: Isya_Keterangan.value,
-    Taraweh_Status: Taraweh_Status.value,
-    Taraweh_Keterangan: Taraweh_Keterangan.value,
-    Tidur_Waktu: Tidur_Waktu.value,
-    Tidur_Keterangan: Tidur_Keterangan.value,
-    Sedekah_Status: Sedekah_Status.value,
-    Sedekah_Keterangan: Sedekah_Keterangan.value,
-    Olahraga_Keterangan: Olahraga_Keterangan.value,
-    AktivitasKeluarga_Keterangan: AktivitasKeluarga_Keterangan.value,
-    Pesantren_Keterangan: Pesantren_Keterangan.value,
-    AksiEkologi_Keterangan: AksiEkologi_Keterangan.value,
-    Buka_Keterangan: Buka_Keterangan.value,
-    Tadarus_Keterangan: Tadarus_Keterangan.value
+    Long: Long.value
   };
 
-  await ambilFile("Sahur_Foto",data);
-  await ambilFile("Olahraga_Foto",data);
-  await ambilFile("AktivitasKeluarga_Foto",data);
-  await ambilFile("Pesantren_Foto",data);
-  await ambilFile("AksiEkologi_Foto",data);
-  await ambilFile("Buka_Foto",data);
-  await ambilFile("Tadarus_Foto",data);
-
   google.script.run.withSuccessHandler(function(res){
-    alert(res);
-    location.reload();
+    hasil.innerHTML = res;
   }).saveLaporan(data);
 }
 </script>
