@@ -1,137 +1,151 @@
-// ==========================
-// KONFIGURASI
-// ==========================
-const SPREADSHEET_ID = "1srT53Fp8fW89ViyP61BydjiCPqUNRvKDee8IEnR2Ezo";
-const FOLDER_ID = "1hrAAIpRz_-y4-qTDvzRKNC_ic3RWhw8q";
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
+  margin:0;padding:20px;
+}
+.card{
+  background:white;
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+  border-radius:15px;
+}
+select,input,textarea,button{
+  width:100%;padding:10px;margin:8px 0;
+}
+button{
+  background:#2a5298;color:white;border:none;
+}
+.hidden{display:none;}
+</style>
+</head>
+<body>
 
-const SHEET_KELOMPOK = "KELOMPOK";
-const SHEET_USERS = "USERS";
-const SHEET_LAPORAN = "LAPORAN";
+<div class="card">
+<h2>E-KAROMAH SMKNB</h2>
 
-// ==========================
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile("index")
-    .setTitle("E-KAROMAH SMKNB")
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+<select id="kelompok" onchange="loadNama()">
+<option value="">Pilih Kelompok</option>
+</select>
+
+<select id="nama" onchange="tampilForm()" disabled>
+<option value="">Pilih Nama</option>
+</select>
+
+<input type="text" id="pembimbing" readonly>
+
+<div id="formInput" class="hidden">
+
+<input type="time" id="sahur_waktu">
+<input type="file" id="sahur_foto" required>
+
+<input type="file" id="olahraga_foto" required>
+<input type="file" id="aktivitas_foto" required>
+<input type="file" id="pesantren_foto" required>
+<input type="file" id="aksi_foto" required>
+<input type="file" id="buka_foto" required>
+<input type="file" id="tadarus_foto" required>
+
+<select id="subuh_status"><option>Ya</option><option>Tidak</option></select>
+<select id="dzuhur_status"><option>Ya</option><option>Tidak</option></select>
+<select id="ashar_status"><option>Ya</option><option>Tidak</option></select>
+<select id="magrib_status"><option>Ya</option><option>Tidak</option></select>
+<select id="isya_status"><option>Ya</option><option>Tidak</option></select>
+<select id="taraweh_status"><option>Ya</option><option>Tidak</option></select>
+<select id="sedekah_status"><option>Ya</option><option>Tidak</option></select>
+
+<button onclick="kirim()">Simpan</button>
+
+</div>
+</div>
+
+<script>
+
+function loadKelompok(){
+google.script.run.withSuccessHandler(function(data){
+let s=document.getElementById("kelompok");
+data.forEach(k=>{
+let o=document.createElement("option");
+o.value=k;o.text=k;s.appendChild(o);
+});
+}).getKelompok();
 }
 
-// ==========================
-// DROPDOWN
-// ==========================
-function getKelompok() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_KELOMPOK);
-  return sheet.getRange("A2:A" + sheet.getLastRow())
-    .getValues().flat().filter(String);
+function loadNama(){
+let k=document.getElementById("kelompok").value;
+google.script.run.withSuccessHandler(function(data){
+let s=document.getElementById("nama");
+s.innerHTML='<option>Pilih Nama</option>';
+data.forEach(n=>{
+let o=document.createElement("option");
+o.value=n;o.text=n;s.appendChild(o);
+});
+s.disabled=false;
+}).getNamaByKelompok(k);
 }
 
-function getNamaByKelompok(kelompok) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_USERS);
-  const data = sheet.getDataRange().getValues();
-  let result = [];
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][2] == kelompok) result.push(data[i][0]);
-  }
-  return result;
+function tampilForm(){
+let k=document.getElementById("kelompok").value;
+google.script.run.withSuccessHandler(function(p){
+document.getElementById("pembimbing").value=p;
+document.getElementById("formInput").classList.remove("hidden");
+}).getPembimbingByKelompok(k);
 }
 
-function getPembimbingByKelompok(kelompok) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_KELOMPOK);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] == kelompok) return data[i][1];
-  }
-  return "";
+async function kirim(){
+
+function getBase64(id){
+return new Promise(resolve=>{
+let file=document.getElementById(id).files[0];
+let reader=new FileReader();
+reader.onload=()=>resolve(reader.result);
+reader.readAsDataURL(file);
+});
 }
 
-// ==========================
-// UPLOAD FILE
-// ==========================
-function uploadFile(base64Data, fileName) {
-  const folder = DriveApp.getFolderById(FOLDER_ID);
-  const contentType = base64Data.match(/^data:(.*);base64,/)[1];
-  const bytes = Utilities.base64Decode(base64Data.split(',')[1]);
-  const blob = Utilities.newBlob(bytes, contentType, fileName);
-  const file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return file.getUrl();
+navigator.geolocation.getCurrentPosition(async function(pos){
+
+let data={
+nama:document.getElementById("nama").value,
+kelompok:document.getElementById("kelompok").value,
+pembimbing:document.getElementById("pembimbing").value,
+lat:pos.coords.latitude,
+long:pos.coords.longitude,
+
+sahur_waktu:document.getElementById("sahur_waktu").value,
+
+sahur_foto:await getBase64("sahur_foto"),
+olahraga_foto:await getBase64("olahraga_foto"),
+aktivitas_foto:await getBase64("aktivitas_foto"),
+pesantren_foto:await getBase64("pesantren_foto"),
+aksi_foto:await getBase64("aksi_foto"),
+buka_foto:await getBase64("buka_foto"),
+tadarus_foto:await getBase64("tadarus_foto"),
+
+subuh_status:document.getElementById("subuh_status").value,
+dzuhur_status:document.getElementById("dzuhur_status").value,
+ashar_status:document.getElementById("ashar_status").value,
+magrib_status:document.getElementById("magrib_status").value,
+isya_status:document.getElementById("isya_status").value,
+taraweh_status:document.getElementById("taraweh_status").value,
+sedekah_status:document.getElementById("sedekah_status").value
+};
+
+google.script.run.withSuccessHandler(function(res){
+alert(res);
+location.reload();
+}).simpanData(data);
+
+});
 }
 
-// ==========================
-// SIMPAN DATA (WAJIB FOTO)
-// ==========================
-function simpanData(form) {
+loadKelompok();
+</script>
 
-  // VALIDASI WAJIB FOTO
-  const wajibFoto = [
-    form.sahur_foto,
-    form.olahraga_foto,
-    form.aktivitas_foto,
-    form.pesantren_foto,
-    form.aksi_foto,
-    form.buka_foto,
-    form.tadarus_foto
-  ];
-
-  if (wajibFoto.some(f => !f)) {
-    return "❌ Semua kegiatan wajib upload foto (kecuali sholat & sedekah)";
-  }
-
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_LAPORAN);
-
-  // Upload semua foto
-  const sahurUrl = uploadFile(form.sahur_foto, "Sahur_"+Date.now()+".jpg");
-  const olahragaUrl = uploadFile(form.olahraga_foto, "Olahraga_"+Date.now()+".jpg");
-  const aktivitasUrl = uploadFile(form.aktivitas_foto, "Aktivitas_"+Date.now()+".jpg");
-  const pesantrenUrl = uploadFile(form.pesantren_foto, "Pesantren_"+Date.now()+".jpg");
-  const aksiUrl = uploadFile(form.aksi_foto, "Aksi_"+Date.now()+".jpg");
-  const bukaUrl = uploadFile(form.buka_foto, "Buka_"+Date.now()+".jpg");
-  const tadarusUrl = uploadFile(form.tadarus_foto, "Tadarus_"+Date.now()+".jpg");
-
-  sheet.appendRow([
-    new Date(),
-    "",
-    form.nama,
-    form.kelompok,
-    form.pembimbing,
-    form.lat,
-    form.long,
-    form.sahur_waktu,
-    sahurUrl,
-    form.sahur_keterangan,
-    form.subuh_status,
-    form.subuh_keterangan,
-    olahragaUrl,
-    form.olahraga_keterangan,
-    aktivitasUrl,
-    form.aktivitas_keterangan,
-    form.dzuhur_status,
-    form.dzuhur_keterangan,
-    pesantrenUrl,
-    form.pesantren_keterangan,
-    form.ashar_status,
-    form.ashar_keterangan,
-    aksiUrl,
-    form.aksi_keterangan,
-    bukaUrl,
-    form.buka_keterangan,
-    form.magrib_status,
-    form.magrib_keterangan,
-    form.isya_status,
-    form.isya_keterangan,
-    form.taraweh_status,
-    form.taraweh_keterangan,
-    tadarusUrl,
-    form.tadarus_keterangan,
-    form.tidur_waktu,
-    form.tidur_keterangan,
-    form.sedekah_status,
-    form.sedekah_keterangan,
-    0
-  ]);
-
-  return "✅ Data berhasil disimpan lengkap!";
-}
+</body>
+</html>
