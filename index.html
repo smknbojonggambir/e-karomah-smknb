@@ -7,82 +7,66 @@
 
 <style>
 :root{
-  --primary:#2563eb;
   --bg1:#0f172a;
   --bg2:#1e293b;
-  --glass:rgba(255,255,255,0.08);
+  --primary:#2563eb;
 }
 
-*{margin:0;padding:0;box-sizing:border-box}
-
 body{
+  margin:0;
   font-family:system-ui;
   background:linear-gradient(135deg,var(--bg1),var(--bg2));
-  color:#fff;
+  color:white;
   min-height:100vh;
-  padding:20px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 .container{
-  max-width:900px;
-  margin:auto;
-}
-
-.header{
   text-align:center;
-  margin-bottom:25px;
+  max-width:400px;
+  width:100%;
+  padding:20px;
 }
 
 .logo{
   width:100px;
-  background:#fff;
+  background:white;
   padding:8px;
   border-radius:50%;
-}
-
-.card{
-  background:var(--glass);
-  backdrop-filter:blur(14px);
-  padding:25px;
-  border-radius:18px;
-}
-
-select,input,textarea{
-  width:100%;
-  padding:11px;
-  margin:8px 0 15px;
-  border-radius:10px;
-  border:none;
-}
-
-.section{
-  background:rgba(255,255,255,0.05);
-  padding:15px;
-  border-radius:12px;
   margin-bottom:15px;
 }
 
-.radio-group{
-  display:flex;
-  gap:20px;
+.card{
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(15px);
+  padding:30px;
+  border-radius:18px;
 }
 
-button{
+h2{
+  margin-bottom:25px;
+}
+
+.btn{
+  display:block;
   width:100%;
   padding:14px;
+  margin:12px 0;
   border:none;
   border-radius:12px;
-  background:#2563eb;
+  background:var(--primary);
   color:white;
   font-weight:600;
+  cursor:pointer;
+  text-decoration:none;
+  transition:.2s;
 }
 
-.hidden{display:none}
-
-.loader{
-  text-align:center;
-  margin-top:10px;
-  display:none;
+.btn:hover{
+  background:#1d4ed8;
+  transform:scale(1.03);
 }
 </style>
 </head>
@@ -91,258 +75,30 @@ button{
 
 <div class="container">
 
-<div class="header">
-<img class="logo"
-src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
-<h2>E-KAROMAH SMKNB</h2>
-</div>
+  <div class="card">
 
-<div class="card">
+    <img class="logo"
+    src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
 
-<select id="kelompok" onchange="loadNama()">
-<option value="">Pilih Kelompok</option>
-</select>
+    <h2>E-KAROMAH SMKNB</h2>
 
-<select id="nama" onchange="tampilForm()" disabled>
-<option value="">Pilih Nama</option>
-</select>
+    <p>Silakan pilih login</p>
 
-<input type="text" id="pembimbing" readonly>
+    <a href="login.html?role=siswa" class="btn">
+      👨‍🎓 Login Siswa
+    </a>
 
-<!-- GPS -->
-<input type="hidden" id="lat">
-<input type="hidden" id="long">
+    <a href="login.html?role=pembimbing" class="btn">
+      👩‍🏫 Login Pembimbing
+    </a>
 
-<div id="formInput" class="hidden">
+    <a href="login.html?role=admin" class="btn">
+      🛠️ Login Admin
+    </a>
 
-<div id="dynamicForm"></div>
-
-<button onclick="kirim()">KIRIM</button>
-
-<div class="loader" id="loader">Mengirim...</div>
+  </div>
 
 </div>
 
-</div>
-</div>
-
-<script>
-
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
-
-/* ================= GPS ================= */
-
-function getLocation(){
-
-  if(!navigator.geolocation){
-    alert("GPS tidak didukung");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-
-    pos=>{
-      lat.value  = pos.coords.latitude;
-      long.value = pos.coords.longitude;
-    },
-
-    err=>{
-      alert("Aktifkan GPS!");
-    },
-
-    {enableHighAccuracy:true}
-
-  );
-}
-
-
-/* ================= FORM ================= */
-
-function toggle(id,show){
-  document.getElementById(id).classList.toggle("hidden",!show);
-}
-
-function radioSection(title,id,withFoto=false,withTime=false){
-
-return `
-<div class="section">
-
-<h4>${title}</h4>
-
-<div class="radio-group">
-
-<label>
-<input type="radio" name="${id}" value="Ya"
-onclick="toggle('${id}_d',true)"> Ya
-</label>
-
-<label>
-<input type="radio" name="${id}" value="Tidak"
-onclick="toggle('${id}_d',false)"> Tidak
-</label>
-
-</div>
-
-<div id="${id}_d" class="hidden">
-
-${withTime?`<input type="time" id="${id}_waktu">`:""}
-
-${withFoto?`<input type="file" id="${id}_foto" accept="image/*">`:""}
-
-<textarea id="${id}_ket"></textarea>
-
-</div>
-</div>
-`;
-}
-
-
-/* ================= LOAD ================= */
-
-async function loadKelompok(){
-
-  const r=await fetch(WEB_APP_URL+"?action=getKelompok");
-  const d=await r.json();
-
-  d.forEach(x=>{
-    kelompok.innerHTML+=`<option>${x}</option>`;
-  });
-
-}
-
-async function loadNama(){
-
-  if(!kelompok.value) return;
-
-  const r=await fetch(
-    WEB_APP_URL+"?action=getNama&kelompok="+kelompok.value
-  );
-
-  const d=await r.json();
-
-  nama.innerHTML='<option></option>';
-
-  d.forEach(x=>{
-    nama.innerHTML+=`<option>${x}</option>`;
-  });
-
-  nama.disabled=false;
-}
-
-async function tampilForm(){
-
-  const r=await fetch(
-    WEB_APP_URL+"?action=getPembimbing&kelompok="+kelompok.value
-  );
-
-  pembimbing.value=await r.text();
-
-  formInput.classList.remove("hidden");
-
-  generateForm();
-}
-
-
-/* ================= GENERATE ================= */
-
-function generateForm(){
-
-  dynamicForm.innerHTML=
-
-  radioSection("Sahur","sahur",true,true)+
-  radioSection("Subuh","subuh")+
-  radioSection("Olahraga","olahraga",true)+
-  radioSection("Keluarga","keluarga",true)+
-  radioSection("Dzuhur","dzuhur")+
-  radioSection("Pesantren","pesantren",true)+
-  radioSection("Ashar","ashar")+
-  radioSection("Aksi","aksi",true)+
-  radioSection("Buka","buka",true)+
-  radioSection("Magrib","magrib")+
-  radioSection("Isya","isya")+
-  radioSection("Tarawih","tarawih")+
-  radioSection("Tadarus","tadarus",true)+
-  radioSection("Tidur","tidur",false,true);
-
-}
-
-
-/* ================= SUBMIT ================= */
-
-async function kirim(){
-
-  loader.style.display="block";
-
-  let fd=new FormData();
-
-  fd.append("action","simpan");
-
-  fd.append("kelompok",kelompok.value);
-  fd.append("nama",nama.value);
-  fd.append("pembimbing",pembimbing.value);
-
-  fd.append("lat",lat.value);
-  fd.append("long",long.value);
-
-  const list=[
-    "sahur","subuh","olahraga","keluarga","dzuhur",
-    "pesantren","ashar","aksi","buka","magrib",
-    "isya","tarawih","tadarus","tidur"
-  ];
-
-  for(let id of list){
-
-    let st=document.querySelector(`input[name="${id}"]:checked`);
-
-    fd.append(id+"_status",st?st.value:"Tidak");
-
-    let w=document.getElementById(id+"_waktu");
-    if(w) fd.append(id+"_waktu",w.value);
-
-    let k=document.getElementById(id+"_ket");
-    if(k) fd.append(id+"_ket",k.value);
-
-    let f=document.getElementById(id+"_foto");
-
-    if(f && f.files[0]){
-
-      let reader=new FileReader();
-
-      await new Promise(r=>{
-
-        reader.onload=()=>{
-
-          fd.append(id+"_foto",reader.result);
-          r();
-
-        };
-
-        reader.readAsDataURL(f.files[0]);
-
-      });
-
-    }
-
-  }
-
-  await fetch(WEB_APP_URL,{
-    method:"POST",
-    body:fd
-  });
-
-  alert("Berhasil!");
-
-  loader.style.display="none";
-
-  location.reload();
-}
-
-
-/* ================= INIT ================= */
-
-loadKelompok();
-getLocation();
-
-</script>
 </body>
 </html>
