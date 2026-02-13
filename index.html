@@ -6,58 +6,116 @@
 <title>E-KAROMAH SMKNB</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
+
 body{
     margin:0;
-    font-family:Segoe UI, sans-serif;
+    font-family:'Segoe UI', sans-serif;
     background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     color:white;
 }
+
 .container{
-    max-width:700px;
+    max-width:750px;
     margin:auto;
     padding:20px;
 }
+
+.header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo{
+    width:130px;
+    border-radius:50%;
+    background:white;
+    padding:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
 .card{
     background:white;
     color:#333;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
 }
+
 h1{
-    text-align:center;
+    margin-top:15px;
+    font-size:26px;
 }
+
+label{
+    font-weight:600;
+    font-size:14px;
+}
+
 select,input,textarea{
     width:100%;
-    padding:10px;
-    margin:8px 0;
-    border-radius:8px;
+    padding:12px;
+    margin:8px 0 15px 0;
+    border-radius:10px;
     border:1px solid #ccc;
+    font-size:14px;
 }
+
+input[type="file"]{
+    padding:8px;
+}
+
 button{
     width:100%;
-    padding:12px;
+    padding:14px;
     background:#2c5364;
     color:white;
     border:none;
-    border-radius:8px;
+    border-radius:10px;
     font-weight:bold;
     cursor:pointer;
+    font-size:15px;
+    transition:0.3s;
 }
+
 button:hover{
     background:#1e3c72;
 }
-.hidden{display:none;}
+
+.hidden{
+    display:none;
+}
+
 .loader{
     text-align:center;
+    margin-top:15px;
+    font-weight:bold;
     display:none;
+}
+
+hr{
+    margin:20px 0;
+}
+
+@media(max-width:600px){
+    .card{
+        padding:18px;
+    }
 }
 </style>
 </head>
+
 <body>
 
 <div class="container">
+
+<div class="header">
+<img class="logo"
+src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
 <h1>E-KAROMAH SMKNB</h1>
+</div>
 
 <div class="card">
 
@@ -74,7 +132,7 @@ button:hover{
 <div id="formInput" class="hidden">
 
 <label>Waktu Sahur</label>
-<input type="time" id="sahur_waktu">
+<input type="time" id="sahur_waktu" required>
 
 <label>Foto Sahur</label>
 <input type="file" id="sahur_foto" required>
@@ -100,25 +158,46 @@ button:hover{
 <hr>
 
 <label>Subuh</label>
-<select id="subuh_status"><option>Ya</option><option>Tidak</option></select>
+<select id="subuh_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <label>Dzuhur</label>
-<select id="dzuhur_status"><option>Ya</option><option>Tidak</option></select>
+<select id="dzuhur_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <label>Ashar</label>
-<select id="ashar_status"><option>Ya</option><option>Tidak</option></select>
+<select id="ashar_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <label>Magrib</label>
-<select id="magrib_status"><option>Ya</option><option>Tidak</option></select>
+<select id="magrib_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <label>Isya</label>
-<select id="isya_status"><option>Ya</option><option>Tidak</option></select>
+<select id="isya_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <label>Taraweh</label>
-<select id="taraweh_status"><option>Ya</option><option>Tidak</option></select>
+<select id="taraweh_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <label>Sedekah</label>
-<select id="sedekah_status"><option>Ya</option><option>Tidak</option></select>
+<select id="sedekah_status">
+<option value="Ya">Ya</option>
+<option value="Tidak">Tidak</option>
+</select>
 
 <button onclick="kirim()">Simpan Data</button>
 
@@ -130,57 +209,65 @@ button:hover{
 
 <script>
 
-// GANTI DENGAN URL WEB APP DEPLOY ANDA
+// GANTI DENGAN WEB APP DEPLOY ANDA
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzasLaP_oWkzvsPOkadw4iL-aLfYP7APzfbM-etQQwu7Al4eykdhdY7K4Pacf9RPHg8/exec";
 
-// =========================
+// ==========================
 // LOAD KELOMPOK
-// =========================
+// ==========================
 async function loadKelompok(){
 const res = await fetch(WEB_APP_URL + "?action=getKelompok");
 const data = await res.json();
-let s=document.getElementById("kelompok");
+
+let select = document.getElementById("kelompok");
 data.forEach(k=>{
-let o=document.createElement("option");
-o.value=k;
-o.text=k;
-s.appendChild(o);
+let option = document.createElement("option");
+option.value = k;
+option.textContent = k;
+select.appendChild(option);
 });
 }
 
-// =========================
+// ==========================
 // LOAD NAMA
-// =========================
+// ==========================
 async function loadNama(){
-let k=document.getElementById("kelompok").value;
-const res = await fetch(WEB_APP_URL + "?action=getNama&kelompok="+k);
+let kelompok = document.getElementById("kelompok").value;
+
+if(!kelompok) return;
+
+const res = await fetch(WEB_APP_URL + "?action=getNama&kelompok="+encodeURIComponent(kelompok));
 const data = await res.json();
 
-let s=document.getElementById("nama");
-s.innerHTML='<option value="">Pilih Nama</option>';
+let select = document.getElementById("nama");
+select.innerHTML = '<option value="">Pilih Nama</option>';
+
 data.forEach(n=>{
-let o=document.createElement("option");
-o.value=n;
-o.text=n;
-s.appendChild(o);
+let option = document.createElement("option");
+option.value = n;
+option.textContent = n;
+select.appendChild(option);
 });
-s.disabled=false;
+
+select.disabled = false;
 }
 
-// =========================
+// ==========================
 // TAMPIL FORM
-// =========================
+// ==========================
 async function tampilForm(){
-let k=document.getElementById("kelompok").value;
-const res = await fetch(WEB_APP_URL + "?action=getPembimbing&kelompok="+k);
+let kelompok = document.getElementById("kelompok").value;
+
+const res = await fetch(WEB_APP_URL + "?action=getPembimbing&kelompok="+encodeURIComponent(kelompok));
 const pembimbing = await res.text();
-document.getElementById("pembimbing").value=pembimbing;
+
+document.getElementById("pembimbing").value = pembimbing;
 document.getElementById("formInput").classList.remove("hidden");
 }
 
-// =========================
+// ==========================
 // KIRIM DATA
-// =========================
+// ==========================
 async function kirim(){
 
 document.getElementById("loader").style.display="block";
@@ -188,27 +275,29 @@ document.getElementById("loader").style.display="block";
 let formData = new FormData();
 formData.append("action","simpan");
 
-formData.append("kelompok",kelompok.value);
-formData.append("nama",nama.value);
-formData.append("pembimbing",pembimbing.value);
+formData.append("kelompok",document.getElementById("kelompok").value);
+formData.append("nama",document.getElementById("nama").value);
+formData.append("pembimbing",document.getElementById("pembimbing").value);
 
-formData.append("subuh_status",subuh_status.value);
-formData.append("dzuhur_status",dzuhur_status.value);
-formData.append("ashar_status",ashar_status.value);
-formData.append("magrib_status",magrib_status.value);
-formData.append("isya_status",isya_status.value);
-formData.append("taraweh_status",taraweh_status.value);
-formData.append("sedekah_status",sedekah_status.value);
+formData.append("sahur_waktu",document.getElementById("sahur_waktu").value);
 
-formData.append("sahur_waktu",sahur_waktu.value);
+formData.append("subuh_status",document.getElementById("subuh_status").value);
+formData.append("dzuhur_status",document.getElementById("dzuhur_status").value);
+formData.append("ashar_status",document.getElementById("ashar_status").value);
+formData.append("magrib_status",document.getElementById("magrib_status").value);
+formData.append("isya_status",document.getElementById("isya_status").value);
+formData.append("taraweh_status",document.getElementById("taraweh_status").value);
+formData.append("sedekah_status",document.getElementById("sedekah_status").value);
 
-formData.append("sahur_foto",sahur_foto.files[0]);
-formData.append("olahraga_foto",olahraga_foto.files[0]);
-formData.append("aktivitas_foto",aktivitas_foto.files[0]);
-formData.append("pesantren_foto",pesantren_foto.files[0]);
-formData.append("aksi_foto",aksi_foto.files[0]);
-formData.append("buka_foto",buka_foto.files[0]);
-formData.append("tadarus_foto",tadarus_foto.files[0]);
+let files = [
+"sahur_foto","olahraga_foto","aktivitas_foto",
+"pesantren_foto","aksi_foto","buka_foto","tadarus_foto"
+];
+
+files.forEach(id=>{
+let file = document.getElementById(id).files[0];
+if(file) formData.append(id,file);
+});
 
 await fetch(WEB_APP_URL,{
 method:"POST",
@@ -221,6 +310,7 @@ location.reload();
 }
 
 loadKelompok();
+
 </script>
 
 </body>
