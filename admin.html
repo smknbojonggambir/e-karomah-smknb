@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin</title>
+</head>
+
+<body>
+
+<h2>Dashboard Admin</h2>
+
+<div id="data"></div>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbyu33np9t611Jzxh6EBCYuw5lH2n4iUyttlDuEznKsr_mgudPpLjAk0Uoiqlk6gkJjRwA/exec";
+
+let user=JSON.parse(localStorage.getItem("user"));
+
+if(!user || user.role!="Admin"){
+  location.href="index.html";
+}
+
+async function load(){
+
+  let r=await fetch(API+"?action=laporanAll");
+
+  let d=await r.json();
+
+  let h="";
+
+  d.forEach(x=>{
+    h+=`
+      <p>${x.nama} | ${x.kelompok} | ${x.tanggal}</p>
+    `;
+  });
+
+  data.innerHTML=h;
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+load();
+</script>
+
+</body>
+</html>
