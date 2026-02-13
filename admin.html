@@ -32,7 +32,6 @@ body {
   margin: auto;
   background: var(--glass);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 25px;
@@ -86,7 +85,7 @@ button:active { transform: scale(0.98); }
 
 /* Table Section */
 .table-wrapper {
-  overflow-x: auto; /* Agar bisa discroll di HP */
+  overflow-x: auto;
   border-radius: 12px;
   border: 1px solid var(--border);
 }
@@ -94,12 +93,10 @@ button:active { transform: scale(0.98); }
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* Mencegah tabel terlalu gepeng di HP */
+  min-width: 600px;
 }
 
-thead {
-  background: rgba(59, 130, 246, 0.2);
-}
+thead { background: rgba(59, 130, 246, 0.2); }
 
 th, td {
   padding: 12px 15px;
@@ -108,31 +105,16 @@ th, td {
   font-size: 14px;
 }
 
-th {
-  font-weight: 600;
-  color: #93c5fd;
-  white-space: nowrap;
-}
+th { font-weight: 600; color: #93c5fd; white-space: nowrap; }
 
-tr:hover {
-  background: rgba(255,255,255,0.03);
-}
+tr:hover { background: rgba(255,255,255,0.03); }
 
-/* Status Badge (Opsional: Jika ada data status) */
-.badge {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-/* Loading Spinner */
 #loader {
   text-align: center;
   padding: 40px;
   font-size: 16px;
   color: var(--text);
-  display: none; /* Hidden by default */
+  display: none;
 }
 .spinner {
   width: 30px;
@@ -144,9 +126,7 @@ tr:hover {
   margin: 0 auto 10px;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 600px) {
   header { flex-direction: column; align-items: flex-start; }
@@ -158,7 +138,6 @@ tr:hover {
 <body>
 
 <div class="container">
-  
   <header>
     <div>
       <h2>Admin Panel</h2>
@@ -187,26 +166,22 @@ tr:hover {
           <th>Status</th>
         </tr>
       </thead>
-      <tbody id="tb">
-        </tbody>
+      <tbody id="tb"></tbody>
     </table>
   </div>
-
 </div>
 
 <script>
 /* ================= PROTEKSI LOGIN ================= */
-// Mengambil data user yang disimpan saat login di index.html
-const user = JSON.parse(localStorage.getItem("user"));
+let user = null;
+try { user = JSON.parse(localStorage.getItem("user")); } catch(e){ console.warn(e); }
 
-// Cek apakah user ada dan rolenya admin
 if(!user || user.role !== "admin"){
   alert("Akses Ditolak! Anda bukan Admin.");
   location.href = "index.html";
 }
 
 /* ================= CONFIG ================= */
-// Pastikan URL ini sesuai dengan Web App Google Script Anda
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
 
 /* ================= LOAD DATA ================= */
@@ -214,25 +189,19 @@ async function load(){
   const tb = document.getElementById("tb");
   const loader = document.getElementById("loader");
   const wrapper = document.getElementById("data");
-  
-  // Tampilkan loader, sembunyikan tabel
+
   loader.style.display = "block";
   wrapper.style.opacity = "0.5";
   tb.innerHTML = "";
 
   try{
-    // Mengambil data dengan action=rekapAdmin
     const r = await fetch(WEB_APP_URL + "?action=rekapAdmin");
-    
     if(!r.ok) throw new Error("Gagal mengambil data");
-    
     const d = await r.json();
 
-    // Jika data kosong
-    if(d.length === 0){
+    if(!Array.isArray(d) || d.length === 0){
       tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data laporan.</td></tr>`;
     } else {
-      // Loop data
       d.forEach(x => {
         tb.innerHTML += `
         <tr>
@@ -244,12 +213,10 @@ async function load(){
         </tr>`;
       });
     }
-
   }catch(e){
     console.error(e);
     tb.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">❌ Gagal memuat data. Periksa koneksi internet.</td></tr>`;
   }finally{
-    // Sembunyikan loader
     loader.style.display = "none";
     wrapper.style.opacity = "1";
   }
@@ -258,23 +225,20 @@ async function load(){
 /* ================= EXPORT PDF ================= */
 function exportPDF(){
   const element = document.getElementById("data");
-  const opt = {
-    margin:       10,
-    filename:     'Rekap-Ekaromah-' + new Date().toISOString().slice(0,10) + '.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-  };
-
-  // Ubah style sementara agar tabel terlihat bagus di PDF (putih)
   const originalColor = element.style.color;
+  const originalBg = element.style.background;
   element.style.color = "black";
   element.style.background = "white";
 
-  html2pdf().set(opt).from(element).save().then(() => {
-    // Kembalikan style
+  html2pdf().set({
+    margin: 10,
+    filename: 'Rekap-Ekaromah-' + new Date().toISOString().slice(0,10) + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  }).from(element).save().then(() => {
     element.style.color = originalColor;
-    element.style.background = "transparent";
+    element.style.background = originalBg;
   });
 }
 
@@ -292,5 +256,3 @@ load();
 
 </body>
 </html>
-
-```
