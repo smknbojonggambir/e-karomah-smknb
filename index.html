@@ -1,169 +1,186 @@
 <!DOCTYPE html>
 <html>
 <head>
-<base target="_top">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      margin:0;
+      padding:20px;
+      color:white;
+    }
 
-<style>
-body{
-  font-family:Arial;
-  background:#f4f6f9;
-  padding:20px;
-}
-.card{
-  max-width:800px;
-  margin:auto;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
-}
-.logo{
-  text-align:center;
-}
-.logo img{
-  width:100px;
-}
-h2{text-align:center;}
-label{font-weight:bold; display:block; margin-top:10px;}
-input,select,textarea{
-  width:100%;
-  padding:8px;
-  margin-top:5px;
-}
-button{
-  margin-top:20px;
-  padding:12px;
-  width:100%;
-  background:#2c3e50;
-  color:white;
-  border:none;
-}
-</style>
+    .card {
+      background:white;
+      color:black;
+      padding:20px;
+      border-radius:15px;
+      max-width:600px;
+      margin:auto;
+      box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      text-align:center;
+      margin-bottom:20px;
+    }
+
+    select,input,textarea,button {
+      width:100%;
+      padding:10px;
+      margin:8px 0;
+      border-radius:8px;
+      border:1px solid #ccc;
+    }
+
+    button {
+      background:#2c5364;
+      color:white;
+      border:none;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    button:hover {
+      background:#203a43;
+    }
+
+    .hidden { display:none; }
+
+    @media(max-width:600px){
+      .card{padding:15px;}
+    }
+  </style>
 </head>
-
 <body>
+
 <div class="card">
+  <h2>E-KAROMAH SMKNB</h2>
 
-<div class="logo">
-<img src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
-<h2>E-KAROMAH SMKNB</h2>
-</div>
+  <!-- STEP 1 -->
+  <label>Pilih Kelompok</label>
+  <select id="kelompok" onchange="loadNama()">
+    <option value="">-- Pilih Kelompok --</option>
+  </select>
 
-<label>Kelompok</label>
-<select id="kelompok" onchange="loadUsers()">
-<option value="">-- Pilih Kelompok --</option>
-</select>
+  <!-- STEP 2 -->
+  <label>Pilih Nama</label>
+  <select id="nama" onchange="tampilPembimbing()" disabled>
+    <option value="">-- Pilih Nama --</option>
+  </select>
 
-<label>Nama</label>
-<select id="nama" onchange="setUser()">
-<option value="">-- Pilih Nama --</option>
-</select>
+  <!-- PEMBIMBING -->
+  <label>Pembimbing</label>
+  <input type="text" id="pembimbing" readonly>
 
-<label>Pembimbing</label>
-<input type="text" id="pembimbing" readonly>
+  <!-- FORM -->
+  <div id="formInput" class="hidden">
 
-<div id="formArea" style="display:none">
+    <label>Sahur Waktu</label>
+    <input type="time" id="sahur_waktu">
 
-<label>Tanggal</label>
-<input type="date" id="Tanggal">
+    <label>Sahur Keterangan</label>
+    <textarea id="sahur_keterangan"></textarea>
 
-<label>Sahur Waktu</label>
-<input type="time" id="Sahur_Waktu">
+    <label>Subuh Status</label>
+    <select id="subuh_status">
+      <option>Ya</option>
+      <option>Tidak</option>
+    </select>
 
-<label>Foto Sahur</label>
-<input type="file" id="Sahur_Foto">
+    <label>Subuh Keterangan</label>
+    <textarea id="subuh_keterangan"></textarea>
 
-<label>Keterangan</label>
-<textarea id="Sahur_Keterangan"></textarea>
+    <label>Dzuhur Status</label>
+    <select id="dzuhur_status">
+      <option>Ya</option>
+      <option>Tidak</option>
+    </select>
 
-<button onclick="kirim()">Simpan Laporan</button>
+    <label>Dzuhur Keterangan</label>
+    <textarea id="dzuhur_keterangan"></textarea>
 
-<div id="hasil"></div>
+    <button onclick="kirim()">Simpan</button>
 
-</div>
+  </div>
 
 </div>
 
 <script>
 
-let kelompokData=[];
-let selectedUser="";
-
-google.script.run.withSuccessHandler(function(data){
-
-  kelompokData=data;
-  data.forEach(k=>{
-    let opt=document.createElement("option");
-    opt.value=k.kelompok;
-    opt.textContent=k.kelompok;
-    kelompok.appendChild(opt);
-  });
-
-}).getKelompok();
-
-function loadUsers(){
-
-  let k=kelompok.value;
-  let found=kelompokData.find(x=>x.kelompok===k);
-
-  pembimbing.value=found?found.pembimbing:"";
-
-  google.script.run.withSuccessHandler(function(users){
-
-    nama.innerHTML='<option value="">-- Pilih Nama --</option>';
-    users.forEach(u=>{
-      let opt=document.createElement("option");
-      opt.value=u.username;
-      opt.textContent=u.nama;
-      nama.appendChild(opt);
+function loadKelompok(){
+  google.script.run.withSuccessHandler(function(data){
+    let select = document.getElementById("kelompok");
+    data.forEach(k=>{
+      let opt = document.createElement("option");
+      opt.value=k;
+      opt.text=k;
+      select.appendChild(opt);
     });
-
-  }).getUsersByKelompok(k);
+  }).getKelompok();
 }
 
-function setUser(){
-  selectedUser=nama.value;
-  formArea.style.display="block";
+function loadNama(){
+  let kelompok = document.getElementById("kelompok").value;
+  let namaSelect = document.getElementById("nama");
+  namaSelect.innerHTML='<option value="">-- Pilih Nama --</option>';
+  namaSelect.disabled=true;
+
+  if(!kelompok) return;
+
+  google.script.run.withSuccessHandler(function(data){
+    data.forEach(n=>{
+      let opt=document.createElement("option");
+      opt.value=n;
+      opt.text=n;
+      namaSelect.appendChild(opt);
+    });
+    namaSelect.disabled=false;
+  }).getNamaByKelompok(kelompok);
 }
 
-navigator.geolocation.getCurrentPosition(function(pos){
-  window.lat=pos.coords.latitude;
-  window.long=pos.coords.longitude;
-});
+function tampilPembimbing(){
+  let kelompok=document.getElementById("kelompok").value;
+  let nama=document.getElementById("nama").value;
 
-function toBase64(file){
-  return new Promise(resolve=>{
-    const reader=new FileReader();
-    reader.onload=e=>resolve(e.target.result);
-    reader.readAsDataURL(file);
+  if(!nama) return;
+
+  google.script.run.withSuccessHandler(function(p){
+    document.getElementById("pembimbing").value=p;
+    document.getElementById("formInput").classList.remove("hidden");
+  }).getPembimbingByKelompok(kelompok);
+}
+
+function kirim(){
+  navigator.geolocation.getCurrentPosition(function(pos){
+
+    let data={
+      nama:document.getElementById("nama").value,
+      kelompok:document.getElementById("kelompok").value,
+      pembimbing:document.getElementById("pembimbing").value,
+      lat:pos.coords.latitude,
+      long:pos.coords.longitude,
+      sahur_waktu:document.getElementById("sahur_waktu").value,
+      sahur_keterangan:document.getElementById("sahur_keterangan").value,
+      subuh_status:document.getElementById("subuh_status").value,
+      subuh_keterangan:document.getElementById("subuh_keterangan").value,
+      dzuhur_status:document.getElementById("dzuhur_status").value,
+      dzuhur_keterangan:document.getElementById("dzuhur_keterangan").value
+    };
+
+    google.script.run.withSuccessHandler(function(res){
+      alert(res);
+      location.reload();
+    }).simpanData(data);
+
   });
 }
 
-async function kirim(){
-
-  let file=Sahur_Foto.files[0];
-  let base64=file?await toBase64(file):"";
-
-  let data={
-    Tanggal:Tanggal.value,
-    Username:selectedUser,
-    Nama:nama.options[nama.selectedIndex].text,
-    Kelompok:kelompok.value,
-    Pembimbing:pembimbing.value,
-    Lat:window.lat,
-    Long:window.long,
-    Sahur_Waktu:Sahur_Waktu.value,
-    Sahur_Foto:base64,
-    Sahur_Foto_mime:file?file.type:"",
-    Sahur_Keterangan:Sahur_Keterangan.value
-  };
-
-  google.script.run.withSuccessHandler(function(res){
-    hasil.innerHTML=res;
-  }).saveLaporan(data);
-}
+loadKelompok();
 
 </script>
+
 </body>
 </html>
