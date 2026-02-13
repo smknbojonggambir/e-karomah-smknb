@@ -19,6 +19,10 @@ header{
   text-align:center;
 }
 
+.header-btn{
+  margin-top:10px;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
@@ -40,6 +44,11 @@ button{
   color:white;
   border-radius:8px;
   cursor:pointer;
+  margin:3px;
+}
+
+.btn-logout{
+  background:#ef4444;
 }
 </style>
 </head>
@@ -48,7 +57,11 @@ button{
 
 <header>
 <h2>Rekap Pembimbing</h2>
+
+<div class="header-btn">
 <button onclick="window.print()">🖨 Cetak</button>
+<button onclick="logout()" class="btn-logout">🚪 Logout</button>
+</div>
 </header>
 
 <div style="padding:15px">
@@ -71,29 +84,50 @@ button{
 
 <script>
 
+/* ================= PROTEKSI LOGIN ================= */
+if(localStorage.getItem("login")!=="pembimbing"){
+  location.href="index.html";
+}
+
+/* ================= CONFIG ================= */
 const WEB_APP_URL="https://script.google.com/macros/s/AKfycbzVdZoXoZLUREfuu1k1i5BNhySWcDqrKs-VnF0oMZpCLT8NAGETKHBgrPGtK-oOC8M8Ew/exec";
 
+/* ================= LOAD DATA ================= */
 async function loadData(){
 
-  const r=await fetch(WEB_APP_URL+"?action=rekapPembimbing");
-  const d=await r.json();
+  try{
+    const r = await fetch(WEB_APP_URL+"?action=rekapPembimbing");
+    const d = await r.json();
 
-  let tb=document.querySelector("tbody");
+    let tb = document.querySelector("tbody");
+    tb.innerHTML = "";
 
-  d.forEach(x=>{
+    d.forEach(x=>{
+      tb.innerHTML += `
+      <tr>
+        <td>${x.tanggal}</td>
+        <td>${x.nama}</td>
+        <td>${x.kelompok}</td>
+        <td>${x.hadir}</td>
+        <td>${x.kegiatan}</td>
+      </tr>`;
+    });
 
-    tb.innerHTML+=`
-    <tr>
-      <td>${x.tanggal}</td>
-      <td>${x.nama}</td>
-      <td>${x.kelompok}</td>
-      <td>${x.hadir}</td>
-      <td>${x.kegiatan}</td>
-    </tr>`;
-  });
+  }catch(e){
+    alert("Gagal memuat data!");
+  }
 
 }
 
+/* ================= LOGOUT ================= */
+function logout(){
+  if(confirm("Yakin ingin logout?")){
+    localStorage.clear();
+    location.href="index.html";
+  }
+}
+
+/* ================= INIT ================= */
 loadData();
 
 </script>
