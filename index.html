@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-KAROMAH SMKNB</title>
+
+<style>
+:root{
+  --bg:#0d1117;
+  --card:#161b22;
+  --border:#30363d;
+  --accent:#2ea043;
+  --text:#e6edf3;
+}
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:var(--bg);
+  color:var(--text);
+}
+.navbar{
+  background:var(--card);
+  padding:15px 25px;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  border-bottom:1px solid var(--border);
+}
+.navbar img{height:45px}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+.card{
+  background:var(--card);
+  padding:20px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  margin-bottom:20px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:15px;
+}
+input,select{
+  width:100%;
+  padding:8px;
+  margin-top:5px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:#0d1117;
+  color:white;
+}
+button{
+  background:var(--accent);
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+  margin-top:20px;
+  width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <img src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LOGO.png">
+  <h2>E-KAROMAH SMKNB</h2>
+</div>
+
+<div class="container">
+
+<div class="card">
+<h3>Lokasi GPS</h3>
+<input type="text" id="lat" placeholder="Latitude" readonly>
+<input type="text" id="long" placeholder="Longitude" readonly>
+</div>
+
+<div class="card">
+<h3>Input Kegiatan Harian</h3>
+
+<div class="grid">
+
+<div>
+<label>Sahur (Waktu)</label>
+<input type="time" id="sahur_waktu">
+<label>Foto Sahur</label>
+<input type="text" id="sahur_foto" placeholder="Link foto">
+</div>
+
+<div>
+<label>Shalat Subuh</label>
+<select id="subuh">
+<option value="">--</option>
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+<div>
+<label>Olahraga (Link Foto)</label>
+<input type="text" id="olahraga">
+</div>
+
+<div>
+<label>Aktivitas Keluarga (Link Foto)</label>
+<input type="text" id="keluarga">
+</div>
+
+<div>
+<label>Shalat Dzuhur</label>
+<select id="dzuhur">
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+<div>
+<label>Pesantren (Link Foto)</label>
+<input type="text" id="pesantren">
+</div>
+
+<div>
+<label>Shalat Ashar</label>
+<select id="ashar">
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+<div>
+<label>Aksi Ekologi (Link Foto)</label>
+<input type="text" id="aksi">
+</div>
+
+<div>
+<label>Buka Bersama (Link Foto)</label>
+<input type="text" id="buka">
+</div>
+
+<div>
+<label>Shalat Magrib</label>
+<select id="magrib">
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+<div>
+<label>Shalat Isya</label>
+<select id="isya">
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+<div>
+<label>Taraweh</label>
+<select id="taraweh">
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+<div>
+<label>Tadarus (Link Foto)</label>
+<input type="text" id="tadarus">
+</div>
+
+<div>
+<label>Tidur Cepat (Waktu)</label>
+<input type="time" id="tidur">
+</div>
+
+<div>
+<label>Sedekah</label>
+<select id="sedekah">
+<option>Ya</option>
+<option>Tidak</option>
+</select>
+</div>
+
+</div>
+
+<button onclick="kirim()">SIMPAN</button>
+
+</div>
+</div>
+
+<script>
+navigator.geolocation.getCurrentPosition(function(pos){
+  document.getElementById("lat").value = pos.coords.latitude;
+  document.getElementById("long").value = pos.coords.longitude;
+});
+
+function kirim(){
+  let data = {
+    lat:lat.value,
+    long:long.value,
+    sahur_waktu:sahur_waktu.value,
+    sahur_foto:sahur_foto.value,
+    subuh:subuh.value,
+    olahraga:olahraga.value,
+    keluarga:keluarga.value,
+    dzuhur:dzuhur.value,
+    pesantren:pesantren.value,
+    ashar:ashar.value,
+    aksi:aksi.value,
+    buka:buka.value,
+    magrib:magrib.value,
+    isya:isya.value,
+    taraweh:taraweh.value,
+    tadarus:tadarus.value,
+    tidur:tidur.value,
+    sedekah:sedekah.value
+  };
+
+  google.script.run.withSuccessHandler(function(res){
+    alert(res);
+  }).saveLaporan(data);
+}
+</script>
+
+</body>
+</html>
