@@ -4,106 +4,232 @@
 <meta charset="UTF-8">
 <title>Pembimbing - E-KAROMAH</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-body{
-  font-family:system-ui;
-  background:#0f172a;
-  color:white;
-  margin:0;
+:root {
+  --primary: #3b82f6;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --glass: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #f8fafc;
+  --success: #10b981;
+  --danger: #ef4444;
 }
-header{
-  background:#1e293b;
-  padding:15px;
-  text-align:center;
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
 }
-.header-btn{
-  margin-top:10px;
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  gap: 15px;
 }
-th,td{
-  border:1px solid #334155;
-  padding:8px;
-  text-align:center;
+
+h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--primary);
 }
-th{background:#2563eb;}
-button{
-  padding:10px 15px;
-  border:none;
-  color:white;
-  border-radius:8px;
-  cursor:pointer;
-  margin:3px;
+
+.header-btn {
+  display: flex;
+  gap: 10px;
 }
-button.print-btn{ background:#22c55e; }
-button.logout-btn{ background:#ef4444; }
+
+button {
+  padding: 10px 16px;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: inherit;
+  font-size: 14px;
+  transition: transform 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+button:hover { opacity: 0.9; transform: translateY(-2px); }
+button:active { transform: scale(0.98); }
+
+.print-btn { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+.logout-btn { background: var(--danger); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+.refresh-btn { background: var(--primary); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+thead {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+th {
+  font-weight: 600;
+  color: #93c5fd;
+  white-space: nowrap;
+}
+
+tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+#loader {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: var(--text);
+  display: none;
+}
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  header { flex-direction: column; align-items: flex-start; }
+  .header-btn { width: 100%; }
+  button { flex: 1; justify-content: center; }
+}
 </style>
 </head>
 <body>
 
+<div class="container">
+
 <header>
-<h2>Rekap Pembimbing</h2>
-<div class="header-btn">
-<button class="print-btn" onclick="window.print()">🖨 Cetak</button>
-<button class="logout-btn" onclick="logout()">🚪 Logout</button>
-</div>
+  <div>
+    <h2>Rekap Pembimbing</h2>
+    <small style="opacity:0.6">Laporan harian siswa</small>
+  </div>
+  <div class="header-btn">
+    <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+    <button class="print-btn" onclick="window.print()">🖨 Cetak</button>
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  </div>
 </header>
 
-<div style="padding:15px">
-<table>
-<thead>
-<tr>
-<th>Tanggal</th>
-<th>Nama</th>
-<th>Kelompok</th>
-<th>Hadir</th>
-<th>Kegiatan</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+<div id="loader">
+  <div class="spinner"></div>
+  Memuat Data...
+</div>
+
+<div id="data" class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Nama</th>
+        <th>Kelompok</th>
+        <th>Hadir</th>
+        <th>Kegiatan</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
 </div>
 
 <script>
 /* ================= PROTEKSI LOGIN ================= */
-if(localStorage.getItem("login") !== "pembimbing"){
+const user = JSON.parse(localStorage.getItem("user"));
+if(!user || user.role !== "pembimbing"){
+  alert("Akses Ditolak! Anda bukan Pembimbing.");
   location.href = "index.html";
 }
 
 /* ================= CONFIG ================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmYrzpRxVzWp69AIM8UFPCA-TaKmVkxxnlTibJ2JTwjZYX0gxqaAJs_8z1TMH2uSUbSw/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLR_m_WV59sIKvYVf5GgwMiKjVYxY0fG3gwJvqgrNyDJbsrd-y9QrYxIYrrWkmF5wMFw/exec";
 
 /* ================= LOAD DATA ================= */
 async function loadData(){
+  const tb = document.querySelector("tbody");
+  const loader = document.getElementById("loader");
+  const wrapper = document.getElementById("data");
+  
+  loader.style.display = "block";
+  wrapper.style.opacity = "0.5";
+  tb.innerHTML = "";
+
   try{
     const r = await fetch(WEB_APP_URL + "?action=rekapPembimbing");
+    if(!r.ok) throw new Error("Gagal fetch");
     const d = await r.json();
 
-    let tb = document.querySelector("tbody");
-    tb.innerHTML = "";
-
-    d.forEach(x => {
-      tb.innerHTML += `
-      <tr>
-        <td>${x.tanggal}</td>
-        <td>${x.nama}</td>
-        <td>${x.kelompok}</td>
-        <td>${x.hadir}</td>
-        <td>${x.kegiatan}</td>
-      </tr>`;
-    });
+    if(d.length === 0){
+      tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data laporan.</td></tr>`;
+    } else {
+      d.forEach(x => {
+        tb.innerHTML += `
+        <tr>
+          <td>${x.tanggal || "-"}</td>
+          <td><b>${x.nama || "-"}</b></td>
+          <td>${x.kelompok || "-"}</td>
+          <td>${x.hadir || "✔️"}</td>
+          <td>${x.kegiatan || "-"}</td>
+        </tr>`;
+      });
+    }
   }catch(e){
     console.error(e);
-    alert("Gagal memuat data! Cek console.");
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">❌ Gagal memuat data. Periksa koneksi internet.</td></tr>`;
+  }finally{
+    loader.style.display = "none";
+    wrapper.style.opacity = "1";
   }
 }
 
 /* ================= LOGOUT ================= */
 function logout(){
-  if(confirm("Yakin ingin logout?")){
+  if(confirm("Apakah Anda yakin ingin keluar?")){
     localStorage.clear();
     location.href = "index.html";
   }
