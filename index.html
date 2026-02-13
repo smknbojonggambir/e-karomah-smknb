@@ -38,22 +38,18 @@ h1{font-size:22px;font-weight:600}
   box-shadow:0 8px 30px rgba(0,0,0,.3);
 }
 
-select,input,textarea{
+input,textarea{
   width:100%;padding:11px;
   margin:8px 0 15px;
   border-radius:10px;border:none;
   font-size:14px;
 }
 
-textarea{resize:vertical}
-
 .section{
   background:rgba(255,255,255,0.05);
   padding:15px;border-radius:12px;
   margin-bottom:15px;
 }
-
-.section h3{font-size:14px;margin-bottom:8px;font-weight:600}
 
 .radio-group{display:flex;gap:20px;margin-bottom:10px}
 
@@ -78,36 +74,74 @@ src="https://raw.githubusercontent.com/smknbojonggambir/E-RAMADHAN-SMKNB/main/LO
 <h1>E-KAROMAH SMKNB</h1>
 </div>
 
-<div class="card">
+<div class="card" id="loginBox">
+<h3>Login Siswa</h3>
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
 
+<div class="card hidden" id="formBox">
+
+<h3 id="infoUser"></h3>
 <input type="date" id="tanggal">
 
-<select id="kelompok" onchange="loadNama()">
-<option value="">Pilih Kelompok</option>
-</select>
-
-<select id="nama" disabled>
-<option value="">Pilih Nama</option>
-</select>
-
-<input type="text" id="pembimbing" placeholder="Pembimbing" readonly>
+<input type="text" id="pembimbing" readonly>
 
 <input type="hidden" id="lat">
 <input type="hidden" id="long">
 
-<div id="formInput" class="hidden">
 <div id="dynamicForm"></div>
 
 <button onclick="kirim()">Simpan Data</button>
 <div class="loader" id="loader">Mengirim data...</div>
-</div>
 
 </div>
+
 </div>
 
 <script>
 
 const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwkvh-Eoj_AafFUfu7PkB45y6MvWZfMgsSiaKxETOUCoBzvD3h9_QWaSC5N1ooTzgrbIQ/exec";
+
+let userData={};
+
+/* ================= LOGIN ================= */
+async function login(){
+
+const u=username.value;
+const p=password.value;
+
+const res=await fetch(WEB_APP_URL+
+"?action=login&username="+encodeURIComponent(u)+
+"&password="+encodeURIComponent(p));
+
+const data=await res.json();
+
+if(data.status=="success"){
+
+userData=data;
+
+loginBox.classList.add("hidden");
+formBox.classList.remove("hidden");
+
+infoUser.innerText="Nama: "+data.nama+
+" | Kelompok: "+data.kelompok;
+
+loadPembimbing(data.kelompok);
+generateForm();
+
+}else{
+alert("Username atau Password salah!");
+}
+}
+
+/* ================= LOAD PEMBIMBING ================= */
+async function loadPembimbing(kelompok){
+const res=await fetch(WEB_APP_URL+
+"?action=getPembimbing&kelompok="+encodeURIComponent(kelompok));
+pembimbing.value=await res.text();
+}
 
 /* ================= GPS ================= */
 navigator.geolocation.getCurrentPosition(pos=>{
@@ -115,7 +149,7 @@ lat.value=pos.coords.latitude;
 long.value=pos.coords.longitude;
 });
 
-/* ================= UI ================= */
+/* ================= FORM ================= */
 function toggle(id,show){
 document.getElementById(id).classList.toggle("hidden",!show);
 }
@@ -123,12 +157,11 @@ document.getElementById(id).classList.toggle("hidden",!show);
 function radioSection(title,id,withFoto=false,withTime=false){
 return `
 <div class="section">
-<h3>${title}</h3>
+<h4>${title}</h4>
 <div class="radio-group">
 <label><input type="radio" name="${id}" value="Ya" onclick="toggle('${id}_detail',true)"> Ya</label>
 <label><input type="radio" name="${id}" value="Tidak" onclick="toggle('${id}_detail',false)"> Tidak</label>
 </div>
-
 <div id="${id}_detail" class="hidden">
 ${withTime?'<input type="time" id="'+id+'_waktu">':''}
 ${withFoto?'<input type="file" id="'+id+'_foto">':''}
@@ -138,56 +171,19 @@ ${withFoto?'<input type="file" id="'+id+'_foto">':''}
 `;
 }
 
-/* ================= LOAD DATA ================= */
-async function loadKelompok(){
-const res=await fetch(WEB_APP_URL+"?action=getKelompok");
-const data=await res.json();
-data.forEach(k=>{
-let opt=document.createElement("option");
-opt.value=k;
-opt.textContent=k;
-kelompok.appendChild(opt);
-});
-}
-
-async function loadNama(){
-if(!kelompok.value)return;
-
-const res=await fetch(WEB_APP_URL+
-"?action=getNama&kelompok="+encodeURIComponent(kelompok.value));
-const data=await res.json();
-
-nama.innerHTML='<option value="">Pilih Nama</option>';
-data.forEach(n=>{
-let opt=document.createElement("option");
-opt.value=n;
-opt.textContent=n;
-nama.appendChild(opt);
-});
-nama.disabled=false;
-
-const pemb=await fetch(WEB_APP_URL+
-"?action=getPembimbing&kelompok="+encodeURIComponent(kelompok.value));
-pembimbing.value=await pemb.text();
-
-formInput.classList.remove("hidden");
-generateForm();
-}
-
-/* ================= GENERATE FORM ================= */
 function generateForm(){
 dynamicForm.innerHTML=
-radioSection("1) Bangun Pagi & Sahur","sahur",true,true)+
-radioSection("2) Shalat Subuh","subuh")+
+radioSection("1) Sahur","sahur",true,true)+
+radioSection("2) Subuh","subuh")+
 radioSection("3) Olahraga","olahraga",true)+
-radioSection("4) Aktivitas Keluarga","keluarga",true)+
-radioSection("5) Shalat Dzuhur","dzuhur")+
-radioSection("6) Pesantren Ekologi","pesantren",true)+
-radioSection("7) Shalat Ashar","ashar")+
+radioSection("4) Keluarga","keluarga",true)+
+radioSection("5) Dzuhur","dzuhur")+
+radioSection("6) Pesantren","pesantren",true)+
+radioSection("7) Ashar","ashar")+
 radioSection("8) Aksi Ekologi","aksi",true)+
-radioSection("9) Buka Bersama","buka",true)+
-radioSection("10) Shalat Magrib","magrib")+
-radioSection("11) Shalat Isya","isya")+
+radioSection("9) Buka","buka",true)+
+radioSection("10) Magrib","magrib")+
+radioSection("11) Isya","isya")+
 radioSection("12) Tarawih","tarawih")+
 radioSection("13) Tadarus","tadarus",true)+
 radioSection("14) Sedekah","sedekah");
@@ -201,9 +197,9 @@ loader.style.display="block";
 let fd=new FormData();
 
 fd.append("tanggal",tanggal.value);
-fd.append("username",nama.value);
-fd.append("nama",nama.value);
-fd.append("kelompok",kelompok.value);
+fd.append("username",userData.username);
+fd.append("nama",userData.nama);
+fd.append("kelompok",userData.kelompok);
 fd.append("pembimbing",pembimbing.value);
 fd.append("lat",lat.value);
 fd.append("long",long.value);
@@ -235,8 +231,7 @@ loader.style.display="none";
 location.reload();
 }
 
-loadKelompok();
-
 </script>
+
 </body>
 </html>
