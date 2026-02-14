@@ -203,14 +203,14 @@
 // ================= CONFIG =================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec"; 
 
-// Data Kegiatan (Urutan sesuai Sheet)
+// Data Kegiatan (Sesuai Header Kolom Excel/Sheet Anda)
 const activities = [
     "Sahur", "Subuh", "Olahraga", "Keluarga", 
     "Dzuhur", "Pesantren", "Ashar", "Aksi", 
     "Buka", "Magrib", "Isya", "Tarawih", "Tadarus", "Tidur"
 ];
 
-// Kegiatan yang TIDAK PUNYA FOTO (untuk menyembunyikan kolom foto)
+// Kegiatan yang TIDAK PUNYA FOTO (Logika Sembunyikan Kolom Foto)
 const noPhotoActs = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
 
 let currentData = [];
@@ -221,15 +221,19 @@ const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'pembimbing'){
     alert("Akses ditolak."); location.href='index.html';
 }
+
+// Tampilkan Info Profil
 document.getElementById('mName').textContent = user.nama;
 document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
-document.getElementById('dateFilter').valueAsDate = new Date(); // Set today
+
+// HAPUS DEFAULT DATE AGAR SEMUA DATA MUNCUL DULUAN
+// document.getElementById('dateFilter').valueAsDate = new Date(); 
 
 // 2. LOAD DATA
 async function loadData() {
     const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
-    const dateVal = document.getElementById('dateFilter').value; // Format YYYY-MM-DD
+    const dateInput = document.getElementById('dateFilter').value; // Format YYYY-MM-DD (2026-02-14)
 
     list.innerHTML = "";
     loader.style.display = "block";
@@ -240,38 +244,67 @@ async function loadData() {
         const res = await fetch(url);
         const data = await res.json();
         
-        currentData = data; // Simpan data global
+        // Debugging: Cek data di Console browser jika masih error
+        console.log("Data diterima:", data);
+
+        currentData = data; 
         loader.style.display = "none";
 
-        // Filter by Date (Simple Client Side Filter)
-        // Data sheet biasanya format "YYYY-MM-DD" atau "DD/MM/YYYY". Asumsikan Sheet sudah standar ISO atau kita filter stringnya.
-        // Disini kita tampilkan semua dulu, logic filter bisa diperketat.
-        
+        // Filter Logic yang Lebih Aman
         const filtered = data.filter(item => {
-            // Cocokkan tanggal (hanya jika user memilih tanggal)
-            if(!dateVal) return true;
-            return item.tanggal.includes(dateVal);
+            // Jika filter tanggal kosong, tampilkan semua
+            if (!dateInput) return true;
+
+            // Konversi format tanggal agar cocok
+            // Data Sheet mungkin: "14/02/2026" atau "2/14/2026"
+            // Input HTML: "2026-02-14"
+            
+            // Cara gampang: Cek apakah string tanggal sheet mengandung bagian dari input
+            // Contoh: ambil bagian tanggal saja "14" atau bulan "02" (ini filter kasar tapi efektif)
+            
+            // OPSI TERBAIK: Ubah format input HTML ke format umum (DD/MM/YYYY) atau sebaliknya
+            // Kita coba match string sederhana dulu:
+            const sheetDate = item.Tanggal || ""; // Pakai 'Tanggal' (Huruf Besar)
+            
+            // Cek apakah tanggal sheet mengandung tahun-bulan-hari input (tergantung format sheet)
+            // Jika format sheet "2/14/2026", dan input "2026-02-14", string match gagal.
+            
+            // Solusi: Parse Date
+            const d1 = new Date(dateInput); // Dari Input
+            const d2 = new Date(sheetDate); // Dari Sheet
+            
+            // Bandingkan Tanggal, Bulan, Tahun
+            return d1.getDate() === d2.getDate() && 
+                   d1.getMonth() === d2.getMonth() && 
+                   d1.getFullYear() === d2.getFullYear();
         });
 
         if(filtered.length === 0) {
-            list.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.6">Belum ada laporan pada tanggal ini.</div>`;
+            list.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.6">
+                Belum ada laporan. <br><small>(Coba hapus filter tanggal atau pilih tanggal lain)</small>
+            </div>`;
             return;
         }
 
         filtered.forEach(item => {
-            // Cek apakah sudah dinilai
-            const isGraded = (item.nilai && item.nilai !== "") ? "Sudah Dinilai" : "Belum Dinilai";
-            const gradeClass = (item.nilai && item.nilai !== "") ? "done" : "";
+            // PENTING: Gunakan item.Nama (Huruf Besar) sesuai header sheet
+            const namaSiswa = item.Nama || item.nama || "Tanpa Nama";
+            const tglSiswa = item.Tanggal || item.tanggal || "-";
+            
+            // Cek apakah sudah dinilai (item.Catatan atau item.Nilai)
+            const isGraded = (item.Catatan && item.Catatan !== "") ? "Sudah Dinilai" : "Belum Dinilai";
+            const gradeClass = (item.Catatan && item.Catatan !== "") ? "done" : "";
 
             const card = document.createElement("div");
             card.className = "student-card";
             card.innerHTML = `
                 <div class="st-info">
-                    <h3>${item.nama}</h3>
-                    <p>📅 ${item.tanggal} | 📍 Lokasi Ada</p>
+                    <h3>${namaSiswa}</h3>
+                    <p>📅 ${tglSiswa}</p>
                 </div>
                 <div class="st-status ${gradeClass}">${isGraded}</div>
             `;
+            // Simpan seluruh object item ke tombol agar bisa dibuka di modal
             card.onclick = () => showDetail(item);
             list.appendChild(card);
         });
@@ -279,42 +312,45 @@ async function loadData() {
     } catch(e) {
         console.error(e);
         loader.style.display = "none";
-        alert("Gagal memuat data.");
+        alert("Gagal memuat data. Cek Console Browser.");
     }
 }
 
 // 3. SHOW DETAIL (MODAL + ACCORDION)
 function showDetail(item) {
-    selectedRowId = item.id; // Simpan ID baris untuk save
-    document.getElementById("modalName").textContent = item.nama;
-    document.getElementById("modalDate").textContent = item.tanggal;
+    // Gunakan 'RowId' atau 'No' jika ada dari sheet sebagai ID unik
+    // Jika tidak ada ID, kita harus hati-hati saat menyimpan. 
+    // Asumsi: Apps Script mengirimkan properti 'row' atau 'id'.
+    selectedRowId = item.row || item.id; 
+    
+    document.getElementById("modalName").textContent = item.Nama || item.nama;
+    document.getElementById("modalDate").textContent = item.Tanggal || item.tanggal;
     
     // Isi Form Penilaian dengan data lama (jika ada)
-    document.getElementById("inputNilai").value = item.nilai || "";
-    document.getElementById("inputCatatan").value = item.catatan_pembimbing || "";
-
+    // Sesuaikan key dengan header sheet: 'Catatan' (untuk nilai/catatan pembimbing)
+    document.getElementById("inputCatatan").value = item.Catatan || ""; 
+    
     const container = document.getElementById("accordionContainer");
     container.innerHTML = ""; // Reset
 
-    // Loop Kegiatan untuk membuat Accordion
+    // Loop Kegiatan
     activities.forEach(act => {
-        // Ambil data dari object item (pastikan key JSON dari Apps Script sesuai)
-        // Format key di JSON biasanya: "Sahur_Status", "Sahur_Waktu", dll.
+        // PENTING: Akses data dengan format HeaderSheet + "_" + Suffix
+        // Contoh: "Sahur_Status", "Sahur_Waktu"
         const status = item[`${act}_Status`] || "-";
         const waktu = item[`${act}_Waktu`] || "-";
         const ket = item[`${act}_Ket`] || "-";
-        const foto = item[`${act}_Foto`]; // Base64 atau Link
+        const foto = item[`${act}_Foto`]; 
         
-        // Ikon status
-        const statusIcon = (status === "Ya" || status === "Hadir") ? "✅" : "❌";
+        const statusIcon = (String(status).toLowerCase() === "ya") ? "✅" : "❌";
         
-        // Logic Sembunyikan Foto
         let photoHtml = "";
-        if (!noPhotoActs.includes(act) && foto && foto.length > 10) {
+        // Cek Foto (Hanya jika bukan sholat & string foto cukup panjang/valid URL)
+        if (!noPhotoActs.includes(act) && foto && foto.length > 5) {
             photoHtml = `
                 <div class="data-row">
                     <span class="data-label">📸 Foto Bukti</span>
-                    <img src="${foto}" class="img-preview" alt="Bukti">
+                    <img src="${foto}" class="img-preview" alt="Bukti" onerror="this.style.display='none'">
                 </div>
             `;
         } else if (!noPhotoActs.includes(act)) {
@@ -347,14 +383,12 @@ function showDetail(item) {
         container.innerHTML += html;
     });
 
-    // Buka Modal
     document.getElementById("detailModal").style.display = "block";
 }
 
 // 4. LOGIC ACCORDION
 function toggleAcc(header) {
     const content = header.nextElementSibling;
-    // Tutup yang lain biar rapi (opsional)
     document.querySelectorAll('.acc-content').forEach(el => {
         if(el !== content) el.classList.remove('show');
     });
@@ -364,19 +398,21 @@ function toggleAcc(header) {
 // 5. SIMPAN PENILAIAN
 async function saveGrade() {
     const btn = document.querySelector(".btn-save");
-    const nilai = document.getElementById("inputNilai").value;
+    // const nilai = document.getElementById("inputNilai").value; // Jika mau pakai nilai angka
     const catatan = document.getElementById("inputCatatan").value;
 
-    if(!selectedRowId) return;
+    if(!selectedRowId) {
+        alert("ID Baris tidak ditemukan. Pastikan script backend mengirimkan nomor baris (row).");
+        return;
+    }
 
     btn.innerHTML = "⏳ Menyimpan...";
     btn.disabled = true;
 
     const fd = new FormData();
     fd.append("action", "simpanCatatan");
-    fd.append("id", selectedRowId);
-    fd.append("nilai", nilai); // Pastikan backend handle kolom 'nilai'
-    fd.append("catatan", catatan);
+    fd.append("id", selectedRowId); // ID baris di Google Sheet
+    fd.append("catatan", catatan); // Kolom 'Catatan' di sheet akan diisi ini
 
     try {
         await fetch(WEB_APP_URL, { method: "POST", body: fd });
@@ -384,7 +420,7 @@ async function saveGrade() {
         closeModal();
         loadData(); // Refresh list
     } catch(e) {
-        alert("Gagal menyimpan.");
+        alert("Gagal menyimpan: " + e.message);
     } finally {
         btn.innerHTML = "💾 SIMPAN PENILAIAN";
         btn.disabled = false;
@@ -395,7 +431,7 @@ async function saveGrade() {
 function closeModal() { document.getElementById("detailModal").style.display = "none"; }
 function logout() { localStorage.removeItem("user"); location.href="index.html"; }
 
-// Klik di luar modal tutup modal
+// Klik luar modal
 window.onclick = function(event) {
     const modal = document.getElementById("detailModal");
     if (event.target == modal) closeModal();
