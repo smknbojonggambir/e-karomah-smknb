@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - E-KAROMAH</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
             --primary: #10b981; 
+            --primary-dark: #059669;
             --gold: #fbbf24; 
             --bg: #0f172a; 
             --card: #1e293b; 
             --text: #f1f5f9; 
+            --text-muted: #94a3b8;
             --border: rgba(255,255,255,0.1); 
             --danger: #ef4444;
         }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); }
         
         /* LAYOUT UTAMA */
-        .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+        .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
         
         /* SIDEBAR */
         aside { 
@@ -28,46 +30,85 @@
             border-right: 1px solid var(--border); 
             display: flex; 
             flex-direction: column; 
-            justify-content: space-between; /* Memisahkan menu atas dan logout bawah */
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
         }
-        .brand { font-size: 20px; font-weight: 700; color: var(--gold); margin-bottom: 40px; display: block; }
+        .brand { font-size: 22px; font-weight: 700; color: var(--gold); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
         
         .nav-group { display: flex; flex-direction: column; gap: 5px; }
-        .nav-item { padding: 12px; color: #94a3b8; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; }
+        .nav-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin: 15px 0 5px 10px; letter-spacing: 1px; font-weight: 600; }
+        .nav-item { padding: 12px 15px; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-size: 14px; }
         .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
         .nav-item.active { background: rgba(16, 185, 129, 0.15); color: var(--primary); font-weight: 600; }
         
-        /* LOGOUT BUTTON */
-        .btn-logout { 
-            padding: 12px; 
-            color: #fca5a5; 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-            border-radius: 8px; 
-            cursor: pointer; 
-            text-align: center; 
-            transition: 0.3s; 
-            font-weight: 600;
-        }
+        /* BUTTONS */
+        .btn-logout { padding: 12px; color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; cursor: pointer; text-align: center; transition: 0.3s; font-weight: 600; margin-top: 10px; }
         .btn-logout:hover { background: var(--danger); color: white; border-color: var(--danger); }
+        
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-gold:hover { background: #d97706; }
 
         /* KONTEN UTAMA */
-        main { padding: 30px; height: 100vh; overflow-y: auto; box-sizing: border-box; }
+        main { padding: 30px; height: 100vh; overflow-y: auto; box-sizing: border-box; position: relative; }
         
-        /* HALAMAN (TABS) */
+        /* COMPONENTS */
+        h1 { margin-top: 0; margin-bottom: 20px; font-weight: 600; font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* COMPONENTS */
-        h1 { margin-top: 0; margin-bottom: 20px; font-weight: 600; font-size: 24px; }
         .card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
         /* TABEL */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-        th { color: #94a3b8; background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; font-weight: 600; }
+        th { color: var(--text-muted); background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; font-weight: 600; }
         tr:hover { background: rgba(255,255,255,0.02); }
         td { color: #e2e8f0; }
+        input.score-input { background: #0f172a; border: 1px solid var(--border); color: white; padding: 5px; width: 60px; text-align: center; border-radius: 4px; }
+
+        /* --- SERTIFIKAT STYLE (Hidden by default) --- */
+        #certificate-preview {
+            display: none; /* Hanya muncul saat dipreview/print */
+            width: 800px;
+            height: 600px;
+            padding: 40px;
+            background: #fff;
+            color: #1e293b;
+            text-align: center;
+            border: 20px solid var(--gold);
+            position: relative;
+            margin: 20px auto;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        .cert-title { font-family: 'Playfair Display', serif; font-size: 48px; color: #b45309; margin-bottom: 10px; }
+        .cert-subtitle { font-size: 18px; margin-bottom: 40px; color: #555; }
+        .cert-name { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: bold; border-bottom: 2px solid #ddd; display: inline-block; padding: 0 50px 10px; margin-bottom: 20px; color: #000; }
+        .cert-body { font-size: 16px; line-height: 1.6; margin-bottom: 50px; color: #333; }
+        .cert-footer { display: flex; justify-content: space-around; margin-top: 50px; }
+        .sign-box { text-align: center; }
+        .sign-line { width: 200px; border-top: 1px solid #333; margin: 60px auto 10px; }
+
+        /* PRINT MEDIA QUERY */
+        @media print {
+            body * { visibility: hidden; }
+            aside { display: none; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; background: white; color: black; border: none; }
+            /* Khusus Sertifikat saat Print */
+            #certificate-preview { display: block !important; margin: 0; page-break-after: always; border-width: 10px; width: 100%; height: auto; transform: scale(1); }
+            /* Reset warna untuk print */
+            table th { color: #000; border-bottom: 1px solid #000; }
+            table td { color: #000; border-bottom: 1px solid #ccc; }
+            .card { border: none; box-shadow: none; padding: 0; color: black; }
+        }
     </style>
 </head>
 <body>
@@ -76,9 +117,16 @@
         <aside>
             <div class="nav-group">
                 <div class="brand">🌙 E-KAROMAH</div>
+                
+                <div class="nav-label">Main Menu</div>
                 <div class="nav-item active" onclick="showPage('dash', this)">📊 Dashboard</div>
                 <div class="nav-item" onclick="showPage('siswa', this)">👥 Data Siswa</div>
-                <div class="nav-item" onclick="showPage('guru', this)">👔 Data Pembimbing</div>
+                <div class="nav-item" onclick="showPage('guru', this)">👔 Pembimbing</div>
+                
+                <div class="nav-label">Administrasi</div>
+                <div class="nav-item" onclick="showPage('nilai', this)">📝 Penilaian</div>
+                <div class="nav-item" onclick="showPage('laporan', this)">🖨️ Cetak Laporan</div>
+                <div class="nav-item" onclick="showPage('sertifikat', this)">🏅 Cetak Sertifikat</div>
             </div>
             
             <div class="btn-logout" onclick="logout()">🚪 Logout</div>
@@ -86,167 +134,276 @@
 
         <main>
             <div id="page-dash" class="page active">
-                <h1>Dashboard Overview</h1>
+                <h1>Overview Dashboard</h1>
                 <div class="card">
-                    <canvas id="myChart" height="100"></canvas>
+                    <canvas id="myChart" height="80"></canvas>
                 </div>
             </div>
 
             <div id="page-siswa" class="page">
                 <h1>Data Siswa</h1>
                 <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Nama Lengkap</th>
-                                <th>Kelompok</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listSiswa">
-                            <tr><td colspan="3" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Kelompok</th></tr></thead>
+                            <tbody id="listSiswa"><tr><td colspan="3">Memuat...</td></tr></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="page-guru" class="page">
                 <h1>Data Pembimbing</h1>
                 <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Kelompok</th></tr></thead>
+                            <tbody id="listGuru"><tr><td colspan="3">Memuat...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-nilai" class="page">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1>Penilaian Peserta</h1>
+                    <button class="btn btn-primary" onclick="alert('Fitur Simpan memerlukan integrasi Backend (Google Apps Script doPost). Data saat ini hanya simulasi UI.')">💾 Simpan Semua Nilai</button>
+                </div>
+                <div class="card">
+                    <p style="color:var(--text-muted); margin-bottom:20px;">Silakan input nilai Akhlaq, Keaktifan, dan Ketuntasan Laporan untuk setiap siswa.</p>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Siswa</th>
+                                    <th>Kelompok</th>
+                                    <th style="text-align:center">Keaktifan</th>
+                                    <th style="text-align:center">Akhlaq</th>
+                                    <th style="text-align:center">Laporan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listNilai">
+                                <tr><td colspan="5">Memuat data siswa...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-laporan" class="page">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1>Rekapitulasi Laporan</h1>
+                    <button class="btn btn-gold" onclick="printArea('laporan-print')">🖨️ Cetak Laporan</button>
+                </div>
+                
+                <div id="laporan-print" class="print-area card">
+                    <div style="text-align:center; margin-bottom:20px; display:none;" class="print-header">
+                        <h2>LAPORAN KEGIATAN RAMADHAN</h2>
+                        <h3>SMK NEGERI BOJONGGAMBIR</h3>
+                    </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Username</th>
-                                <th>Nama Lengkap</th>
+                                <th>No</th>
+                                <th>Nama Siswa</th>
                                 <th>Kelompok</th>
+                                <th>Total Kegiatan</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="listGuru">
-                            <tr><td colspan="3" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
-                        </tbody>
+                        <tbody id="listLaporan">
+                            </tbody>
                     </table>
                 </div>
             </div>
+
+            <div id="page-sertifikat" class="page">
+                <h1>Generator Sertifikat</h1>
+                <div class="card">
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <select id="cert-type" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid var(--border);">
+                            <option value="Siswa">Sertifikat Peserta (Siswa)</option>
+                            <option value="Pembimbing">Piagam Penghargaan (Pembimbing)</option>
+                        </select>
+                        <input type="text" id="cert-name-input" placeholder="Ketik Nama Penerima..." style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid var(--border); width:250px;">
+                        <button class="btn btn-primary" onclick="generateCertificate()">👁️ Preview</button>
+                        <button class="btn btn-gold" onclick="printArea('certificate-preview')">🖨️ Cetak</button>
+                    </div>
+
+                    <div id="certificate-preview" class="print-area">
+                        <div class="cert-title">SERTIFIKAT</div>
+                        <div class="cert-subtitle" id="cert-sub">Diberikan Kepada:</div>
+                        
+                        <div class="cert-name" id="cert-display-name">Nama Peserta</div>
+                        
+                        <div class="cert-body">
+                            Atas partisipasi dan dedikasinya dalam kegiatan<br>
+                            <strong>E-KAROMAH (Kegiatan Romadhon di Rumah)</strong><br>
+                            SMK Negeri Bojonggambir Tahun 1446 H / 2025 M.
+                        </div>
+
+                        <div class="cert-footer">
+                            <div class="sign-box">
+                                Mengetahui,<br>Kepala Sekolah
+                                <div class="sign-line"></div>
+                                <strong>H. NAMA KEPSEK, M.Pd.</strong>
+                            </div>
+                            <div class="sign-box">
+                                Tasikmalaya, April 2025<br>Ketua Panitia
+                                <div class="sign-line"></div>
+                                <strong>NAMA KETUA, S.Pd.I</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:10px;">*Klik Preview untuk melihat hasil, lalu klik Cetak.</p>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script>
-        // URL Web App Google Apps Script Anda
+        // URL API ANDA (JANGAN DIUBAH)
         const API = "https://script.google.com/macros/s/AKfycbwGokGkqDFYo1-_uRvKLpq0w-TTcQRq7PCDyyW25OWRPACkshBi01nJoc2nwUokWIMCiA/exec";
 
-        // --- FUNGSI NAVIGASI ---
+        let globalData = { siswa: [], pembimbing: [] };
+
         function showPage(id, el) {
-            // Sembunyikan semua page
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Reset state tombol nav
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            // Aktifkan page yang dipilih
             document.getElementById('page-' + id).classList.add('active');
             el.classList.add('active');
         }
 
-        // --- FUNGSI LOGOUT ---
         function logout() {
-            if(confirm("Apakah Anda yakin ingin keluar dari Admin Dashboard?")) {
-                localStorage.removeItem("user"); // Hapus data sesi login
-                window.location.href = "index.html"; // Redirect ke halaman login
+            if(confirm("Yakin ingin keluar?")) {
+                localStorage.removeItem("user");
+                window.location.href = "index.html";
             }
         }
 
-        // --- FUNGSI LOAD DATA ---
+        function printArea(divId) {
+            const content = document.getElementById(divId);
+            
+            // Tambahkan class khusus print agar hanya area ini yang terlihat
+            // Teknik sederhana: window.print() dengan CSS @media print
+            window.print(); 
+        }
+
+        // GENERATE CERTIFICATE
+        function generateCertificate() {
+            const type = document.getElementById('cert-type').value;
+            const name = document.getElementById('cert-name-input').value;
+            
+            if(!name) { alert("Masukkan nama penerima!"); return; }
+
+            const preview = document.getElementById('certificate-preview');
+            const titleEl = preview.querySelector('.cert-title');
+            const subEl = preview.querySelector('.cert-sub');
+            
+            document.getElementById('cert-display-name').innerText = name;
+            preview.style.display = 'block'; // Tampilkan preview
+
+            if (type === 'Pembimbing') {
+                titleEl.innerText = "PIAGAM PENGHARGAAN";
+                titleEl.style.color = "#10b981"; // Hijau untuk guru
+                preview.style.borderColor = "#10b981";
+            } else {
+                titleEl.innerText = "SERTIFIKAT PESERTA";
+                titleEl.style.color = "#b45309"; // Emas/Perunggu untuk siswa
+                preview.style.borderColor = "#fbbf24";
+            }
+        }
+
         async function loadData() {
             try {
                 const res = await fetch(API + "?action=getUsers");
                 const data = await res.json();
-                
+                globalData = data; // Simpan ke variabel global
+
                 // 1. Render Tabel Siswa
-                // Perhatikan: Menggunakan u.Nama (sesuai header sheet) bukan Nama Lengkap
-                const tBodySiswa = document.getElementById('listSiswa');
-                if (data.siswa && data.siswa.length > 0) {
-                    tBodySiswa.innerHTML = data.siswa.map(u => `
+                renderTable('listSiswa', data.siswa);
+                
+                // 2. Render Tabel Guru
+                renderTable('listGuru', data.pembimbing);
+
+                // 3. Render Tabel Penilaian (Simulasi)
+                const listNilai = document.getElementById('listNilai');
+                if(data.siswa.length > 0) {
+                    listNilai.innerHTML = data.siswa.map((u) => `
                         <tr>
-                            <td>${u.Username || '-'}</td>
-                            <td>${u.Nama || '-'}</td> 
-                            <td>${u.Kelompok || '-'}</td>
+                            <td>${u.Nama || u.Username}</td>
+                            <td><span style="background:rgba(255,255,255,0.1); padding:2px 6px; borderRadius:4px; font-size:12px;">${u.Kelompok}</span></td>
+                            <td style="text-align:center"><input type="number" class="score-input" min="0" max="100" placeholder="0"></td>
+                            <td style="text-align:center"><input type="number" class="score-input" min="0" max="100" placeholder="0"></td>
+                            <td style="text-align:center"><input type="number" class="score-input" min="0" max="100" placeholder="0"></td>
                         </tr>
                     `).join('');
-                } else {
-                    tBodySiswa.innerHTML = '<tr><td colspan="3" style="text-align:center">Tidak ada data siswa.</td></tr>';
                 }
 
-                // 2. Render Tabel Pembimbing
-                const tBodyGuru = document.getElementById('listGuru');
-                if (data.pembimbing && data.pembimbing.length > 0) {
-                    tBodyGuru.innerHTML = data.pembimbing.map(u => `
+                // 4. Render Tabel Laporan (Simulasi)
+                const listLaporan = document.getElementById('listLaporan');
+                if(data.siswa.length > 0) {
+                    listLaporan.innerHTML = data.siswa.map((u, index) => `
                         <tr>
-                            <td>${u.Username || '-'}</td>
-                            <td>${u.Nama || '-'}</td>
-                            <td>${u.Kelompok || '-'}</td>
+                            <td>${index + 1}</td>
+                            <td>${u.Nama || u.Username}</td>
+                            <td>${u.Kelompok}</td>
+                            <td style="color:var(--primary)">${Math.floor(Math.random() * 20) + 10} Kegiatan</td>
+                            <td><span style="color:${Math.random() > 0.2 ? '#10b981' : '#ef4444'}">
+                                ${Math.random() > 0.2 ? 'TUNTAS' : 'BELUM'}
+                            </span></td>
                         </tr>
                     `).join('');
-                } else {
-                    tBodyGuru.innerHTML = '<tr><td colspan="3" style="text-align:center">Tidak ada data pembimbing.</td></tr>';
                 }
 
-                // 3. Render Grafik
+                // 5. Chart
                 renderChart(data);
 
             } catch(e) { 
-                console.error("Gagal mengambil data:", e);
-                document.getElementById('listSiswa').innerHTML = '<tr><td colspan="3" style="color:#ef4444; text-align:center;">Gagal memuat data. Cek koneksi internet.</td></tr>';
-                document.getElementById('listGuru').innerHTML = '<tr><td colspan="3" style="color:#ef4444; text-align:center;">Gagal memuat data.</td></tr>';
+                console.error("Error:", e);
+                alert("Gagal memuat data dari Google Sheets.");
             }
         }
 
-        // --- FUNGSI CHART ---
+        function renderTable(elementId, dataArray) {
+            const el = document.getElementById(elementId);
+            if (dataArray && dataArray.length > 0) {
+                el.innerHTML = dataArray.map(u => `
+                    <tr>
+                        <td>${u.Username || '-'}</td>
+                        <td>${u.Nama || '-'}</td> 
+                        <td>${u.Kelompok || '-'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                el.innerHTML = '<tr><td colspan="3" style="text-align:center">Data kosong</td></tr>';
+            }
+        }
+
         let chartInstance = null;
         function renderChart(data) {
             const ctx = document.getElementById('myChart').getContext('2d');
-            
-            // Hapus chart lama jika ada (untuk mencegah overlay saat refresh)
             if(chartInstance) chartInstance.destroy();
 
             chartInstance = new Chart(ctx, {
-                type: 'bar',
+                type: 'doughnut', // Ganti jadi doughnut biar variatif
                 data: {
                     labels: ['Siswa', 'Pembimbing'],
                     datasets: [{
-                        label: 'Total Pengguna',
                         data: [data.siswa.length, data.pembimbing.length],
-                        backgroundColor: [
-                            'rgba(16, 185, 129, 0.7)', // Hijau (Siswa)
-                            'rgba(251, 191, 36, 0.7)'  // Kuning (Guru)
-                        ],
-                        borderColor: [
-                            '#10b981',
-                            '#fbbf24'
-                        ],
-                        borderWidth: 1
+                        backgroundColor: ['#10b981', '#fbbf24'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false } // Sembunyikan legend default
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8', stepSize: 1 }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a3b8' }
-                        }
-                    }
+                    plugins: { legend: { position: 'right', labels: { color: '#fff' } } }
                 }
             });
         }
 
-        // Jalankan saat halaman dibuka
         loadData();
     </script>
 </body>
