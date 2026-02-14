@@ -1,20 +1,37 @@
-// PASTE URL SCRIPT BARU ANDA DI SINI
+// ================= CONFIG =================
 const CHAT_URL = "https://script.google.com/macros/s/AKfycbyG-PtZzxkwB2WvOLKQk1IPy0Z4Lq6se0YVZ798W0cGK_AIaeDR3gm7MKFcIvuHxDdwjg/exec";
 
-document.addEventListener("DOMContentLoaded", function(){
+// Pastikan script jalan setelah HTML siap
+document.addEventListener("DOMContentLoaded", function() {
 
-    // ================= CONFIG & STATE =================
+    // 1. BUAT WADAH TERISOLASI (SHADOW DOM)
+    // Ini kuncinya: Membuat elemen 'host' yang terpisah dari dunia luar
+    const host = document.createElement('div');
+    host.setAttribute('id', 'ekar-chat-widget-host');
+    // Set style host agar berada di atas segalanya tapi tidak memblokir klik
+    host.style.position = 'fixed';
+    host.style.bottom = '0';
+    host.style.right = '0';
+    host.style.zIndex = '2147483647'; // Max Z-Index
+    host.style.width = '0';
+    host.style.height = '0';
+    host.style.overflow = 'visible';
+    
+    document.body.appendChild(host);
+    const shadow = host.attachShadow({ mode: 'open' });
+
+    // ================= STATE =================
     const user = {
-        username: localStorage.getItem("username") || "guest" + Math.floor(Math.random()*1000),
+        username: localStorage.getItem("username") || "guest" + Math.floor(Math.random() * 1000),
         nama: localStorage.getItem("nama") || "Tamu",
         kelompok: localStorage.getItem("kelompok") || "Umum",
         role: localStorage.getItem("role") || "siswa"
     };
 
     let chatState = {
-        view: 'list', // 'list' atau 'chat'
-        target: 'group', // 'group' atau username orang lain
-        targetName: user.kelompok // Nama tampilan header
+        view: 'list', 
+        target: 'group', 
+        targetName: user.kelompok
     };
 
     // ================= ICONS =================
@@ -27,10 +44,13 @@ document.addEventListener("DOMContentLoaded", function(){
         user: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`
     };
 
-    // ================= STYLE =================
-    document.head.insertAdjacentHTML("beforeend", `
+    // ================= INJECT CSS & HTML KE DALAM SHADOW =================
+    shadow.innerHTML = `
     <style>
-        :root {
+        /* CSS Reset khusus untuk widget ini saja */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        :host {
             --c-primary: #008069; 
             --c-bg: #e5ddd5;
             --c-me: #dcf8c6;
@@ -56,7 +76,6 @@ document.addEventListener("DOMContentLoaded", function(){
             box-shadow: 0 5px 25px rgba(0,0,0,0.2);
             display: none; flex-direction: column;
             z-index: 9999; overflow: hidden;
-            font-family: sans-serif;
             border: 1px solid #ddd;
         }
 
@@ -108,14 +127,15 @@ document.addEventListener("DOMContentLoaded", function(){
         #chatMessages {
             flex: 1; overflow-y: auto; padding: 15px;
             background-color: var(--c-bg);
-            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+            /* Pattern background optional */
+            background-image: linear-gradient(rgba(229,221,213,0.9), rgba(229,221,213,0.9)); 
             display: flex; flex-direction: column; gap: 8px;
         }
         .msg {
             max-width: 80%; padding: 8px 12px; border-radius: 8px; 
             font-size: 14px; position: relative; word-wrap: break-word;
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            color: var(--c-text) !important; /* Paksa Hitam */
+            color: var(--c-text) !important;
         }
         .me { background: var(--c-me); align-self: flex-end; border-top-right-radius: 0; }
         .other { background: var(--c-other); align-self: flex-start; border-top-left-radius: 0; }
@@ -141,10 +161,7 @@ document.addEventListener("DOMContentLoaded", function(){
             #chatBtn { bottom: 20px; right: 20px; }
         }
     </style>
-    `);
 
-    // ================= HTML =================
-    document.body.insertAdjacentHTML("beforeend", `
     <div id="chatBtn">${icons.chat}</div>
     
     <div id="chatBox">
@@ -171,22 +188,22 @@ document.addEventListener("DOMContentLoaded", function(){
             </div>
         </div>
     </div>
-    `);
+    `;
 
-    // ================= DOM ELEMENTS =================
+    // ================= DOM ELEMENTS (PENTING: Pakai shadow.querySelector) =================
     const els = {
-        box: document.getElementById('chatBox'),
-        btn: document.getElementById('chatBtn'),
-        close: document.getElementById('btnClose'),
-        back: document.getElementById('btnBack'),
-        list: document.getElementById('viewList'),
-        chat: document.getElementById('viewChat'),
-        uContainer: document.getElementById('userListContainer'),
-        msgs: document.getElementById('chatMessages'),
-        input: document.getElementById('chatInput'),
-        send: document.getElementById('sendBtn'),
-        title: document.getElementById('headerTitle'),
-        status: document.getElementById('headerStatus')
+        box: shadow.querySelector('#chatBox'),
+        btn: shadow.querySelector('#chatBtn'),
+        close: shadow.querySelector('#btnClose'),
+        back: shadow.querySelector('#btnBack'),
+        list: shadow.querySelector('#viewList'),
+        chat: shadow.querySelector('#viewChat'),
+        uContainer: shadow.querySelector('#userListContainer'),
+        msgs: shadow.querySelector('#chatMessages'),
+        input: shadow.querySelector('#chatInput'),
+        send: shadow.querySelector('#sendBtn'),
+        title: shadow.querySelector('#headerTitle'),
+        status: shadow.querySelector('#headerStatus')
     };
 
     // ================= LOGIC =================
@@ -199,18 +216,18 @@ document.addEventListener("DOMContentLoaded", function(){
         } else {
             els.box.style.display = 'flex';
             els.btn.style.display = 'none';
-            switchView('list'); // Default buka list dulu
+            switchView('list');
             loadUsers();
         }
     }
-    els.btn.onclick = toggleChat;
-    els.close.onclick = toggleChat;
+    els.btn.addEventListener('click', toggleChat);
+    els.close.addEventListener('click', toggleChat);
 
     // 2. Navigasi
-    els.back.onclick = () => {
+    els.back.addEventListener('click', () => {
         switchView('list');
-        chatState.target = null; // Reset target
-    };
+        chatState.target = null;
+    });
 
     function switchView(viewName) {
         chatState.view = viewName;
@@ -220,7 +237,7 @@ document.addEventListener("DOMContentLoaded", function(){
             els.back.style.display = 'none';
             els.title.innerText = "Daftar Kontak";
             els.status.innerText = user.kelompok;
-            loadUsers(); // Refresh user list
+            loadUsers();
         } else {
             els.list.style.display = 'none';
             els.chat.style.display = 'flex';
@@ -228,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function(){
             els.title.innerText = chatState.targetName;
             els.status.innerText = chatState.target === 'group' ? 'Grup Diskusi' : 'Chat Pribadi';
             els.msgs.innerHTML = '<div style="text-align:center;margin-top:20px;color:#888;">Memuat pesan...</div>';
-            loadChat(); // Load pesan
+            loadChat();
         }
     }
 
@@ -242,9 +259,9 @@ document.addEventListener("DOMContentLoaded", function(){
             
             let html = '';
             
-            // A. Tombol Grup (Selalu ada paling atas)
+            // A. Tombol Grup
             html += `
-            <div class="user-card" onclick="startChat('group', 'Grup ${user.kelompok}')">
+            <div class="user-card" id="btnGroupChat">
                 <div class="u-icon grp">${icons.group}</div>
                 <div class="u-info">
                     <div class="u-name">Grup ${user.kelompok}</div>
@@ -255,15 +272,16 @@ document.addEventListener("DOMContentLoaded", function(){
             `;
 
             // B. Tombol User Lain
-            users.forEach(u => {
-                if(u.username === user.username) return; // Jangan tampilkan diri sendiri
+            users.forEach((u, index) => {
+                if(u.username === user.username) return;
                 
                 let badge = '';
                 if(u.role === 'admin') badge = `<span class="role-badge role-admin">Admin</span>`;
                 else if(u.role === 'pembimbing') badge = `<span class="role-badge role-pembimbing">Guru</span>`;
                 
+                // Kita beri ID unik atau data-attribute biar bisa di-click listener
                 html += `
-                <div class="user-card" onclick="startChat('${u.username}', '${u.nama}')">
+                <div class="user-card contact-item" data-username="${u.username}" data-nama="${u.nama}">
                     <div class="u-icon">${icons.user}</div>
                     <div class="u-info">
                         <div class="u-name">${u.nama}</div>
@@ -275,25 +293,40 @@ document.addEventListener("DOMContentLoaded", function(){
             });
 
             els.uContainer.innerHTML = html;
+
+            // ATTACH EVENT LISTENERS (Karena onclick="function" tidak jalan di Shadow DOM dengan mudah)
+            const btnGroup = shadow.getElementById('btnGroupChat');
+            if(btnGroup) {
+                btnGroup.addEventListener('click', () => {
+                    startChatInternal('group', `Grup ${user.kelompok}`);
+                });
+            }
+
+            const contacts = shadow.querySelectorAll('.contact-item');
+            contacts.forEach(item => {
+                item.addEventListener('click', () => {
+                    startChatInternal(item.dataset.username, item.dataset.nama);
+                });
+            });
+
         } catch(e) {
             console.error(e);
             els.uContainer.innerHTML = '<div style="color:red;text-align:center;">Gagal memuat kontak</div>';
         }
     }
 
-    // 4. Start Chat Function (Global scope helper)
-    window.startChat = function(targetId, targetDisplayName) {
+    // 4. Start Chat Internal Helper
+    function startChatInternal(targetId, targetDisplayName) {
         chatState.target = targetId;
         chatState.targetName = targetDisplayName;
         switchView('chat');
-    };
+    }
 
     // 5. Load Chat Messages
     async function loadChat() {
         if(chatState.view !== 'chat') return;
 
         try {
-            // Fetch dengan param TARGET
             const url = `${CHAT_URL}?action=getChat&kelompok=${user.kelompok}&username=${user.username}&target=${chatState.target}`;
             const res = await fetch(url);
             const messages = await res.json();
@@ -311,7 +344,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 `;
             });
 
-            // Cek scroll position sebelum update
             const isAtBottom = els.msgs.scrollHeight - els.msgs.scrollTop <= els.msgs.clientHeight + 100;
             
             els.msgs.innerHTML = html;
@@ -326,14 +358,13 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 
     // 6. Send Message
-    els.send.onclick = sendMessage;
+    els.send.addEventListener('click', sendMessage);
     els.input.addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
 
     async function sendMessage() {
         const txt = els.input.value.trim();
         if(!txt) return;
 
-        // Optimistic UI
         const tempMsg = `
             <div class="msg me" style="opacity:0.7">
                 ${txt} <small>⏳</small>
@@ -352,16 +383,16 @@ document.addEventListener("DOMContentLoaded", function(){
                     kelompok: user.kelompok,
                     role: user.role,
                     pesan: txt,
-                    target: chatState.target // Kirim target (grup atau username personal)
+                    target: chatState.target
                 })
             });
-            loadChat(); // Refresh segera
+            loadChat();
         } catch(e) {
             alert("Gagal mengirim pesan");
         }
     }
 
-    // Auto Refresh setiap 4 detik
+    // Auto Refresh
     setInterval(() => {
         if(els.box.style.display === 'flex' && chatState.view === 'chat') {
             loadChat();
