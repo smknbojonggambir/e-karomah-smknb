@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Admin - E-KAROMAH</title>
+<title>Admin Dashboard - E-KAROMAH</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -28,17 +28,17 @@ body {
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1200px; /* Lebar ditambah agar tabel muat */
   margin: auto;
   background: var(--glass);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 25px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-/* Header Section */
 header {
   display: flex;
   justify-content: space-between;
@@ -50,16 +50,10 @@ header {
   gap: 15px;
 }
 
-h2 {
-  margin: 0;
-  font-size: 24px;
-  color: var(--primary);
-}
+h2 { margin: 0; font-size: 24px; color: var(--primary); }
+small { display: block; margin-top: 5px; opacity: 0.7; }
 
-.header-btn {
-  display: flex;
-  gap: 10px;
-}
+.header-btn { display: flex; gap: 10px; }
 
 button {
   padding: 10px 16px;
@@ -71,62 +65,57 @@ button {
   font-family: inherit;
   font-size: 14px;
   transition: transform 0.2s, opacity 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: flex; align-items: center; gap: 6px;
 }
 
 button:hover { opacity: 0.9; transform: translateY(-2px); }
-button:active { transform: scale(0.98); }
 
-.export-btn { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-.logout-btn { background: var(--danger); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
-.refresh-btn { background: var(--primary); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+.export-btn { background: var(--success); }
+.logout-btn { background: var(--danger); }
+.refresh-btn { background: var(--primary); }
 
-/* Table Section */
 .table-wrapper {
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid var(--border);
+  max-height: 70vh; /* Agar bisa discroll vertikal jika panjang */
+  overflow-y: auto;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-thead { background: rgba(59, 130, 246, 0.2); }
-
-th, td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-}
-
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+thead { background: rgba(59, 130, 246, 0.2); position: sticky; top: 0; }
+th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; }
 th { font-weight: 600; color: #93c5fd; white-space: nowrap; }
-
 tr:hover { background: rgba(255,255,255,0.03); }
 
-#loader {
-  text-align: center;
-  padding: 40px;
-  font-size: 16px;
-  color: var(--text);
-  display: none;
-}
+/* Loader */
+#loader { text-align: center; padding: 40px; display: none; }
 .spinner {
-  width: 30px;
-  height: 30px;
+  width: 30px; height: 30px;
   border: 3px solid rgba(255,255,255,0.3);
   border-radius: 50%;
   border-top-color: var(--primary);
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 1s infinite linear;
   margin: 0 auto 10px;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Badge Status */
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+.hadir { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+.izin { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+.sakit { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+/* CSS KHUSUS UNTUK PRINT PDF AGAR PUTIH */
+.pdf-mode {
+    background: white !important;
+    color: black !important;
+}
+.pdf-mode table, .pdf-mode th, .pdf-mode td {
+    color: black !important;
+    border-color: #ddd !important;
+}
+.pdf-mode thead { background: #f0f0f0 !important; }
 
 @media (max-width: 600px) {
   header { flex-direction: column; align-items: flex-start; }
@@ -137,121 +126,130 @@ tr:hover { background: rgba(255,255,255,0.03); }
 </head>
 <body>
 
-<div class="container">
-  <header>
+<div class="container" id="main-container">
+  <header data-html2canvas-ignore="true"> 
     <div>
       <h2>Admin Panel</h2>
-      <small style="opacity:0.6">Rekap Laporan E-KAROMAH</small>
+      <small>Rekap Seluruh Laporan Siswa</small>
     </div>
     <div class="header-btn">
-      <button class="refresh-btn" onclick="load()">🔄 Refresh</button>
+      <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
       <button class="export-btn" onclick="exportPDF()">📄 PDF</button>
       <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     </div>
   </header>
 
   <div id="loader">
-    <div class="spinner"></div>
-    Memuat Data...
+    <div class="spinner"></div> Memuat Data...
   </div>
 
-  <div id="data" class="table-wrapper">
-    <table>
+  <div id="data-area" class="table-wrapper">
+    <table id="tabel-laporan">
       <thead>
         <tr>
           <th>Tanggal</th>
           <th>Nama Siswa</th>
           <th>Kelompok</th>
-          <th>Pembimbing</th>
-          <th>Status</th>
+          <th>Kehadiran</th>
+          <th>Kegiatan</th>
+          <th>Catatan Pembimbing</th>
         </tr>
       </thead>
-      <tbody id="tb"></tbody>
+      <tbody></tbody>
     </table>
   </div>
 </div>
 
 <script>
+// ==========================================
+// CONFIG: GANTI URL SCRIPT ANDA DI SINI
+// ==========================================
+const WEB_APP_URL = "URL_WEB_APP_ANDA_DISINI"; 
+
 /* ================= PROTEKSI LOGIN ================= */
 let user = null;
-try { user = JSON.parse(localStorage.getItem("user")); } catch(e){ console.warn(e); }
+try { user = JSON.parse(localStorage.getItem("user")); } catch(e){}
 
 if(!user || user.role !== "admin"){
-  alert("Akses Ditolak! Anda bukan Admin.");
+  alert("Akses Ditolak! Halaman ini khusus Admin.");
   location.href = "index.html";
 }
 
-/* ================= CONFIG ================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLR_m_WV59sIKvYVf5GgwMiKjVYxY0fG3gwJvqgrNyDJbsrd-y9QrYxIYrrWkmF5wMFw/exec";
-
 /* ================= LOAD DATA ================= */
-async function load(){
-  const tb = document.getElementById("tb");
+async function loadData(){
+  const tb = document.querySelector("tbody");
   const loader = document.getElementById("loader");
-  const wrapper = document.getElementById("data");
+  const wrapper = document.getElementById("data-area");
 
   loader.style.display = "block";
-  wrapper.style.opacity = "0.5";
+  wrapper.style.opacity = "0.3";
   tb.innerHTML = "";
 
   try{
-    const r = await fetch(WEB_APP_URL + "?action=rekapAdmin");
-    if(!r.ok) throw new Error("Gagal mengambil data");
-    const d = await r.json();
+    const response = await fetch(WEB_APP_URL + "?action=rekapAdmin");
+    const data = await response.json();
 
-    if(!Array.isArray(d) || d.length === 0){
-      tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data laporan.</td></tr>`;
+    if(!Array.isArray(data) || data.length === 0){
+      tb.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada data masuk.</td></tr>`;
     } else {
-      d.forEach(x => {
+      data.forEach(x => {
+        // Tentukan warna badge status
+        let statusClass = "hadir";
+        let textHadir = x.hadir || "Hadir";
+        if(textHadir.toLowerCase().includes("sakit")) statusClass = "sakit";
+        if(textHadir.toLowerCase().includes("izin")) statusClass = "izin";
+
         tb.innerHTML += `
         <tr>
-          <td>${x.tanggal || "-"}</td>
-          <td><b>${x.nama || "-"}</b></td>
-          <td>${x.kelompok || "-"}</td>
-          <td>${x.pembimbing || "-"}</td>
-          <td>${x.status || "✔️ Lapor"}</td>
+          <td>${x.tanggal}</td>
+          <td><b>${x.nama}</b></td>
+          <td>${x.kelompok}</td>
+          <td><span class="badge ${statusClass}">${textHadir}</span></td>
+          <td>${x.kegiatan || "-"}</td>
+          <td><i style="color:#aaa">${x.catatan || "-"}</i></td>
         </tr>`;
       });
     }
-  }catch(e){
+  } catch(e){
     console.error(e);
-    tb.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">❌ Gagal memuat data. Periksa koneksi internet.</td></tr>`;
-  }finally{
+    alert("Gagal memuat data. Periksa URL Script dan Internet.");
+  } finally {
     loader.style.display = "none";
     wrapper.style.opacity = "1";
   }
 }
 
-/* ================= EXPORT PDF ================= */
+/* ================= EXPORT PDF (FIXED) ================= */
 function exportPDF(){
-  const element = document.getElementById("data");
-  const originalColor = element.style.color;
-  const originalBg = element.style.background;
-  element.style.color = "black";
-  element.style.background = "white";
+  const element = document.getElementById("data-area");
+  
+  // 1. Tambah class 'pdf-mode' sementara agar background jadi putih saat print
+  element.classList.add("pdf-mode");
+  
+  const opt = {
+    margin:       10,
+    filename:     'Laporan-Ekaromah-' + new Date().toISOString().slice(0,10) + '.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true }, // Scale 2 agar tajam
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  };
 
-  html2pdf().set({
-    margin: 10,
-    filename: 'Rekap-Ekaromah-' + new Date().toISOString().slice(0,10) + '.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-  }).from(element).save().then(() => {
-    element.style.color = originalColor;
-    element.style.background = originalBg;
+  html2pdf().set(opt).from(element).save().then(() => {
+    // 2. Kembalikan ke mode gelap setelah selesai download
+    element.classList.remove("pdf-mode");
   });
 }
 
 /* ================= LOGOUT ================= */
 function logout(){
-  if(confirm("Apakah Anda yakin ingin keluar?")){
-    localStorage.clear();
+  if(confirm("Keluar dari Admin Panel?")){
+    localStorage.removeItem("user");
     location.href = "index.html";
   }
 }
 
-/* ================= INIT ================= */
-load();
+// Jalankan saat load
+loadData();
 </script>
 
 </body>
