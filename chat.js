@@ -1,5 +1,5 @@
 // PASTE URL SCRIPT BARU ANDA DI SINI
-const CHAT_URL = "https://script.google.com/macros/s/AKfycbx9ziBKETSpxXTARK6uyFbZaLIVoHO5xodyF_r8rxrFOXwIonB1U7L1KpHNXnOAmF49Kg/exec";
+const CHAT_URL = "https://script.google.com/macros/s/AKfycbyG-PtZzxkwB2WvOLKQk1IPy0Z4Lq6se0YVZ798W0cGK_AIaeDR3gm7MKFcIvuHxDdwjg/exec";
 
 document.addEventListener("DOMContentLoaded", function(){
 
