@@ -13,6 +13,7 @@
             --bg-dark: #0f172a; 
             --card-bg: #1e293b;
             --text: #f1f5f9;
+            --text-muted: #94a3b8;
             --danger: #ef4444;
             --blue: #3b82f6;
         }
@@ -23,21 +24,21 @@
             background: #0f172a;
             color: var(--text);
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 80px; /* Space for footer */
         }
 
         /* --- Header Modern --- */
         header {
             background: #1e293b;
             padding: 15px 20px;
-            position: sticky; top: 0; z-index: 50;
+            position: sticky; top: 0; z-index: 40;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        .mentor-profile h2 { margin: 0; font-size: 15px; color: var(--gold); letter-spacing: 0.5px; }
+        .mentor-profile h2 { margin: 0; font-size: 16px; color: var(--gold); letter-spacing: 0.5px; }
         .mentor-profile span { font-size: 11px; color: #94a3b8; font-weight: 500; }
-        .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
         .btn-logout:hover { background: var(--danger); color: white; }
 
         .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
@@ -80,7 +81,7 @@
         /* Progress Bar di Kartu */
         .progress-area { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #cbd5e1; }
         .progress-track { flex: 1; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #34d399); border-radius: 3px; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
         .score-preview { font-weight: bold; font-size: 12px; }
 
         /* --- MODAL DASHBOARD --- */
@@ -88,6 +89,9 @@
         .modal-content {
             background: #1e293b; margin: 20px auto; width: 95%; max-width: 600px;
             border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            /* Padding bottom agar scroll di HP enak */
+            padding-bottom: 20px; 
+            margin-bottom: 100px; 
         }
         
         /* Summary Box di Modal */
@@ -137,6 +141,31 @@
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { to {transform: rotate(360deg);} }
 
+        /* FOOTER OTOMATIS */
+        .footer-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #020617;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            z-index: 50;
+        }
+        .footer-fixed a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .footer-fixed a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        @media print { .footer-fixed { display: none; } }
     </style>
 </head>
 <body>
@@ -153,7 +182,7 @@
     
     <div class="filter-container">
         <div class="filter-row">
-            <input type="date" id="dateFilter" onchange="applyFilters()">
+            <input type="date" id="dateFilter" onchange="loadData()">
             <button onclick="loadData()" style="background:#334155; border:1px solid #475569; color:white; border-radius:8px; padding:0 15px; cursor:pointer;">🔄</button>
         </div>
         <div class="filter-chips">
@@ -212,11 +241,15 @@
             <textarea id="inputCatatanPembimbing" rows="3" placeholder="Tulis evaluasi manual atau gunakan tombol otomatis..."></textarea>
             
             <div class="btn-group">
-                <button class="btn-auto" onclick="generateAutoReview()">✨ Buat Ulasan Otomatis</button>
+                <button class="btn-auto" onclick="generateAutoReview()">✨ Auto Review</button>
                 <button class="btn-save" onclick="saveGrade()">💾 SIMPAN & KIRIM</button>
             </div>
         </div>
     </div>
+</div>
+
+<div class="footer-fixed">
+    &copy; 2025 E-KAROMAH App. Developer <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
 </div>
 
 <script>
@@ -232,7 +265,9 @@ const noPhotoActs = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
 
 // Global Variables
 let rawData = [];
+let filteredData = []; // Untuk filter
 let selectedRowId = null;
+let currentFilterType = 'all';
 
 // 1. CEK LOGIN & KELOMPOK
 const user = JSON.parse(localStorage.getItem("user"));
@@ -246,6 +281,8 @@ if(!user || user.role !== 'pembimbing'){
 // Set UI Profil
 document.getElementById('mName').textContent = user.nama;
 document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
+// Set Default Date ke Hari Ini
+document.getElementById('dateFilter').valueAsDate = new Date();
 
 // ==========================================
 // 2. FUNGSI LOAD DATA (OPTIMALISASI UTAMA)
@@ -253,41 +290,52 @@ document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
 async function loadData() {
     const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
+    const dateInput = document.getElementById("dateFilter").value;
     
     list.innerHTML = "";
     loader.style.display = "block";
-    loader.innerHTML = `<div class="spinner"></div>Sedang mencari laporan siswa ${user.kelompok}...`;
+    loader.innerHTML = `<div class="spinner"></div>Mencari laporan kelompok ${user.kelompok}...`;
 
     try {
-        // Fetch data (Mengirim parameter kelompok ke server untuk meringankan beban, 
-        // tapi kita filter lagi di sini untuk keamanan ganda)
+        // Fetch data (Mengirim parameter kelompok ke server)
         const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
-        // --- LOGIKA PENYARINGAN & PENGURUTAN CANGGIH ---
-        
-        // 1. Pastikan hanya kelompok yang sesuai (Double Check)
-        // 2. Pastikan baris memiliki Nama (Validasi data kosong)
-        const myStudents = data.filter(item => {
+        // --- FILTERING ---
+        // 1. Filter Kelompok & Validitas (Double Check)
+        let myStudents = data.filter(item => {
             const groupItem = String(item.Kelompok || "").trim().toLowerCase();
             const groupUser = String(user.kelompok || "").trim().toLowerCase();
             return groupItem === groupUser && (item.Nama || item.nama);
         });
 
+        // 2. Filter Tanggal (Jika ada input tanggal)
+        if(dateInput) {
+            myStudents = myStudents.filter(item => {
+                // Ambil bagian tanggal saja dari string ISO/Time stamp
+                const itemDate = item.Tanggal ? item.Tanggal.substring(0, 10) : ""; 
+                return itemDate === dateInput;
+            });
+        }
+
         rawData = myStudents; // Simpan ke global
+        updateCountChips(rawData);
 
         if(myStudents.length === 0) {
             loader.style.display = "block";
             loader.innerHTML = `
                 <div style="padding:40px; text-align:center;">
-                    <h3 style="color:#94a3b8">🍃 Belum ada laporan masuk</h3>
-                    <p style="font-size:12px; color:#64748b">Siswa kelompok ${user.kelompok} belum mengisi laporan hari ini.</p>
+                    <h3 style="color:#94a3b8">🍃 Tidak ada laporan</h3>
+                    <p style="font-size:12px; color:#64748b">
+                        Belum ada siswa mengisi pada tanggal tersebut.<br>
+                        Coba ganti tanggal filter.
+                    </p>
                 </div>`;
             return;
         }
 
-        renderList(myStudents);
+        renderList(rawData);
         loader.style.display = "none";
 
     } catch(e) {
@@ -296,49 +344,52 @@ async function loadData() {
     }
 }
 
-// 3. FUNGSI RENDER (MEMISAHKAN YANG BELUM DINILAI)
+// Update Angka di Chip Filter
+function updateCountChips(data) {
+    const pending = data.filter(item => !(item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2)).length;
+    const done = data.filter(item => (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2)).length;
+    
+    document.getElementById("countAll").textContent = data.length;
+    document.getElementById("countPending").textContent = pending;
+    document.getElementById("countDone").textContent = done;
+}
+
+// Fungsi Filter Manual (Tab)
+function setFilter(type, el) {
+    // UI Active State
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    
+    currentFilterType = type;
+    renderList(rawData);
+}
+
+// 3. FUNGSI RENDER
 function renderList(data) {
     const list = document.getElementById("studentList");
     list.innerHTML = "";
 
-    // Pisahkan data menjadi dua antrian
-    const pending = []; // Belum dinilai
-    const done = [];    // Sudah dinilai
+    // Filter berdasarkan Tab yang aktif
+    let displayData = data;
+    if(currentFilterType === 'pending') {
+        displayData = data.filter(item => !(item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2));
+    } else if(currentFilterType === 'done') {
+        displayData = data.filter(item => (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2));
+    }
 
-    data.forEach(item => {
-        // Cek apakah kolom Nilai_Pembimbing sudah terisi
-        const hasGrade = (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2);
-        if(hasGrade) {
-            done.push(item);
-        } else {
-            pending.push(item);
-        }
+    // Sort: Belum dinilai di atas, lalu berdasarkan tanggal
+    displayData.sort((a,b) => {
+        const aDone = (a.Nilai_Pembimbing && String(a.Nilai_Pembimbing).length > 2);
+        const bDone = (b.Nilai_Pembimbing && String(b.Nilai_Pembimbing).length > 2);
+        if (aDone === bDone) return new Date(b.Tanggal) - new Date(a.Tanggal); // Sama status, urut tanggal
+        return aDone ? 1 : -1; // Belum dinilai (false) lebih dulu
     });
 
-    // Urutkan: Yang baru submit paling atas
-    pending.sort((a,b) => new Date(b.Tanggal) - new Date(a.Tanggal));
-    done.sort((a,b) => new Date(b.Tanggal) - new Date(a.Tanggal));
-
-    // --- RENDER SECTION 1: PERLU PERHATIAN (PRIORITY) ---
-    if(pending.length > 0) {
-        const headerPending = document.createElement("div");
-        headerPending.innerHTML = `<h4 style="margin:20px 0 10px; color:var(--gold); font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #334155; padding-bottom:5px;">⚠️ Menunggu Penilaian (${pending.length})</h4>`;
-        list.appendChild(headerPending);
-
-        pending.forEach(item => list.appendChild(createCard(item, false)));
-    } else {
-        // Jika semua sudah dinilai
-        list.innerHTML += `<div style="background:rgba(16, 185, 129, 0.1); border:1px solid var(--primary); color:var(--primary); padding:15px; border-radius:10px; text-align:center; font-size:12px; margin-bottom:20px;">🎉 Alhamdulillah, semua tugas kelompok ${user.kelompok} sudah dinilai!</div>`;
-    }
-
-    // --- RENDER SECTION 2: RIWAYAT ---
-    if(done.length > 0) {
-        const headerDone = document.createElement("div");
-        headerDone.innerHTML = `<h4 style="margin:30px 0 10px; color:#94a3b8; font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #334155; padding-bottom:5px;">✅ Riwayat Penilaian</h4>`;
-        list.appendChild(headerDone);
-
-        done.forEach(item => list.appendChild(createCard(item, true)));
-    }
+    displayData.forEach(item => {
+        // Cek status nilai
+        const isDone = (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2);
+        list.appendChild(createCard(item, isDone));
+    });
 }
 
 // Helper: Membuat Kartu Siswa
@@ -384,7 +435,7 @@ function createCard(item, isDone) {
 }
 
 // ==========================================
-// 4. DETAIL, MODAL & GRADING (Sama seperti Pro)
+// 4. DETAIL, MODAL & GRADING
 // ==========================================
 function showDetail(item) {
     selectedRowId = item.row || item.id;
@@ -467,7 +518,6 @@ function showDetail(item) {
 
 // 5. FITUR AUTO REVIEW & SAVE
 function generateAutoReview() {
-    // Ambil data statistik saat ini dari DOM
     const total = parseInt(document.getElementById("statTotal").textContent);
     const missed = parseInt(document.getElementById("statMissed").textContent);
     const sum = total + missed;
@@ -481,8 +531,8 @@ function generateAutoReview() {
     } else if(pct >= 80) {
         text = `Sangat Baik. Ananda ${nama} mengerjakan ${total} kegiatan. Tingkatkan terus.`;
         setScoreUI(90);
-    } else if(pct >= 50) {
-        text = `Cukup. Ananda ${nama} mengerjakan ${total} kegiatan. Mohon lebih rajin lagi.`;
+    } else if(pct >= 60) {
+        text = `Cukup Baik. Ananda ${nama} mengerjakan ${total} kegiatan. Mohon lebih disiplin lagi.`;
         setScoreUI(75);
     } else {
         text = `Perlu Bimbingan. Laporan Ananda ${nama} sangat sedikit (${total}/${sum}). Segera perbaiki.`;
@@ -510,12 +560,12 @@ async function saveGrade() {
     const comment = document.getElementById("inputCatatanPembimbing").value.trim();
 
     if(!selectedRowId) return;
-    if(!comment) { alert("Isi komentar dulu"); return; }
+    if(!comment) { alert("⚠️ Mohon isi catatan/komentar penilaian."); return; }
 
     btn.textContent = "Mengirim...";
     btn.disabled = true;
 
-    // Format Data
+    // Format Data: [Nilai: 90] Pesan...
     const payload = `[Nilai: ${score}] ${comment}`;
     const fd = new FormData();
     fd.append("action", "simpanCatatan");
@@ -529,9 +579,12 @@ async function saveGrade() {
         const idx = rawData.findIndex(x => (x.row || x.id) == selectedRowId);
         if(idx !== -1) rawData[idx].Nilai_Pembimbing = payload;
 
-        alert("✅ Nilai Tersimpan");
+        alert("✅ Nilai Berhasil Disimpan!");
         closeModal();
-        renderList(rawData); // Re-render agar item pindah ke 'Riwayat'
+        
+        // Refresh List (Agar status berubah jadi 'Sudah Dinilai')
+        updateCountChips(rawData);
+        renderList(rawData); 
         
     } catch(e) {
         alert("Gagal: " + e.message);
@@ -544,14 +597,16 @@ async function saveGrade() {
 // Utils
 function toggleAcc(header) {
     const content = header.nextElementSibling;
-    document.querySelectorAll('.acc-content').forEach(el => {
-        if(el !== content) el.classList.remove('show');
-    });
-    content.classList.toggle('show');
+    const isVisible = content.classList.contains('show');
+    
+    // Tutup semua yang lain (optional, biar rapi)
+    document.querySelectorAll('.acc-content').forEach(el => el.classList.remove('show'));
+    
+    if(!isVisible) content.classList.add('show');
 }
 function formatTglIndo(str) {
     if(!str) return "";
-    try { return new Date(str).toLocaleDateString('id-ID', {day:'numeric', month:'short'}); } catch(e){return str;}
+    try { return new Date(str).toLocaleDateString('id-ID', {weekday: 'short', day:'numeric', month:'short'}); } catch(e){return str;}
 }
 function closeModal() { document.getElementById("detailModal").style.display = "none"; }
 function logout() { localStorage.removeItem("user"); location.href="index.html"; }
