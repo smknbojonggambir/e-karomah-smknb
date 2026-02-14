@@ -68,6 +68,7 @@
             overflow: hidden; transition: 0.3s;
         }
         .activity-card.active { border-color: var(--primary); background: rgba(6, 78, 59, 0.4); }
+        .activity-card.filled { border-left: 4px solid var(--primary); }
 
         .activity-header {
             padding: 16px;
@@ -178,11 +179,11 @@
         </div>
     </div>
 
-    <form id="formLaporan" onsubmit="kirimLaporan(event)">
-        <input type="hidden" name="action" value="inputSiswa">
-        <input type="hidden" name="nama" id="inputNama">
-        <input type="hidden" name="kelompok" id="inputKelompok">
-        <input type="hidden" name="latlong" id="inputLatLong">
+    <form id="formLaporan" onsubmit="return false;">
+        <input type="hidden" id="inputNama">
+        <input type="hidden" id="inputKelompok">
+        <input type="hidden" id="inputPembimbing">
+        <input type="hidden" id="inputLatLong">
 
         <h3 style="color:var(--gold); font-size:14px; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">📋 Kegiatan Harian</h3>
         
@@ -193,12 +194,12 @@
                 <h4 style="color:#60a5fa;">📝 Catatan Tambahan</h4>
             </div>
             <div class="activity-body open" style="padding-top:0;">
-                <input type="text" name="Catatan" placeholder="Apa yang kamu rasakan hari ini? (Opsional)" style="background: rgba(0,0,0,0.3);">
+                <input type="text" id="inputCatatan" placeholder="Apa yang kamu rasakan hari ini? (Opsional)" style="background: rgba(0,0,0,0.3);">
             </div>
         </div>
 
         <div class="fab-container">
-            <button type="submit" class="submit-btn" id="btnSubmit">
+            <button type="button" class="submit-btn" id="btnSubmit" onclick="kirimLaporan()">
                 <span>🚀 KIRIM LAPORAN</span>
             </button>
         </div>
@@ -215,10 +216,10 @@
 // ==========================================
 // CONFIGURATION
 // ==========================================
+// ⚠️ GANTI URL DI BAWAH INI DENGAN HASIL DEPLOY TERBARU ANDA
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwm29E1u9oMvRuc-Vxx5J6f5EgV1J-qklwIJG5XzAyGQBmavR0huq-Ho_dQ6QEaSdwmSg/exec"; 
 
 // DAFTAR KEGIATAN
-// ID harus sama persis dengan Header di Google Sheet
 const activities = [
     { id: "Sahur", label: "🍽️ Makan Sahur" },
     { id: "Subuh", label: "🕌 Sholat Subuh" },
@@ -236,21 +237,26 @@ const activities = [
     { id: "Tidur", label: "😴 Tidur Malam" }
 ];
 
-// List ID yang TIDAK mewajibkan/menampilkan upload foto (Agar lebih ringan)
+// List ID yang TIDAK mewajibkan/menampilkan upload foto
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
 
-// 1. CEK LOGIN (Keamanan Sederhana)
+// 1. CEK LOGIN
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'siswa'){
     alert("⛔ Akses Ditolak. Harap login sebagai Siswa.");
-    location.href = 'index.html';
+    // Redirect ke halaman login jika ada, jika ini satu file, abaikan
+    location.href = 'index.html'; 
 }
 
 // 2. SET DATA USER KE UI
-document.getElementById('namaSiswa').textContent = user.nama;
-document.getElementById('kelompokSiswa').textContent = user.kelompok;
-document.getElementById('inputNama').value = user.nama;
-document.getElementById('inputKelompok').value = user.kelompok;
+if(user){
+    document.getElementById('namaSiswa').textContent = user.nama;
+    document.getElementById('kelompokSiswa').textContent = user.kelompok;
+    document.getElementById('inputNama').value = user.nama;
+    document.getElementById('inputKelompok').value = user.kelompok;
+    // Cari pembimbing dari localstorage atau biarkan kosong jika tidak disimpan
+    // document.getElementById('inputPembimbing').value = user.pembimbing || "";
+}
 
 // 3. AMBIL LOKASI (GPS)
 const gpsText = document.getElementById('gpsText');
@@ -280,18 +286,15 @@ if(navigator.geolocation){
     gpsText.textContent = "GPS tidak support";
 }
 
-// 4. RENDER FORM KEGIATAN (ACCORDION)
+// 4. RENDER FORM KEGIATAN
 const container = document.getElementById("activitiesContainer");
 
 activities.forEach(act => {
-    // Cek apakah butuh foto
     const needPhoto = !noPhotoList.includes(act.id);
     const photoInputHtml = needPhoto ? `
         <div class="form-group">
-            <label class="form-label">📸 Foto Bukti</label>
+            <label class="form-label">📸 Foto Bukti <span style="color:#ef4444">*</span></label>
             <input type="file" accept="image/*" id="file_${act.id}">
-            <input type="hidden" name="${act.id}_Foto" id="base64_${act.id}">
-            <small style="color:#64748b; font-size:10px;">*Wajib diisi</small>
         </div>` : '';
 
     const html = `
@@ -303,7 +306,7 @@ activities.forEach(act => {
         <div class="activity-body" id="body_${act.id}">
             
             <div class="status-wrapper">
-                <input type="checkbox" name="${act.id}_Status" value="Ya" id="chk_${act.id}" class="chk-hidden" onchange="updateCardStyle('${act.id}')">
+                <input type="checkbox" id="chk_${act.id}" class="chk-hidden" onchange="updateCardStyle('${act.id}')">
                 <label for="chk_${act.id}" class="chk-label">
                     <span id="lbl_icon_${act.id}">⬜</span> Saya Melaksanakan
                 </label>
@@ -311,27 +314,26 @@ activities.forEach(act => {
 
             <div class="form-group">
                 <label class="form-label">⏰ Pukul Berapa?</label>
-                <input type="time" name="${act.id}_Waktu">
+                <input type="time" id="time_${act.id}">
             </div>
 
             ${photoInputHtml}
             
             <div class="form-group">
                 <label class="form-label">📝 Keterangan Singkat</label>
-                <input type="text" name="${act.id}_Ket" placeholder="Contoh: Di Masjid / Di Rumah">
+                <input type="text" id="ket_${act.id}" placeholder="Contoh: Di Masjid / Di Rumah">
             </div>
         </div>
     </div>`;
     container.innerHTML += html;
 });
 
-// --- INTERACTION FUNCTIONS ---
-
+// --- UI FUNCTIONS ---
 function toggleAccordion(id) {
     const body = document.getElementById(`body_${id}`);
     const card = document.getElementById(`card_${id}`);
     
-    // Tutup yang lain (Optional, biar rapi)
+    // Auto-close yang lain
     document.querySelectorAll('.activity-body').forEach(el => {
         if(el.id !== `body_${id}`) el.classList.remove('open');
     });
@@ -350,7 +352,7 @@ function updateCardStyle(id) {
     
     if(chk.checked) {
         lblIcon.textContent = "✅";
-        card.classList.add('filled'); // Penanda visual sudah diisi
+        card.classList.add('filled');
         card.style.borderLeft = "4px solid var(--primary)";
     } else {
         lblIcon.textContent = "⬜";
@@ -359,11 +361,9 @@ function updateCardStyle(id) {
     }
 }
 
-// 5. PROSES UPLOAD & SUBMIT
-async function kirimLaporan(e) {
-    e.preventDefault();
-    
-    // Validasi Sederhana: Minimal 1 kegiatan dicentang
+// 5. PROSES SUBMIT (JSON)
+async function kirimLaporan() {
+    // Validasi: Minimal 1 kegiatan
     const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
     if(checkedBoxes.length === 0){
         alert("⚠️ Mohon tandai minimal satu kegiatan yang sudah dilaksanakan.");
@@ -373,57 +373,69 @@ async function kirimLaporan(e) {
     const btn = document.getElementById('btnSubmit');
     const overlay = document.getElementById('loaderOverlay');
     
-    overlay.style.display = 'flex'; // Show loading full screen
+    overlay.style.display = 'flex';
     btn.disabled = true;
 
     try {
-        // A. Proses Konversi Foto ke Base64
-        for (let act of activities) {
-            // Cek jika kegiatan tersebut butuh foto
-            if (!noPhotoList.includes(act.id)) {
-                const fileInput = document.getElementById(`file_${act.id}`);
-                const hiddenInput = document.getElementById(`base64_${act.id}`);
-                const checkBox = document.getElementById(`chk_${act.id}`);
-                
-                // Jika dicentang tapi foto kosong
-                if (checkBox.checked && fileInput.files.length === 0) {
-                    throw new Error(`⚠️ Foto bukti untuk "${act.label}" wajib diisi jika dilaksanakan.`);
-                }
+        // --- MEMBANGUN OBJECT JSON UNTUK DIKIRIM ---
+        let payload = {
+            action: "simpan",
+            nama: document.getElementById('inputNama').value,
+            kelompok: document.getElementById('inputKelompok').value,
+            pembimbing: document.getElementById('inputPembimbing').value,
+            latlong: document.getElementById('inputLatLong').value,
+            Catatan: document.getElementById('inputCatatan').value
+        };
 
-                // Jika ada file, convert
-                if (fileInput && fileInput.files.length > 0) {
-                    // Kompresi ringan (opsional) atau langsung convert
-                    hiddenInput.value = await convertToBase64(fileInput.files[0]);
-                } else {
-                    hiddenInput.value = "";
+        // Loop setiap kegiatan untuk mengisi payload
+        for (let act of activities) {
+            const chk = document.getElementById(`chk_${act.id}`);
+            const time = document.getElementById(`time_${act.id}`);
+            const ket = document.getElementById(`ket_${act.id}`);
+            const fileInput = document.getElementById(`file_${act.id}`);
+
+            if (chk.checked) {
+                payload[`${act.id}_Status`] = "Ya";
+                payload[`${act.id}_Waktu`] = time.value;
+                payload[`${act.id}_Ket`] = ket.value;
+
+                // Proses Foto
+                if (!noPhotoList.includes(act.id)) {
+                    if (fileInput.files.length > 0) {
+                        // Convert ke Base64
+                        payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
+                    } else {
+                        throw new Error(`⚠️ Foto bukti untuk "${act.label}" wajib diisi.`);
+                    }
                 }
+            } else {
+                payload[`${act.id}_Status`] = "Tidak";
             }
         }
 
-        // B. Persiapan Data
-        const form = document.getElementById('formLaporan');
-        const fd = new FormData(form);
+        // --- KIRIM KE GOOGLE SCRIPT ---
+        // Menggunakan 'no-cors' tidak disarankan karena kita butuh respon JSON
+        // Kita kirim sebagai text biasa yang berisi JSON string
+        
+        console.log("Mengirim data...", payload);
 
-        // Tambahkan status "Tidak" untuk checkbox yang kosong
-        activities.forEach(act => {
-             if(!form.querySelector(`[name="${act.id}_Status"]`).checked){
-                 fd.append(`${act.id}_Status`, "Tidak");
-             }
-        });
-
-        // C. Kirim ke Google Script
         const response = await fetch(WEB_APP_URL, {
             method: "POST",
-            body: fd
+            body: JSON.stringify(payload)
         });
 
-        // D. Sukses
-        alert("✅ Alhamdulillah! Laporan harian berhasil dikirim.");
-        window.location.reload(); 
+        const result = await response.json();
+
+        if(result.status === "ok"){
+             alert("✅ Alhamdulillah! Laporan berhasil dikirim.");
+             window.location.reload(); 
+        } else {
+             throw new Error("Gagal menyimpan data di server.");
+        }
 
     } catch (err) {
         console.error(err);
-        alert(err.message); // Tampilkan error (misal foto kurang)
+        alert(err.message);
         overlay.style.display = 'none';
         btn.disabled = false;
     }
@@ -440,9 +452,9 @@ function convertToBase64(file) {
 }
 
 function logout(){
-    if(confirm("Apakah kamu yakin ingin keluar?")){
+    if(confirm("Yakin ingin keluar?")){
         localStorage.removeItem("user");
-        location.href = "index.html";
+        location.href = "index.html"; // Sesuaikan dengan nama file login anda
     }
 }
 </script>
