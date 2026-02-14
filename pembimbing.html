@@ -181,17 +181,18 @@
         </div>
         
         <div class="modal-body">
+            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:15px; font-size:13px;">
+                <span class="data-label">📝 Catatan Siswa Hari Ini:</span>
+                <span id="modalCatatanSiswa" style="font-style:italic; color:#a7f3d0">-</span>
+            </div>
+
             <div id="accordionContainer"></div>
 
             <div class="grading-section">
-                <h4>📝 Penilaian & Catatan</h4>
-                <div style="margin-bottom:10px">
-                    <span class="data-label">Nilai (0-100) / Predikat</span>
-                    <input type="text" id="inputNilai" placeholder="Contoh: 90 atau Baik">
-                </div>
+                <h4>👨‍🏫 Penilaian Pembimbing</h4>
                 <div>
-                    <span class="data-label">Catatan untuk Siswa</span>
-                    <textarea id="inputCatatan" rows="3" placeholder="Berikan semangat atau evaluasi..."></textarea>
+                    <span class="data-label">Nilai / Komentar untuk Siswa</span>
+                    <textarea id="inputCatatanPembimbing" rows="3" placeholder="Tulis nilai atau komentar evaluasi disini..."></textarea>
                 </div>
                 <button class="btn-save" onclick="saveGrade()">💾 SIMPAN PENILAIAN</button>
             </div>
@@ -201,9 +202,10 @@
 
 <script>
 // ================= CONFIG =================
+// PASTIKAN URL INI ADALAH DEPLOYMENT TERBARU DARI CODE.GS ANDA
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQJ6TgDJWEEKa05nRtFIogxp1TzOa044BQTYrgh9N9-q5f8AgWiUJvR-2lRSIgTKOWxA/exec"; 
 
-// Data Kegiatan (Header Sheet)
+// Data Kegiatan (Sesuai Header Sheet)
 const activities = [
     "Sahur", "Subuh", "Olahraga", "Keluarga", 
     "Dzuhur", "Pesantren", "Ashar", "Aksi", 
@@ -239,29 +241,22 @@ async function loadData() {
     loader.style.display = "block";
 
     try {
-        // Fetch data rekap pembimbing berdasarkan kelompok
         const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
-        console.log("Data Mentah dari Sheet:", data); // Cek di Console (F12)
+        console.log("Data diterima:", data);
         currentData = data; 
         loader.style.display = "none";
 
-        // --- FILTER LOGIC ---
-        // Jika user tidak memilih tanggal, TAMPILKAN SEMUA.
-        // Jika user memilih tanggal, lakukan pencocokan.
+        // Filter Logic
         const filtered = data.filter(item => {
             if (!dateInput) return true; // Tampilkan semua jika filter kosong
-            
-            // Ambil tanggal dari data sheet (Misal: "14/02/2026" atau "2026-02-14")
             const tglSheet = item.Tanggal || item.tanggal;
             if(!tglSheet) return false;
-
             return isSameDate(tglSheet, dateInput);
         });
 
-        // Jika data kosong
         if(filtered.length === 0) {
             list.innerHTML = `
             <div style="text-align:center; padding:30px; opacity:0.6">
@@ -271,15 +266,14 @@ async function loadData() {
             return;
         }
 
-        // Render List Siswa
+        // Render List
         filtered.forEach(item => {
-            // Deteksi Nama (Coba berbagai variasi Key jaga-jaga)
             const namaSiswa = item.Nama || item.nama || "Tanpa Nama";
-            const tglSiswa = item.Tanggal || item.tanggal || "-";
+            const tglSiswa = formatTglIndo(item.Tanggal || item.tanggal);
             
-            // Cek Status Penilaian (Kolom 'Catatan' diisi pembimbing)
-            // Pastikan di Sheet kolomnya bernama "Catatan" (bukan Catatan2) atau sesuaikan disini
-            const nilai = item.Catatan || ""; 
+            // Cek apakah sudah dinilai (Kolom Nilai_Pembimbing)
+            // Sesuai update Code.gs, kolom terakhir header adalah "Nilai_Pembimbing"
+            const nilai = item.Nilai_Pembimbing || ""; 
             const isGraded = (nilai !== "") ? "Sudah Dinilai" : "Belum Dinilai";
             const gradeClass = (nilai !== "") ? "done" : "";
 
@@ -293,53 +287,57 @@ async function loadData() {
                 <div class="st-status ${gradeClass}">${isGraded}</div>
             `;
             
-            // Simpan data item ke tombol click
             card.onclick = () => showDetail(item);
             list.appendChild(card);
         });
 
     } catch(e) {
-        console.error("Error Load Data:", e);
+        console.error("Error:", e);
         loader.style.display = "none";
         list.innerHTML = `<div style="color:red; text-align:center; margin-top:20px;">Gagal memuat data.<br><small>${e.message}</small></div>`;
     }
 }
 
-// Helper: Membandingkan Tanggal yang formatnya beda-beda
+// Helper Date Matcher
 function isSameDate(dateStringSheet, dateInputHTML) {
     try {
-        // Buat objek Date dari kedua sumber
-        const d1 = new Date(dateStringSheet); // Sheet
-        const d2 = new Date(dateInputHTML);   // HTML Input
-
-        // Bandingkan Tanggal, Bulan, Tahun
+        const d1 = new Date(dateStringSheet); 
+        const d2 = new Date(dateInputHTML);   
         return d1.getDate() === d2.getDate() &&
                d1.getMonth() === d2.getMonth() &&
                d1.getFullYear() === d2.getFullYear();
-    } catch (e) {
-        return false; // Jika error parsing, anggap tidak cocok
-    }
+    } catch (e) { return false; }
+}
+
+function formatTglIndo(dateString) {
+    if(!dateString) return "-";
+    try {
+        const d = new Date(dateString);
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch(e) { return dateString; }
 }
 
 // ==========================================
 // 3. TAMPILKAN DETAIL (MODAL)
 // ==========================================
 function showDetail(item) {
-    // Ambil ID Unik (Row ID dari Apps Script)
     selectedRowId = item.row || item.id; 
     
     document.getElementById("modalName").textContent = item.Nama || item.nama;
-    document.getElementById("modalDate").textContent = item.Tanggal || item.tanggal;
+    document.getElementById("modalDate").textContent = formatTglIndo(item.Tanggal || item.tanggal);
     
-    // Isi Form Penilaian sebelumnya
-    document.getElementById("inputCatatan").value = item.Catatan || ""; 
+    // Tampilkan Catatan Siswa (Read Only)
+    const catSiswa = item.Catatan || "-";
+    document.getElementById("modalCatatanSiswa").textContent = `"${catSiswa}"`;
+
+    // Tampilkan Nilai Lama di Form Input (Jika ada)
+    // Menggunakan key 'Nilai_Pembimbing' sesuai header di Code.gs
+    document.getElementById("inputCatatanPembimbing").value = item.Nilai_Pembimbing || ""; 
     
     const container = document.getElementById("accordionContainer");
     container.innerHTML = ""; 
 
-    // Loop Kegiatan
     activities.forEach(act => {
-        // Key Mapping: Sahur_Status, Sahur_Waktu, dll.
         const status = item[`${act}_Status`] || "-";
         const waktu = item[`${act}_Waktu`] || "-";
         const ket = item[`${act}_Ket`] || "-";
@@ -347,13 +345,12 @@ function showDetail(item) {
         
         const statusIcon = (String(status).toLowerCase().includes("ya")) ? "✅" : "❌";
         
-        // Logika Foto
         let photoHtml = "";
         if (!noPhotoActs.includes(act) && foto && foto.length > 20) {
             photoHtml = `
                 <div class="data-row">
                     <span class="data-label">📸 Foto Bukti</span>
-                    <img src="${foto}" class="img-preview" alt="Bukti" onerror="this.style.display='none'">
+                    <img src="${foto}" class="img-preview" alt="Bukti">
                 </div>`;
         } else if (!noPhotoActs.includes(act)) {
              photoHtml = `<div class="data-row"><span class="data-label">📸 Foto Bukti</span><span style="color:#aaa; font-style:italic">Tidak ada foto</span></div>`;
@@ -367,7 +364,7 @@ function showDetail(item) {
             </div>
             <div class="acc-content">
                 <div class="data-row">
-                    <span class="data-label">Status Pelaksanaan</span>
+                    <span class="data-label">Status</span>
                     <span class="data-value">${statusIcon} ${status}</span>
                 </div>
                 <div class="data-row">
@@ -376,7 +373,7 @@ function showDetail(item) {
                 </div>
                 ${photoHtml}
                 <div class="data-row">
-                    <span class="data-label">📝 Keterangan Siswa</span>
+                    <span class="data-label">📝 Ket. Siswa</span>
                     <span class="data-value" style="color:#d1fae5; font-style:italic">"${ket}"</span>
                 </div>
             </div>
@@ -387,10 +384,8 @@ function showDetail(item) {
     document.getElementById("detailModal").style.display = "block";
 }
 
-// Accordion Toggle
 function toggleAcc(header) {
     const content = header.nextElementSibling;
-    // Tutup yang lain
     document.querySelectorAll('.acc-content').forEach(el => {
         if(el !== content) el.classList.remove('show');
     });
@@ -402,10 +397,11 @@ function toggleAcc(header) {
 // ==========================================
 async function saveGrade() {
     const btn = document.querySelector(".btn-save");
-    const catatan = document.getElementById("inputCatatan").value;
+    // Ambil value dari textarea pembimbing
+    const catatan = document.getElementById("inputCatatanPembimbing").value;
 
     if(!selectedRowId) {
-        alert("Error: ID Baris tidak ditemukan. Pastikan script Google Apps mengirimkan 'row' atau 'id'.");
+        alert("Error: ID Baris tidak ditemukan. Refresh halaman dan coba lagi.");
         return;
     }
 
@@ -421,7 +417,7 @@ async function saveGrade() {
         await fetch(WEB_APP_URL, { method: "POST", body: fd });
         alert("✅ Penilaian berhasil disimpan!");
         closeModal();
-        loadData(); // Refresh data agar status berubah
+        loadData(); // Refresh list agar status berubah jadi 'Sudah Dinilai'
     } catch(e) {
         alert("Gagal menyimpan: " + e.message);
     } finally {
@@ -438,11 +434,9 @@ window.onclick = function(event) {
     if (event.target == modal) closeModal();
 }
 
-// Jalankan Load Data saat halaman siap
+// Jalankan saat awal buka
 loadData();
 </script>
-
-```
 
 </body>
 </html>
