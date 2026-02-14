@@ -69,6 +69,7 @@
         .score-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; width: 30px; text-align: center; }
         .score-high { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .score-mid { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .score-none { background: rgba(255,255,255,0.1); color: #94a3b8; }
 
         /* --- FOOTER FIXED STYLE --- */
         .footer-fixed {
@@ -171,7 +172,7 @@
 
             <div id="page-nilai" class="page">
                 <h1>Monitoring Penilaian Pembimbing</h1>
-                <p style="color:var(--text-muted); margin-bottom:25px;">Hasil penilaian dari pembimbing. Admin dapat memberikan catatan evaluasi.</p>
+                <p style="color:var(--text-muted); margin-bottom:25px;">Hasil penilaian dari pembimbing. Nilai akan muncul saat pembimbing mengisi form penilaian.</p>
                 <div id="container-penilaian"><div style="text-align:center; padding:50px;">Memuat data penilaian...</div></div>
             </div>
 
@@ -236,7 +237,9 @@
     </div>
 
     <script>
+        // CONFIG
         const API = "https://script.google.com/macros/s/AKfycbwGokGkqDFYo1-_uRvKLpq0w-TTcQRq7PCDyyW25OWRPACkshBi01nJoc2nwUokWIMCiA/exec";
+        
         let globalData = { siswa: [], pembimbing: [] };
 
         function showPage(id, el) {
@@ -265,9 +268,10 @@
             document.getElementById('cert-display-name').innerText = name;
             preview.style.display = 'block';
 
-            document.getElementById('cert-data-jumlah').innerText = "-";
-            document.getElementById('cert-data-nilai').innerText = "-";
-            document.getElementById('cert-data-predikat').innerText = "-";
+            // Reset data sertifikat
+            document.getElementById('cert-data-jumlah').innerText = "0 Kegiatan";
+            document.getElementById('cert-data-nilai').innerText = "0";
+            document.getElementById('cert-data-predikat').innerText = "Belum Ada Nilai";
 
             if (type === 'Pembimbing') {
                 titleEl.innerText = "PIAGAM PENGHARGAAN";
@@ -286,14 +290,23 @@
 
         async function loadData() {
             try {
+                // Fetch data User dari Google Sheet
                 const res = await fetch(API + "?action=getUsers");
                 const data = await res.json();
+                
+                // Simpan data
                 globalData = data;
+                
+                // Render Tabel Siswa & Guru
                 renderTable('listSiswa', data.siswa);
                 renderTable('listGuru', data.pembimbing);
                 renderChart(data);
+
+                // Render Laporan & Penilaian (DEFAULT 0 / KOSONG)
+                // Karena data asli belum masuk dari Google Sheet
                 renderLaporan(data);
                 renderPenilaianByGroup(data);
+
             } catch(e) { 
                 console.error("Error:", e);
                 alert("Gagal memuat data dari Google Sheets.");
@@ -303,6 +316,8 @@
         function renderPenilaianByGroup(data) {
             const container = document.getElementById('container-penilaian');
             const grouped = {};
+            
+            // Grouping Siswa per Kelompok
             data.siswa.forEach(s => {
                 const kel = s.Kelompok || 'Tanpa Kelompok';
                 if(!grouped[kel]) grouped[kel] = [];
@@ -320,17 +335,21 @@
             sortedGroups.forEach(kelompokName => {
                 const guru = data.pembimbing.find(g => g.Kelompok == kelompokName);
                 const namaGuru = guru ? guru.Nama : "Belum ada Pembimbing";
+                
+                // PERBAIKAN: NILAI DEFAULT 0
                 const rows = grouped[kelompokName].map((s, idx) => {
-                    const nilaiAktif = Math.floor(Math.random() * (100 - 70) + 70);
-                    const nilaiAkhlaq = Math.floor(Math.random() * (100 - 75) + 75);
-                    const nilaiLaporan = Math.floor(Math.random() * (100 - 60) + 60);
+                    // Cek jika siswa punya nilai di data (sementara 0)
+                    const nilaiAktif = s.NilaiAktif || 0;
+                    const nilaiAkhlaq = s.NilaiAkhlaq || 0;
+                    const nilaiLaporan = s.NilaiLaporan || 0;
+
                     return `
                     <tr>
                         <td>${idx + 1}</td>
                         <td>${s.Nama}</td>
-                        <td style="text-align:center"><span class="score-badge ${nilaiAktif >= 85 ? 'score-high' : 'score-mid'}">${nilaiAktif}</span></td>
-                        <td style="text-align:center"><span class="score-badge ${nilaiAkhlaq >= 85 ? 'score-high' : 'score-mid'}">${nilaiAkhlaq}</span></td>
-                        <td style="text-align:center"><span class="score-badge ${nilaiLaporan >= 85 ? 'score-high' : 'score-mid'}">${nilaiLaporan}</span></td>
+                        <td style="text-align:center"><span class="score-badge score-none">${nilaiAktif}</span></td>
+                        <td style="text-align:center"><span class="score-badge score-none">${nilaiAkhlaq}</span></td>
+                        <td style="text-align:center"><span class="score-badge score-none">${nilaiLaporan}</span></td>
                     </tr>`;
                 }).join('');
 
@@ -355,24 +374,34 @@
             container.innerHTML = htmlContent;
         }
 
+        function renderLaporan(data) {
+            const listLaporan = document.getElementById('listLaporan');
+            if(data.siswa.length > 0) {
+                // PERBAIKAN: DEFAULT TOTAL 0 & STATUS BELUM
+                listLaporan.innerHTML = data.siswa.map((u, index) => {
+                    // Jika ada data laporan nanti, ambil dari u.TotalLaporan
+                    const totalLap = u.TotalLaporan || 0; 
+                    const status = totalLap > 20 ? "TUNTAS" : "BELUM";
+                    const statusColor = totalLap > 20 ? "#10b981" : "#ef4444";
+
+                    return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${u.Nama || u.Username}</td>
+                        <td>${u.Kelompok}</td>
+                        <td style="color:var(--text-muted)">${totalLap} Kegiatan</td>
+                        <td><span style="color:${statusColor}; font-weight:600; font-size:12px;">${status}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
         function renderTable(elementId, dataArray) {
             const el = document.getElementById(elementId);
             if (dataArray && dataArray.length > 0) {
                 el.innerHTML = dataArray.map(u => `<tr><td>${u.Username || '-'}</td><td>${u.Nama || '-'}</td><td>${u.Kelompok || '-'}</td></tr>`).join('');
             } else {
                 el.innerHTML = '<tr><td colspan="3" style="text-align:center">Data kosong</td></tr>';
-            }
-        }
-
-        function renderLaporan(data) {
-            const listLaporan = document.getElementById('listLaporan');
-            if(data.siswa.length > 0) {
-                listLaporan.innerHTML = data.siswa.map((u, index) => `
-                    <tr>
-                        <td>${index + 1}</td><td>${u.Nama || u.Username}</td><td>${u.Kelompok}</td>
-                        <td style="color:var(--primary)">${Math.floor(Math.random() * 20) + 10} Kegiatan</td>
-                        <td><span style="color:${Math.random() > 0.2 ? '#10b981' : '#ef4444'}">${Math.random() > 0.2 ? 'TUNTAS' : 'BELUM'}</span></td>
-                    </tr>`).join('');
             }
         }
 
