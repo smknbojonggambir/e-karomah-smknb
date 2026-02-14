@@ -220,8 +220,7 @@
 </div>
 
 <script>
-// ================= CONFIG =================
-// Ganti URL ini dengan deployment terbaru AppScript Anda
+// ================= CONFIG & SETUP =================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQJ6TgDJWEEKa05nRtFIogxp1TzOa044BQTYrgh9N9-q5f8AgWiUJvR-2lRSIgTKOWxA/exec"; 
 
 const activities = [
@@ -229,136 +228,164 @@ const activities = [
     "Dzuhur", "Pesantren", "Ashar", "Aksi", 
     "Buka", "Magrib", "Isya", "Tarawih", "Tadarus", "Tidur"
 ];
-
 const noPhotoActs = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
 
-// Global State
+// Global Variables
 let rawData = [];
-let currentFilter = 'all'; 
 let selectedRowId = null;
-let currentStudentStats = { done: 0, total: 0 }; // Untuk auto review
 
-// 1. AUTH & INIT
+// 1. CEK LOGIN & KELOMPOK
 const user = JSON.parse(localStorage.getItem("user"));
+
+// Validasi Keamanan Client-Side
 if(!user || user.role !== 'pembimbing'){
-    alert("Akses ditolak. Login dulu."); location.href='index.html';
+    alert("⛔ Akses Ditolak. Harap login sebagai Pembimbing."); 
+    location.href='index.html';
 }
+
+// Set UI Profil
 document.getElementById('mName').textContent = user.nama;
 document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
 
-// 2. DATA LOADING
+// ==========================================
+// 2. FUNGSI LOAD DATA (OPTIMALISASI UTAMA)
+// ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
     
     list.innerHTML = "";
     loader.style.display = "block";
-    
+    loader.innerHTML = `<div class="spinner"></div>Sedang mencari laporan siswa ${user.kelompok}...`;
+
     try {
+        // Fetch data (Mengirim parameter kelompok ke server untuk meringankan beban, 
+        // tapi kita filter lagi di sini untuk keamanan ganda)
         const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
-        rawData = data;
-        applyFilters(); // Render data
-        loader.style.display = "none";
+        // --- LOGIKA PENYARINGAN & PENGURUTAN CANGGIH ---
         
+        // 1. Pastikan hanya kelompok yang sesuai (Double Check)
+        // 2. Pastikan baris memiliki Nama (Validasi data kosong)
+        const myStudents = data.filter(item => {
+            const groupItem = String(item.Kelompok || "").trim().toLowerCase();
+            const groupUser = String(user.kelompok || "").trim().toLowerCase();
+            return groupItem === groupUser && (item.Nama || item.nama);
+        });
+
+        rawData = myStudents; // Simpan ke global
+
+        if(myStudents.length === 0) {
+            loader.style.display = "block";
+            loader.innerHTML = `
+                <div style="padding:40px; text-align:center;">
+                    <h3 style="color:#94a3b8">🍃 Belum ada laporan masuk</h3>
+                    <p style="font-size:12px; color:#64748b">Siswa kelompok ${user.kelompok} belum mengisi laporan hari ini.</p>
+                </div>`;
+            return;
+        }
+
+        renderList(myStudents);
+        loader.style.display = "none";
+
     } catch(e) {
         console.error(e);
-        loader.innerHTML = `<span style="color:var(--danger)">Gagal memuat data. Cek koneksi.</span>`;
+        loader.innerHTML = `<div style="color:var(--danger); padding:20px;">Gagal memuat data: ${e.message}</div>`;
     }
 }
 
-// 3. FILTER LOGIC & RENDERING
-function setFilter(type, el) {
-    currentFilter = type;
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    applyFilters();
-}
-
-function applyFilters() {
-    const dateInput = document.getElementById('dateFilter').value;
+// 3. FUNGSI RENDER (MEMISAHKAN YANG BELUM DINILAI)
+function renderList(data) {
     const list = document.getElementById("studentList");
     list.innerHTML = "";
 
-    // Step 1: Filter by Date & Category
-    let filtered = rawData.filter(item => {
-        // Date check
-        if (dateInput) {
-            const tglSheet = item.Tanggal || item.tanggal;
-            if(!tglSheet || !isSameDate(tglSheet, dateInput)) return false;
-        }
-        
-        // Status Check (Pending vs Done)
-        // Cek kolom "Nilai_Pembimbing"
+    // Pisahkan data menjadi dua antrian
+    const pending = []; // Belum dinilai
+    const done = [];    // Sudah dinilai
+
+    data.forEach(item => {
+        // Cek apakah kolom Nilai_Pembimbing sudah terisi
         const hasGrade = (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2);
-        
-        if (currentFilter === 'pending' && hasGrade) return false;
-        if (currentFilter === 'done' && !hasGrade) return false;
-        
-        return true;
+        if(hasGrade) {
+            done.push(item);
+        } else {
+            pending.push(item);
+        }
     });
 
-    // Update Counts
-    document.getElementById('countAll').textContent = rawData.length;
-    document.getElementById('countPending').textContent = rawData.filter(i => !(i.Nilai_Pembimbing && String(i.Nilai_Pembimbing).length > 2)).length;
-    document.getElementById('countDone').textContent = rawData.filter(i => (i.Nilai_Pembimbing && String(i.Nilai_Pembimbing).length > 2)).length;
+    // Urutkan: Yang baru submit paling atas
+    pending.sort((a,b) => new Date(b.Tanggal) - new Date(a.Tanggal));
+    done.sort((a,b) => new Date(b.Tanggal) - new Date(a.Tanggal));
 
-    if(filtered.length === 0) {
-        list.innerHTML = `<div style="text-align:center; padding:30px; opacity:0.5; font-size:12px;">Tidak ada data sesuai filter.</div>`;
-        return;
+    // --- RENDER SECTION 1: PERLU PERHATIAN (PRIORITY) ---
+    if(pending.length > 0) {
+        const headerPending = document.createElement("div");
+        headerPending.innerHTML = `<h4 style="margin:20px 0 10px; color:var(--gold); font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #334155; padding-bottom:5px;">⚠️ Menunggu Penilaian (${pending.length})</h4>`;
+        list.appendChild(headerPending);
+
+        pending.forEach(item => list.appendChild(createCard(item, false)));
+    } else {
+        // Jika semua sudah dinilai
+        list.innerHTML += `<div style="background:rgba(16, 185, 129, 0.1); border:1px solid var(--primary); color:var(--primary); padding:15px; border-radius:10px; text-align:center; font-size:12px; margin-bottom:20px;">🎉 Alhamdulillah, semua tugas kelompok ${user.kelompok} sudah dinilai!</div>`;
     }
 
-    // Step 2: Render Cards with Complexity (Progress Bars)
-    filtered.forEach(item => {
-        // Hitung Progress
-        let doneCount = 0;
-        activities.forEach(act => {
-            if(String(item[`${act}_Status`]).toLowerCase().includes('ya')) doneCount++;
-        });
-        const progressPct = Math.round((doneCount / activities.length) * 100);
-        
-        // Status Penilaian
-        const nilaiDb = item.Nilai_Pembimbing || "";
-        const isGraded = (nilaiDb.length > 2);
-        const cardClass = isGraded ? 'done' : 'priority';
-        const badgeHtml = isGraded 
-            ? `<span class="badge badge-done">SUDAH DINILAI</span>` 
-            : `<span class="badge badge-pending">BELUM DINILAI</span>`;
+    // --- RENDER SECTION 2: RIWAYAT ---
+    if(done.length > 0) {
+        const headerDone = document.createElement("div");
+        headerDone.innerHTML = `<h4 style="margin:30px 0 10px; color:#94a3b8; font-size:13px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #334155; padding-bottom:5px;">✅ Riwayat Penilaian</h4>`;
+        list.appendChild(headerDone);
 
-        const card = document.createElement("div");
-        card.className = `student-card ${cardClass}`;
-        card.innerHTML = `
-            <div class="card-top">
-                <div>
-                    <h3 class="st-name">${item.Nama || item.nama}</h3>
-                    <span class="st-date">📅 ${formatTglIndo(item.Tanggal || item.tanggal)}</span>
-                </div>
-                ${badgeHtml}
-            </div>
-            
-            <div class="progress-area">
-                <span>${doneCount}/${activities.length} Kegiatan</span>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width: ${progressPct}%"></div>
-                </div>
-                <span class="score-preview" style="color:${getColor(progressPct)}">${progressPct}%</span>
-            </div>
-        `;
-        
-        card.onclick = () => showDetail(item);
-        list.appendChild(card);
+        done.forEach(item => list.appendChild(createCard(item, true)));
+    }
+}
+
+// Helper: Membuat Kartu Siswa
+function createCard(item, isDone) {
+    // Hitung Progress Kegiatan
+    let doneCount = 0;
+    activities.forEach(act => {
+        if(String(item[`${act}_Status`]).toLowerCase().includes('ya')) doneCount++;
     });
+    const progressPct = Math.round((doneCount / activities.length) * 100);
+
+    const card = document.createElement("div");
+    // Tambahkan class 'priority' jika belum dinilai agar border berwarna Emas
+    card.className = `student-card ${isDone ? 'done' : 'priority'}`;
+    
+    const badgeHtml = isDone 
+        ? `<span class="badge badge-done">SUDAH DINILAI</span>` 
+        : `<span class="badge badge-pending">BUTUH NILAI</span>`;
+
+    // Warna progress bar
+    const progressColor = progressPct >= 80 ? '#34d399' : (progressPct >= 50 ? '#fbbf24' : '#ef4444');
+
+    card.innerHTML = `
+        <div class="card-top">
+            <div>
+                <h3 class="st-name">${item.Nama || item.nama}</h3>
+                <span class="st-date">📅 ${formatTglIndo(item.Tanggal || item.tanggal)}</span>
+            </div>
+            ${badgeHtml}
+        </div>
+        
+        <div class="progress-area">
+            <span>Isian: ${doneCount}/${activities.length}</span>
+            <div class="progress-track">
+                <div class="progress-fill" style="width: ${progressPct}%; background:${progressColor}"></div>
+            </div>
+            <span class="score-preview" style="color:${progressColor}">${progressPct}%</span>
+        </div>
+    `;
+    
+    card.onclick = () => showDetail(item);
+    return card;
 }
 
-function getColor(pct) {
-    if(pct >= 80) return '#34d399'; // Green
-    if(pct >= 50) return '#fbbf24'; // Yellow
-    return '#ef4444'; // Red
-}
-
-// 4. DETAIL MODAL & ANALYTICS
+// ==========================================
+// 4. DETAIL, MODAL & GRADING (Sama seperti Pro)
+// ==========================================
 function showDetail(item) {
     selectedRowId = item.row || item.id;
     
@@ -366,78 +393,69 @@ function showDetail(item) {
     document.getElementById("modalDate").textContent = formatTglIndo(item.Tanggal || item.tanggal);
     document.getElementById("modalCatatanSiswa").textContent = item.Catatan ? `"${item.Catatan}"` : "-";
 
-    // --- ANALYTICS ENGINE ---
-    let done = 0;
+    // Reset Accordion
     const container = document.getElementById("accordionContainer");
     container.innerHTML = "";
+    
+    let totalDone = 0;
 
     activities.forEach(act => {
         const status = item[`${act}_Status`] || "-";
         const isYa = String(status).toLowerCase().includes("ya");
-        if(isYa) done++;
-
+        if(isYa) totalDone++;
+        
         const waktu = item[`${act}_Waktu`] || "-";
         const ket = item[`${act}_Ket`] || "-";
-        const foto = item[`${act}_Foto`]; 
-
-        const icon = isYa ? "✅" : "❌";
-        const badgeClass = isYa ? "bg-ok" : "bg-no";
+        const foto = item[`${act}_Foto`];
         
-        // Logic Foto (Ada/Tidak)
+        const badgeClass = isYa ? "bg-ok" : "bg-no";
+        const icon = isYa ? "✅" : "❌";
+
+        // Logic Foto (Teks Link)
         let photoDisplay = "";
         if (!noPhotoActs.includes(act)) {
-             if (foto && foto.length > 15) {
-                photoDisplay = `<div class="data-row" style="margin-top:5px; padding-top:5px; border-top:1px dashed #334155;">
-                    <span style="color:#94a3b8; font-size:11px;">Bukti Foto:</span> 
-                    <a href="${foto}" target="_blank" style="color:#34d399; font-weight:bold; font-size:12px; text-decoration:none;">📸 LIHAT FOTO</a>
+             if (foto && foto.length > 10) {
+                photoDisplay = `<div class="data-row" style="margin-top:5px; border-top:1px dashed #334155; padding-top:5px;">
+                    <a href="${foto}" target="_blank" style="color:#34d399; font-size:12px; text-decoration:none;">📸 Buka Foto Bukti</a>
                 </div>`;
             } else {
-                photoDisplay = `<div class="data-row" style="margin-top:5px;"><span style="color:#ef4444; font-size:11px;">❌ Tidak ada bukti foto</span></div>`;
+                photoDisplay = `<div class="data-row" style="margin-top:5px;"><span style="color:#ef4444; font-size:11px;">Tidak ada foto</span></div>`;
             }
         }
 
         const html = `
         <div class="acc-item">
             <div class="acc-header" onclick="toggleAcc(this)">
-                <span>${icon} <span style="margin-left:8px; font-weight:500;">${act}</span></span>
+                <span>${icon} ${act}</span>
                 <span class="status-badge ${badgeClass}">${status}</span>
             </div>
             <div class="acc-content">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span style="color:#94a3b8">Waktu: <span style="color:white">${waktu}</span></span>
-                </div>
-                <div style="font-size:12px; background:rgba(255,255,255,0.05); padding:8px; border-radius:6px;">
-                    <span style="color:#gold; opacity:0.7">Ket:</span> "${ket}"
-                </div>
+                <div style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">Jam: ${waktu}</div>
+                <div style="font-size:12px; color:#94a3b8; font-style:italic; margin-bottom:4px;">"${ket}"</div>
                 ${photoDisplay}
             </div>
         </div>`;
         container.innerHTML += html;
     });
 
-    // Update Top Stats
-    currentStudentStats.done = done;
-    currentStudentStats.total = activities.length;
-    
-    const pct = Math.round((done / activities.length) * 100);
-    document.getElementById("statTotal").textContent = done;
-    document.getElementById("statMissed").textContent = activities.length - done;
+    // Update Stats di Modal
+    document.getElementById("statTotal").textContent = totalDone;
+    document.getElementById("statMissed").textContent = activities.length - totalDone;
+    const pct = Math.round((totalDone/activities.length)*100);
     document.getElementById("statScore").textContent = pct + "%";
 
-    // --- PREPARE GRADING FORM ---
-    // Parsing Nilai Lama: Format "[Nilai: 80] Komentar..."
+    // Setup Form Penilaian
     const existingVal = item.Nilai_Pembimbing || "";
-    let score = 80; // Default
+    let score = pct; 
     let comment = "";
 
-    // Regex sederhana untuk memisahkan Nilai dan Komentar jika formatnya sesuai
+    // Regex ambil nilai lama [Nilai: 80] ...
     const match = existingVal.match(/\[Nilai:\s*(\d+)\]\s*(.*)/s);
     if(match) {
         score = match[1];
         comment = match[2];
-    } else {
-        comment = existingVal; // Jika format lama (cuma teks)
-        if(existingVal !== "") score = pct; // Saran nilai berdasarkan aktivitas jika belum dinilai angka
+    } else if(existingVal.length > 2) {
+        comment = existingVal;
     }
 
     document.getElementById("scoreInput").value = score;
@@ -447,106 +465,99 @@ function showDetail(item) {
     document.getElementById("detailModal").style.display = "block";
 }
 
-// 5. HELPER FUNCTIONS UI
+// 5. FITUR AUTO REVIEW & SAVE
+function generateAutoReview() {
+    // Ambil data statistik saat ini dari DOM
+    const total = parseInt(document.getElementById("statTotal").textContent);
+    const missed = parseInt(document.getElementById("statMissed").textContent);
+    const sum = total + missed;
+    const pct = Math.round((total/sum)*100);
+    const nama = document.getElementById("modalName").textContent.split(" ")[0];
+
+    let text = "";
+    if(pct === 100) {
+        text = `Sempurna! Ananda ${nama} mengerjakan semua kegiatan (${total}/${sum}). Pertahankan!`;
+        setScoreUI(100);
+    } else if(pct >= 80) {
+        text = `Sangat Baik. Ananda ${nama} mengerjakan ${total} kegiatan. Tingkatkan terus.`;
+        setScoreUI(90);
+    } else if(pct >= 50) {
+        text = `Cukup. Ananda ${nama} mengerjakan ${total} kegiatan. Mohon lebih rajin lagi.`;
+        setScoreUI(75);
+    } else {
+        text = `Perlu Bimbingan. Laporan Ananda ${nama} sangat sedikit (${total}/${sum}). Segera perbaiki.`;
+        setScoreUI(50);
+    }
+    document.getElementById("inputCatatanPembimbing").value = text;
+}
+
+function setScoreUI(val) {
+    document.getElementById("scoreInput").value = val;
+    updateScoreDisplay(val);
+}
+
 function updateScoreDisplay(val) {
-    document.getElementById("scoreValueDisplay").textContent = val;
-    // Ubah warna text slider value
     const el = document.getElementById("scoreValueDisplay");
+    el.textContent = val;
     if(val < 60) el.style.color = "#ef4444";
     else if(val < 85) el.style.color = "#fbbf24";
     else el.style.color = "#34d399";
 }
 
+async function saveGrade() {
+    const btn = document.querySelector(".btn-save");
+    const score = document.getElementById("scoreInput").value;
+    const comment = document.getElementById("inputCatatanPembimbing").value.trim();
+
+    if(!selectedRowId) return;
+    if(!comment) { alert("Isi komentar dulu"); return; }
+
+    btn.textContent = "Mengirim...";
+    btn.disabled = true;
+
+    // Format Data
+    const payload = `[Nilai: ${score}] ${comment}`;
+    const fd = new FormData();
+    fd.append("action", "simpanCatatan");
+    fd.append("id", selectedRowId);
+    fd.append("catatan", payload);
+
+    try {
+        await fetch(WEB_APP_URL, {method: "POST", body: fd});
+        
+        // Update Lokal & Refresh Tampilan
+        const idx = rawData.findIndex(x => (x.row || x.id) == selectedRowId);
+        if(idx !== -1) rawData[idx].Nilai_Pembimbing = payload;
+
+        alert("✅ Nilai Tersimpan");
+        closeModal();
+        renderList(rawData); // Re-render agar item pindah ke 'Riwayat'
+        
+    } catch(e) {
+        alert("Gagal: " + e.message);
+    } finally {
+        btn.textContent = "💾 SIMPAN & KIRIM";
+        btn.disabled = false;
+    }
+}
+
+// Utils
 function toggleAcc(header) {
     const content = header.nextElementSibling;
-    // Tutup yang lain biar rapi
     document.querySelectorAll('.acc-content').forEach(el => {
         if(el !== content) el.classList.remove('show');
     });
     content.classList.toggle('show');
 }
-
-// 6. FITUR: AUTO REVIEW (AI SEDERHANA)
-function generateAutoReview() {
-    const pct = Math.round((currentStudentStats.done / currentStudentStats.total) * 100);
-    const nama = document.getElementById("modalName").textContent.split(" ")[0]; // Panggil nama depan aja
-    
-    let text = "";
-    
-    if(pct === 100) {
-        text = `MasyaAllah, Luar biasa! Ananda ${nama} melaksanakan seluruh kegiatan (${currentStudentStats.done}/${currentStudentStats.total}) dengan lengkap. Pertahankan semangatnya!`;
-        updateScoreDisplay(100); document.getElementById("scoreInput").value = 100;
-    } else if(pct >= 80) {
-        text = `Alhamdulillah, laporan kegiatan Ananda ${nama} sudah sangat baik (${currentStudentStats.done}/${currentStudentStats.total} terlaksana). Sedikit lagi sempurna, ayo lebih teliti mengisi laporannya.`;
-        updateScoreDisplay(90); document.getElementById("scoreInput").value = 90;
-    } else if(pct >= 50) {
-        text = `Terima kasih laporannya Ananda ${nama}. Masih ada beberapa kegiatan yang terlewat (${currentStudentStats.done}/${currentStudentStats.total}). Mohon ditingkatkan lagi ibadahnya ya.`;
-        updateScoreDisplay(75); document.getElementById("scoreInput").value = 75;
-    } else {
-        text = `Mohon perhatian Ananda ${nama}. Laporan hari ini sangat minim (${currentStudentStats.done}/${currentStudentStats.total}). Jika ada kendala, silakan hubungi Bapak/Ibu. Jangan lupa ibadahnya.`;
-        updateScoreDisplay(50); document.getElementById("scoreInput").value = 50;
-    }
-    
-    document.getElementById("inputCatatanPembimbing").value = text;
-}
-
-// 7. SAVING DATA
-async function saveGrade() {
-    const btn = document.querySelector(".btn-save");
-    const score = document.getElementById("scoreInput").value;
-    const comment = document.getElementById("inputCatatanPembimbing").value.trim();
-    
-    if(!comment) { alert("Mohon isi komentar evaluasi."); return; }
-    
-    // FORMAT GABUNGAN: Agar backend tidak perlu diubah kolomnya
-    // Kita simpan dalam format string unik
-    const finalPayload = `[Nilai: ${score}] ${comment}`;
-
-    btn.innerHTML = "⏳ Mengirim...";
-    btn.disabled = true;
-
-    const fd = new FormData();
-    fd.append("action", "simpanCatatan");
-    fd.append("id", selectedRowId); 
-    fd.append("catatan", finalPayload); // Kirim ke kolom Nilai_Pembimbing
-
-    try {
-        await fetch(WEB_APP_URL, { method: "POST", body: fd });
-        // Update data lokal biar ga perlu reload server
-        const idx = rawData.findIndex(x => (x.row || x.id) == selectedRowId);
-        if(idx !== -1) {
-            rawData[idx].Nilai_Pembimbing = finalPayload;
-        }
-        
-        alert("✅ Penilaian Tersimpan!");
-        closeModal();
-        applyFilters(); // Re-render list
-    } catch(e) {
-        alert("Gagal menyimpan: " + e.message);
-    } finally {
-        btn.innerHTML = "💾 SIMPAN & KIRIM";
-        btn.disabled = false;
-    }
-}
-
-// Utils Standard
-function isSameDate(d1, d2) {
-    try {
-        const a = new Date(d1); const b = new Date(d2);
-        return a.getDate()===b.getDate() && a.getMonth()===b.getMonth() && a.getFullYear()===b.getFullYear();
-    } catch(e){return false;}
-}
 function formatTglIndo(str) {
-    if(!str) return "-";
-    try { return new Date(str).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}); } catch(e){return str;}
+    if(!str) return "";
+    try { return new Date(str).toLocaleDateString('id-ID', {day:'numeric', month:'short'}); } catch(e){return str;}
 }
 function closeModal() { document.getElementById("detailModal").style.display = "none"; }
 function logout() { localStorage.removeItem("user"); location.href="index.html"; }
-window.onclick = function(ev) { if (ev.target == document.getElementById("detailModal")) closeModal(); }
 
-// Jalankan
+// Start
 loadData();
-
 </script>
 </body>
 </html>
