@@ -3,162 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>E-KAROMAH - Panel Siswa</title>
+<title>Panel Siswa - E-KAROMAH</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
 <style>
 :root {
-  --primary: #10b981;
-  --accent: #fbbf24;
-  --bg-gradient: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
-  --card-bg: rgba(6, 78, 59, 0.5);
-  --border: rgba(255, 255, 255, 0.15);
-  --text: #f1f5f9;
+  --primary: #10b981; /* Emerald */
+  --gold: #fbbf24;    /* Emas */
+  --bg-dark: #022c22; /* Hijau Malam */
+  --glass: rgba(6, 78, 59, 0.6);
+  --text: #f0fdf4;
 }
 
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background: var(--bg-gradient);
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
   color: var(--text);
-  min-height: 100vh;
-  padding-bottom: 80px;
+  padding-bottom: 100px;
 }
 
 /* Header Sticky */
 .header-container {
   background: rgba(2, 44, 34, 0.95);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: sticky; top: 0; z-index: 100;
   padding: 15px 20px;
-  border-bottom: 2px solid var(--accent);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  border-bottom: 2px solid var(--gold);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
   display: flex; justify-content: space-between; align-items: center;
 }
-
-h2 { margin: 0; font-size: 18px; color: var(--accent); }
-.logout-mini { font-size: 12px; color: #ef4444; cursor: pointer; text-decoration: underline; }
+.header-container h2 { margin:0; font-size:16px; color:var(--gold); }
+.btn-logout { background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; text-decoration:underline; }
 
 .container { max-width: 800px; margin: auto; padding: 20px; }
 
-.user-info-card {
-  background: linear-gradient(135deg, #064e3b, #047857);
-  padding: 20px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  font-size: 14px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+/* Info User */
+.user-info {
+  background: linear-gradient(to right, #059669, #047857);
+  padding: 15px; border-radius: 12px; margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.1); font-size: 13px;
 }
-.user-info-card b { color: var(--accent); }
+.user-info b { color: var(--gold); font-size: 15px; }
 
-/* Form Sections */
-.section {
-  background: var(--card-bg);
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border);
-}
-
-.section h4 {
-  margin: 0 0 15px 0;
-  font-size: 16px;
-  font-weight: 500;
-  display: flex; align-items: center; color: #a7f3d0;
-}
-.section h4::before {
-  content: '';
-  display: inline-block;
-  width: 4px; height: 16px;
-  background: var(--accent);
-  margin-right: 10px;
-  border-radius: 2px;
-}
-
-/* Radio Buttons Styling (Pills) */
-.radio-group {
-  display: flex;
-  background: rgba(0,0,0,0.3);
-  padding: 4px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  gap: 5px;
-}
-
-.radio-group label {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: 0.3s;
-  font-size: 13px;
-  font-weight: 500;
-  position: relative;
+/* Accordion Style untuk Kegiatan */
+.activity-card {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; margin-bottom: 10px;
   overflow: hidden;
-  color: #94a3b8;
 }
 
-.radio-group input { position: absolute; opacity: 0; }
-
-/* Active State for Radio */
-.radio-group input:checked + span {
-  background: var(--primary);
-  color: #022c22;
-  font-weight: 700;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
-}
-
-.radio-label-text {
-  display: block; width: 100%; height: 100%; padding: 8px 0;
-  border-radius: 8px;
-}
-
-/* Input Text */
-input[type="text"], textarea {
-    width: 100%;
-    padding: 12px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: white;
-    box-sizing: border-box;
-    font-family: inherit;
-}
-input[type="text"]:focus, textarea:focus {
-    outline: 2px solid var(--accent);
-    background: rgba(0,0,0,0.5);
-}
-
-/* Floating Action Button (Submit) */
-.fab-container {
-  position: fixed;
-  bottom: 20px;
-  left: 0; right: 0;
-  padding: 0 20px;
-  max-width: 800px;
-  margin: auto;
-  pointer-events: none; /* Supaya klik tembus di area kosong */
-}
-
-.submit-btn {
-  pointer-events: auto;
-  width: 100%;
-  background: var(--accent);
-  color: #022c22;
-  border: none;
-  padding: 16px;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 700;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+.activity-header {
+  padding: 15px;
+  background: rgba(6, 78, 59, 0.4);
   cursor: pointer;
-  transition: transform 0.2s;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: 0.3s;
 }
+.activity-header:hover { background: rgba(6, 78, 59, 0.7); }
+.activity-header h4 { margin:0; font-size:14px; color:#a7f3d0; font-weight:500; }
+.toggle-icon { font-size: 18px; color: var(--gold); transition: 0.3s; }
 
+/* Input Area (Hidden by default) */
+.activity-body {
+  display: none; padding: 15px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.activity-body.open { display: block; }
+
+/* Form Elements */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #d1fae5; }
+
+input[type="time"], input[type="text"], input[type="file"] {
+  width: 100%; padding: 10px;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px; color: white; box-sizing: border-box; font-family:inherit;
+}
+input:focus { outline:none; border-color:var(--gold); }
+
+/* Custom Checkbox (Status) */
+.status-wrapper {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--primary);
+}
+.status-wrapper input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold); }
+
+/* Submit Button */
+.fab-container {
+  position: fixed; bottom: 20px; left:0; right:0; padding: 0 20px;
+  max-width: 800px; margin: auto; z-index: 99;
+}
+.submit-btn {
+  width: 100%; padding: 15px;
+  background: var(--gold); color: #022c22;
+  border: none; border-radius: 12px;
+  font-weight: 700; font-size: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  cursor: pointer; transition: 0.2s;
+}
 .submit-btn:active { transform: scale(0.98); }
 
 </style>
@@ -166,40 +109,28 @@ input[type="text"]:focus, textarea:focus {
 <body>
 
 <div class="header-container">
-    <h2>🕌 Panel Siswa</h2>
-    <span class="logout-mini" onclick="logout()">Logout</span>
+    <h2>🕌 Jurnal Ramadhan</h2>
+    <button class="btn-logout" onclick="logout()">Keluar</button>
 </div>
 
 <div class="container">
-    
-    <div class="user-info-card">
-        Selamat Datang, <b id="namaSiswa">Siswa</b><br>
-        Kelompok: <span id="kelompokSiswa">-</span>
+    <div class="user-info">
+        Assalamualaikum, <b id="namaSiswa">Siswa</b><br>
+        <span style="opacity:0.8">Kelompok: <span id="kelompokSiswa">-</span></span>
+        <div id="locStatus" style="font-size:11px; margin-top:5px; color:#fbbf24;">📍 Mengambil lokasi...</div>
     </div>
 
-    <form id="laporanForm" onsubmit="kirimLaporan(event)">
-        
-        <div class="section">
-            <h4>Kehadiran</h4>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="hadir" value="Hadir" checked>
-                    <span class="radio-label-text">Hadir</span>
-                </label>
-                <label>
-                    <input type="radio" name="hadir" value="Izin">
-                    <span class="radio-label-text">Izin</span>
-                </label>
-                <label>
-                    <input type="radio" name="hadir" value="Sakit">
-                    <span class="radio-label-text">Sakit</span>
-                </label>
-            </div>
-        </div>
+    <form id="formLaporan" onsubmit="kirimLaporan(event)">
+        <input type="hidden" name="action" value="inputSiswa">
+        <input type="hidden" name="nama" id="inputNama">
+        <input type="hidden" name="kelompok" id="inputKelompok">
+        <input type="hidden" name="latlong" id="inputLatLong">
 
-        <div class="section">
-            <h4>Kegiatan Ibadah</h4>
-            <textarea name="kegiatan" rows="4" placeholder="Contoh: Sholat Dhuha, Tadarus Al-Quran Juz 1..."></textarea>
+        <div id="activitiesContainer"></div>
+
+        <div class="form-group" style="margin-top:20px;">
+            <label>📝 Catatan Tambahan (Opsional)</label>
+            <input type="text" name="Catatan" placeholder="Tulis catatan harianmu...">
         </div>
 
         <div class="fab-container">
@@ -209,50 +140,179 @@ input[type="text"]:focus, textarea:focus {
 </div>
 
 <script>
-    // Konfigurasi
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec"; // Ganti URL ini
-    const user = JSON.parse(localStorage.getItem("user"));
+// ==========================================
+// CONFIG
+// ==========================================
+const WEB_APP_URL = "URL_WEB_APP_ANDA_DISINI"; // Ganti URL Script Google App Anda
 
-    if(!user || user.role !== 'siswa'){
-        alert("Silakan login sebagai siswa.");
-        location.href = 'index.html';
-    } else {
-        document.getElementById('namaSiswa').textContent = user.nama;
-        document.getElementById('kelompokSiswa').textContent = user.kelompok;
-    }
+// DAFTAR KEGIATAN SESUAI KOLOM DATA ANDA
+const activities = [
+    { id: "Sahur", label: "Sahur" },
+    { id: "Subuh", label: "Sholat Subuh" },
+    { id: "Olahraga", label: "Olahraga / Fisik" },
+    { id: "Keluarga", label: "Membantu Keluarga" },
+    { id: "Dzuhur", label: "Sholat Dzuhur" },
+    { id: "Pesantren", label: "Pesantren Kilat" },
+    { id: "Ashar", label: "Sholat Ashar" },
+    { id: "Aksi", label: "Aksi Sosial" },
+    { id: "Buka", label: "Buka Puasa" },
+    { id: "Magrib", label: "Sholat Magrib" },
+    { id: "Isya", label: "Sholat Isya" },
+    { id: "Tarawih", label: "Sholat Tarawih" },
+    { id: "Tadarus", label: "Tadarus Al-Qur'an" },
+    { id: "Tidur", label: "Istirahat / Tidur" }
+];
 
-    function logout(){
-        if(confirm("Keluar aplikasi?")){
-            localStorage.removeItem("user");
-            location.href = "index.html";
+// 1. CEK LOGIN
+const user = JSON.parse(localStorage.getItem("user"));
+if(!user || user.role !== 'siswa'){
+    alert("Harap login sebagai siswa.");
+    location.href = 'index.html';
+}
+
+// 2. SET DATA AWAL
+document.getElementById('namaSiswa').textContent = user.nama;
+document.getElementById('kelompokSiswa').textContent = user.kelompok;
+document.getElementById('inputNama').value = user.nama;
+document.getElementById('inputKelompok').value = user.kelompok;
+
+// 3. AMBIL LOKASI (LatLong)
+if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const loc = `${pos.coords.latitude},${pos.coords.longitude}`;
+            document.getElementById('inputLatLong').value = loc;
+            document.getElementById('locStatus').textContent = "📍 Lokasi terkunci: " + loc;
+        },
+        (err) => {
+            document.getElementById('locStatus').textContent = "⚠️ Gagal ambil lokasi (Aktifkan GPS)";
         }
-    }
+    );
+} else {
+    document.getElementById('locStatus').textContent = "❌ GPS tidak didukung browser ini";
+}
 
-    function kirimLaporan(e){
-        e.preventDefault();
-        const btn = document.querySelector('.submit-btn');
-        const form = document.getElementById('laporanForm');
-        
-        btn.innerHTML = "⏳ Mengirim...";
-        btn.disabled = true;
+// 4. GENERATE FORM KEGIATAN (Render HTML)
+const container = document.getElementById("activitiesContainer");
+activities.forEach(act => {
+    const html = `
+    <div class="activity-card">
+        <div class="activity-header" onclick="toggleAccordion(this)">
+            <h4>${act.label}</h4>
+            <span class="toggle-icon">+</span>
+        </div>
+        <div class="activity-body">
+            
+            <div class="status-wrapper">
+                <input type="checkbox" name="${act.id}_Status" value="Ya" id="chk_${act.id}">
+                <label for="chk_${act.id}" style="margin:0; font-weight:600; cursor:pointer; color:#fff">
+                    ✅ Tandai Sudah Dilaksanakan
+                </label>
+            </div>
 
+            <div class="form-group" style="margin-top:15px">
+                <label>⏰ Waktu Pelaksanaan</label>
+                <input type="time" name="${act.id}_Waktu">
+            </div>
+
+            <div class="form-group">
+                <label>📸 Foto Bukti</label>
+                <input type="file" accept="image/*" id="file_${act.id}">
+                <input type="hidden" name="${act.id}_Foto" id="base64_${act.id}">
+            </div>
+
+            <div class="form-group">
+                <label>📝 Keterangan</label>
+                <input type="text" name="${act.id}_Ket" placeholder="Ket. singkat...">
+            </div>
+        </div>
+    </div>`;
+    container.innerHTML += html;
+});
+
+// 5. FUNGSI ACCORDION
+function toggleAccordion(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    
+    // Tutup yang lain (opsional, biar rapi)
+    document.querySelectorAll('.activity-body').forEach(el => {
+        if(el !== body) el.classList.remove('open');
+    });
+    document.querySelectorAll('.toggle-icon').forEach(el => {
+        if(el !== icon) el.textContent = '+';
+    });
+
+    // Toggle current
+    body.classList.toggle('open');
+    icon.textContent = body.classList.contains('open') ? '-' : '+';
+}
+
+// 6. PROSES UPLOAD & SUBMIT
+async function kirimLaporan(e) {
+    e.preventDefault();
+    const btn = document.querySelector('.submit-btn');
+    btn.innerHTML = "⏳ Mengompres & Mengirim...";
+    btn.disabled = true;
+
+    try {
+        // A. Proses semua file input menjadi Base64
+        for (let act of activities) {
+            const fileInput = document.getElementById(`file_${act.id}`);
+            const hiddenInput = document.getElementById(`base64_${act.id}`);
+            
+            if (fileInput.files.length > 0) {
+                hiddenInput.value = await convertToBase64(fileInput.files[0]);
+            } else {
+                hiddenInput.value = ""; // Kosong jika tidak ada foto
+            }
+        }
+
+        // B. Kirim Data
+        const form = document.getElementById('formLaporan');
         const fd = new FormData(form);
-        fd.append("action", "inputSiswa");
-        fd.append("nama", user.nama);
-        fd.append("kelompok", user.kelompok);
 
-        fetch(WEB_APP_URL, { method: "POST", body: fd })
-        .then(r => r.text())
-        .then(res => {
-            alert("✅ Laporan Berhasil Dikirim!");
-            form.reset();
-        })
-        .catch(err => alert("❌ Gagal mengirim: " + err))
-        .finally(() => {
-            btn.innerHTML = "🚀 KIRIM LAPORAN";
-            btn.disabled = false;
+        // Tambahan logik checkbox (karena unchecked checkbox tidak terkirim di FormData)
+        activities.forEach(act => {
+             if(!form.querySelector(`[name="${act.id}_Status"]`).checked){
+                 fd.append(`${act.id}_Status`, "Tidak");
+             }
         });
+
+        const response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: fd
+        });
+
+        const result = await response.text(); // Biasanya return text/json dari Apps Script
+        
+        alert("✅ Alhamdulillah! Laporan berhasil dikirim.");
+        window.location.reload(); // Refresh halaman
+
+    } catch (err) {
+        console.error(err);
+        alert("❌ Gagal mengirim: " + err.message);
+        btn.innerHTML = "🚀 KIRIM LAPORAN";
+        btn.disabled = false;
     }
+}
+
+// Helper: Convert File to Base64
+function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result); // Mengambil string base64
+        reader.onerror = error => reject(error);
+    });
+}
+
+function logout(){
+    if(confirm("Yakin ingin keluar?")){
+        localStorage.removeItem("user");
+        location.href = "index.html";
+    }
+}
 </script>
 
 </body>
