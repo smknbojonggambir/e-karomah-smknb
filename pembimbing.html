@@ -119,10 +119,7 @@
         .data-label { color: var(--gold); font-size: 11px; display: block; margin-bottom: 3px; }
         .data-value { color: white; display: flex; align-items: center; gap: 8px; }
         
-        .img-preview { 
-            width: 100%; max-width: 200px; margin-top: 5px; 
-            border-radius: 8px; border: 1px solid #555;
-        }
+        /* CSS img-preview dihapus/tidak dipakai lagi karena ganti text */
 
         /* --- Form Penilaian --- */
         .grading-section {
@@ -272,7 +269,6 @@ async function loadData() {
             const tglSiswa = formatTglIndo(item.Tanggal || item.tanggal);
             
             // Cek apakah sudah dinilai (Kolom Nilai_Pembimbing)
-            // Sesuai update Code.gs, kolom terakhir header adalah "Nilai_Pembimbing"
             const nilai = item.Nilai_Pembimbing || ""; 
             const isGraded = (nilai !== "") ? "Sudah Dinilai" : "Belum Dinilai";
             const gradeClass = (nilai !== "") ? "done" : "";
@@ -331,7 +327,6 @@ function showDetail(item) {
     document.getElementById("modalCatatanSiswa").textContent = `"${catSiswa}"`;
 
     // Tampilkan Nilai Lama di Form Input (Jika ada)
-    // Menggunakan key 'Nilai_Pembimbing' sesuai header di Code.gs
     document.getElementById("inputCatatanPembimbing").value = item.Nilai_Pembimbing || ""; 
     
     const container = document.getElementById("accordionContainer");
@@ -346,15 +341,24 @@ function showDetail(item) {
         const statusIcon = (String(status).toLowerCase().includes("ya")) ? "✅" : "❌";
         
         let photoHtml = "";
-        if (!noPhotoActs.includes(act) && foto && foto.length > 20) {
+        
+        // --- LOGIKA BARU FOTO (HANYA TEXT ADA/TIDAK) ---
+        if (!noPhotoActs.includes(act)) {
+            let displayFoto = "";
+            if (foto && foto.length > 20) {
+                // Ada link, tapi tampilkan text "Ada" saja (Link aktif jika diklik)
+                displayFoto = `<a href="${foto}" target="_blank" style="color:#6ee7b7; font-weight:bold; text-decoration:none;">✅ Ada</a>`;
+            } else {
+                displayFoto = `<span style="color:#ef4444;">❌ Tidak ada</span>`;
+            }
+
             photoHtml = `
                 <div class="data-row">
                     <span class="data-label">📸 Foto Bukti</span>
-                    <img src="${foto}" class="img-preview" alt="Bukti">
+                    <span class="data-value">${displayFoto}</span>
                 </div>`;
-        } else if (!noPhotoActs.includes(act)) {
-             photoHtml = `<div class="data-row"><span class="data-label">📸 Foto Bukti</span><span style="color:#aaa; font-style:italic">Tidak ada foto</span></div>`;
         }
+        // -----------------------------------------------
 
         const html = `
         <div class="acc-item">
