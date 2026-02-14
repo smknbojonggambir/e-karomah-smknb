@@ -10,21 +10,25 @@
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); }
         .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
         aside { background: #020617; padding: 20px; border-right: 1px solid var(--border); }
-        .nav-item { padding: 12px; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 5px; }
+        .brand { font-size: 20px; font-weight: 700; color: var(--gold); margin-bottom: 40px; display: block; }
+        .nav-item { padding: 12px; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 5px; transition: 0.3s; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); }
         .nav-item.active { background: rgba(16, 185, 129, 0.15); color: var(--primary); }
-        main { padding: 30px; }
-        .page { display: none; }
+        main { padding: 30px; height: 100vh; overflow-y: auto; box-sizing: border-box; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
-        th { color: #94a3b8; background: rgba(0,0,0,0.2); }
+        th { color: #94a3b8; background: rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 1px; }
+        tr:hover { background: rgba(255,255,255,0.02); }
     </style>
 </head>
 <body>
     <div class="layout">
         <aside>
-            <h2 style="color:var(--gold)">🌙 ADMIN</h2>
+            <div class="brand">🌙 E-KAROMAH</div>
             <div class="nav-item active" onclick="showPage('dash', this)">📊 Dashboard</div>
             <div class="nav-item" onclick="showPage('siswa', this)">👥 Data Siswa</div>
             <div class="nav-item" onclick="showPage('guru', this)">👔 Data Pembimbing</div>
@@ -34,21 +38,39 @@
                 <h1>Overview</h1>
                 <div class="card"><canvas id="myChart" height="100"></canvas></div>
             </div>
+
             <div id="page-siswa" class="page">
                 <h1>Data Siswa</h1>
                 <div class="card">
                     <table>
-                        <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Kelompok</th></tr></thead>
-                        <tbody id="listSiswa"></tbody>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama</th>
+                                <th>Kelompok</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listSiswa">
+                            <tr><td colspan="3">Memuat data...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
+
             <div id="page-guru" class="page">
                 <h1>Data Pembimbing</h1>
                 <div class="card">
                     <table>
-                        <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Kelompok</th></tr></thead>
-                        <tbody id="listGuru"></tbody>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama</th>
+                                <th>Kelompok</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listGuru">
+                            <tr><td colspan="3">Memuat data...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -56,12 +78,12 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbyHBpOUspomuKZ75MGmMoD0ZYuYxjif5FmGfPb6AoVzGC3fFjUmwD1wOfJKggb0F3cYhQ/exec"; // GANTI DENGAN URL DEPLOY ANDA
+        const API = "https://script.google.com/macros/s/AKfycbyHBpOUspomuKZ75MGmMoD0ZYuYxjif5FmGfPb6AoVzGC3fFjUmwD1wOfJKggb0F3cYhQ/exec";
 
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('page-'+id).classList.add('active');
+            document.getElementById('page-' + id).classList.add('active');
             el.classList.add('active');
         }
 
@@ -70,16 +92,51 @@
                 const res = await fetch(API + "?action=getUsers");
                 const data = await res.json();
                 
-                // Render Siswa
-                document.getElementById('listSiswa').innerHTML = data.siswa.map(u => 
-                    `<tr><td>${u.Username}</td><td>${u["Nama Lengkap"]}</td><td>${u.Kelompok}</td></tr>`
-                ).join('');
+                // Render Siswa - Menggunakan key 'Nama' sesuai header GS
+                document.getElementById('listSiswa').innerHTML = data.siswa.length > 0 ? 
+                    data.siswa.map(u => 
+                        `<tr>
+                            <td>${u.Username || '-'}</td>
+                            <td>${u.Nama || '-'}</td>
+                            <td>${u.Kelompok || '-'}</td>
+                        </tr>`
+                    ).join('') : '<tr><td colspan="3" style="text-align:center">Tidak ada data siswa</td></tr>';
 
-                // Render Pembimbing
-                document.getElementById('listGuru').innerHTML = data.pembimbing.map(u => 
-                    `<tr><td>${u.Username}</td><td>${u["Nama Lengkap"]}</td><td>${u.Kelompok}</td></tr>`
-                ).join('');
-            } catch(e) { console.error(e); }
+                // Render Pembimbing - Menggunakan key 'Nama' sesuai header GS
+                document.getElementById('listGuru').innerHTML = data.pembimbing.length > 0 ? 
+                    data.pembimbing.map(u => 
+                        `<tr>
+                            <td>${u.Username || '-'}</td>
+                            <td>${u.Nama || '-'}</td>
+                            <td>${u.Kelompok || '-'}</td>
+                        </tr>`
+                    ).join('') : '<tr><td colspan="3" style="text-align:center">Tidak ada data pembimbing</td></tr>';
+
+                renderChart(data);
+            } catch(e) { 
+                console.error("Error loading data:", e);
+                document.getElementById('listSiswa').innerHTML = '<tr><td colspan="3">Gagal memuat data.</td></tr>';
+            }
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Siswa', 'Pembimbing'],
+                    datasets: [{
+                        label: 'Total User',
+                        data: [data.siswa.length, data.pembimbing.length],
+                        backgroundColor: ['#10b981', '#fbbf24']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } } }
+                }
+            });
         }
 
         loadData();
