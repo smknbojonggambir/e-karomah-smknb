@@ -26,7 +26,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* Hati-hati, jika layar sangat kecil footer mungkin menutupi form */
   position: relative;
 }
 
@@ -63,6 +63,8 @@ body::after {
   border: 1px solid rgba(251, 191, 36, 0.3); /* Gold border */
   box-shadow: 0 15px 35px rgba(0,0,0,0.5);
   animation: floatUp 0.8s ease-out;
+  /* Tambahan margin agar tidak tertutup footer di layar pendek */
+  margin-bottom: 40px; 
 }
 
 @keyframes floatUp {
@@ -169,6 +171,36 @@ button:hover {
   font-weight: 500;
   color: #fbbf24;
 }
+
+/* --- FOOTER OTOMATIS STYLE --- */
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #020617; /* Sesuai request footer sebelumnya */
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 10px 0;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    z-index: 50;
+}
+.footer-fixed a {
+    color: #fbbf24; /* Gold */
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+.footer-fixed a:hover {
+    color: #10b981; /* Primary */
+    text-decoration: underline;
+}
+
+/* Hilangkan footer saat keyboard muncul di HP kecil agar tidak menutupi input */
+@media (max-height: 500px) {
+    .footer-fixed { display: none; }
+}
 </style>
 </head>
 
@@ -198,10 +230,19 @@ button:hover {
   <div id="msg"></div>
 </div>
 
+<div class="footer-fixed">
+    &copy; 2025 E-KAROMAH App. Developer <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
+</div>
+
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHBpOUspomuKZ75MGmMoD0ZYuYxjif5FmGfPb6AoVzGC3fFjUmwD1wOfJKggb0F3cYhQ/exec";
 
 async function login(){
+  const role = document.getElementById('role');
+  const user = document.getElementById('user');
+  const pass = document.getElementById('pass');
+  const msg = document.getElementById('msg');
+
   if(!role.value){ msg.innerHTML="⚠️ Pilih role terlebih dahulu"; return; }
   if(!user.value || !pass.value){ msg.innerHTML="⚠️ Username & Password wajib diisi"; return; }
   
@@ -217,10 +258,13 @@ async function login(){
     const d = await r.json();
 
     if(d.status==="ok"){
-      localStorage.setItem("user",JSON.stringify({ nama: d.nama, role: d.role, kelompok: d.kelompok }));
+      localStorage.setItem("user",JSON.stringify({ nama: d.nama, role: d.role, kelompok: d.kelompok, username: user.value.trim() }));
+      
+      // Redirect sesuai role
       if(d.role==="siswa") location="siswa.html";
-      if(d.role==="pembimbing") location="pembimbing.html";
-      if(d.role==="admin") location="admin.html";
+      else if(d.role==="pembimbing") location="pembimbing.html";
+      else if(d.role==="admin") location="admin.html";
+      
     }else{
       msg.innerHTML="❌ Username / Password salah";
     }
