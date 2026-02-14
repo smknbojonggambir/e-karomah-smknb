@@ -108,11 +108,22 @@
             border: 20px solid var(--gold); position: relative; margin: 20px auto;
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
-        .cert-title { font-family: 'Playfair Display', serif; font-size: 48px; color: #b45309; margin-bottom: 10px; }
-        .cert-subtitle { font-size: 18px; margin-bottom: 40px; color: #555; }
-        .cert-name { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: bold; border-bottom: 2px solid #ddd; display: inline-block; padding: 0 50px 10px; margin-bottom: 20px; color: #000; }
-        .cert-body { font-size: 16px; line-height: 1.6; margin-bottom: 50px; color: #333; }
-        .cert-footer { display: flex; justify-content: space-around; margin-top: 50px; }
+        /* Style Logo */
+        .cert-header { display: flex; justify-content: center; margin-bottom: 20px; }
+        .cert-logo { width: 80px; height: 80px; object-fit: contain; } /* Ukuran Logo */
+
+        .cert-title { font-family: 'Playfair Display', serif; font-size: 48px; color: #b45309; margin-bottom: 5px; margin-top: 10px;}
+        .cert-subtitle { font-size: 18px; margin-bottom: 30px; color: #555; }
+        .cert-name { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: bold; border-bottom: 2px solid #ddd; display: inline-block; padding: 0 40px 10px; margin-bottom: 20px; color: #000; }
+        .cert-body { font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #333; }
+        
+        /* Tabel Data di Sertifikat */
+        .cert-data-table { margin: 0 auto 30px auto; border-collapse: collapse; width: 70%; }
+        .cert-data-table td { border-bottom: 1px solid #eee; padding: 8px; color: #333; font-size: 15px; }
+        .cert-data-table td:first-child { font-weight: 600; text-align: left; width: 60%; }
+        .cert-data-table td:last-child { text-align: center; font-family: 'Courier New', monospace; font-weight: bold; }
+
+        .cert-footer { display: flex; justify-content: space-around; margin-top: 40px; }
         .sign-box { text-align: center; }
         .sign-line { width: 200px; border-top: 1px solid #333; margin: 60px auto 10px; }
 
@@ -235,14 +246,35 @@
                     </div>
 
                     <div id="certificate-preview" class="print-area">
+                        <div class="cert-header">
+                            <img src="https://via.placeholder.com/150x150.png?text=LOGO+SEKOLAH" alt="Logo Sekolah" class="cert-logo">
+                        </div>
+
                         <div class="cert-title">SERTIFIKAT</div>
                         <div class="cert-subtitle" id="cert-sub">Diberikan Kepada:</div>
                         <div class="cert-name" id="cert-display-name">Nama Peserta</div>
+                        
                         <div class="cert-body">
-                            Atas partisipasi dan dedikasinya dalam kegiatan<br>
-                            <strong>E-KAROMAH (Kegiatan Romadhon di Rumah)</strong><br>
-                            SMK Negeri Bojonggambir Tahun 1446 H / 2025 M.
+                            Atas partisipasi aktif dalam kegiatan <strong>E-KAROMAH (Kegiatan Romadhon di Rumah)</strong><br>
+                            SMK Negeri Bojonggambir Tahun 1446 H / 2025 M.<br>
+                            Berdasarkan laporan kegiatan (Google Sheet Report), diperoleh hasil sebagai berikut:
                         </div>
+
+                        <table class="cert-data-table">
+                            <tr>
+                                <td>Jumlah Laporan Harian</td>
+                                <td id="cert-data-jumlah">-</td>
+                            </tr>
+                            <tr>
+                                <td>Nilai Keaktifan & Ibadah</td>
+                                <td id="cert-data-nilai">-</td>
+                            </tr>
+                            <tr>
+                                <td>Predikat / Keterangan</td>
+                                <td id="cert-data-predikat">-</td>
+                            </tr>
+                        </table>
+
                         <div class="cert-footer">
                             <div class="sign-box">
                                 Mengetahui,<br>Kepala Sekolah
@@ -256,7 +288,7 @@
                             </div>
                         </div>
                     </div>
-                    <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:10px;">*Klik Preview untuk melihat hasil, lalu klik Cetak.</p>
+                    <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:10px;">*Klik Preview untuk melihat hasil, lalu klik Cetak. Data aktivitas belum tersedia.</p>
                 </div>
             </div>
         </main>
@@ -295,14 +327,31 @@
             document.getElementById('cert-display-name').innerText = name;
             preview.style.display = 'block';
 
+            // RESET DATA MENJADI KOSONG / STRIP (Sesuai Permintaan)
+            document.getElementById('cert-data-jumlah').innerText = "-";
+            document.getElementById('cert-data-nilai').innerText = "-";
+            document.getElementById('cert-data-predikat').innerText = "-";
+
+            // Logic Jenis Sertifikat
             if (type === 'Pembimbing') {
                 titleEl.innerText = "PIAGAM PENGHARGAAN";
                 titleEl.style.color = "#10b981"; 
                 preview.style.borderColor = "#10b981";
+                // Sembunyikan tabel nilai jika pembimbing (opsional)
+                document.querySelector('.cert-data-table').style.display = 'none';
+                document.querySelector('.cert-body').innerHTML = `
+                    Diberikan penghargaan setinggi-tingginya atas dedikasi sebagai <strong>Pembimbing Kelompok</strong><br>
+                    dalam menyukseskan kegiatan E-KAROMAH SMK Negeri Bojonggambir<br>
+                    Tahun 1446 H / 2025 M.`;
             } else {
                 titleEl.innerText = "SERTIFIKAT PESERTA";
                 titleEl.style.color = "#b45309"; 
                 preview.style.borderColor = "#fbbf24";
+                document.querySelector('.cert-data-table').style.display = 'table';
+                 document.querySelector('.cert-body').innerHTML = `
+                    Atas partisipasi aktif dalam kegiatan <strong>E-KAROMAH (Kegiatan Romadhon di Rumah)</strong><br>
+                    SMK Negeri Bojonggambir Tahun 1446 H / 2025 M.<br>
+                    Berdasarkan laporan kegiatan (Google Sheet Report), diperoleh hasil sebagai berikut:`;
             }
         }
 
@@ -435,8 +484,8 @@
                         <td>${index + 1}</td>
                         <td>${u.Nama || u.Username}</td>
                         <td>${u.Kelompok}</td>
-                        <td style="color:var(--primary)">${Math.floor(Math.random() * 20) + 10} Kegiatan</td>
-                        <td><span style="color:${Math.random() > 0.2 ? '#10b981' : '#ef4444'}">${Math.random() > 0.2 ? 'TUNTAS' : 'BELUM'}</span></td>
+                        <td style="color:var(--text-muted)">-</td>
+                        <td><span style="color:var(--text-muted)">BELUM</span></td>
                     </tr>
                 `).join('');
             }
