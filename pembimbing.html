@@ -203,14 +203,14 @@
 // ================= CONFIG =================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec"; 
 
-// Data Kegiatan (Sesuai Header Kolom Excel/Sheet Anda)
+// Data Kegiatan (Header Sheet)
 const activities = [
     "Sahur", "Subuh", "Olahraga", "Keluarga", 
     "Dzuhur", "Pesantren", "Ashar", "Aksi", 
     "Buka", "Magrib", "Isya", "Tarawih", "Tadarus", "Tidur"
 ];
 
-// Kegiatan yang TIDAK PUNYA FOTO (Logika Sembunyikan Kolom Foto)
+// List kegiatan tanpa upload foto
 const noPhotoActs = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
 
 let currentData = [];
@@ -219,81 +219,69 @@ let selectedRowId = null;
 // 1. CEK LOGIN
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'pembimbing'){
-    alert("Akses ditolak."); location.href='index.html';
+    alert("Akses ditolak. Silakan login sebagai Pembimbing."); 
+    location.href='index.html';
 }
 
-// Tampilkan Info Profil
+// Set Profil Header
 document.getElementById('mName').textContent = user.nama;
 document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
 
-// HAPUS DEFAULT DATE AGAR SEMUA DATA MUNCUL DULUAN
-// document.getElementById('dateFilter').valueAsDate = new Date(); 
-
-// 2. LOAD DATA
+// ==========================================
+// 2. FUNGSI LOAD DATA UTAMA
+// ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
-    const dateInput = document.getElementById('dateFilter').value; // Format YYYY-MM-DD (2026-02-14)
+    const dateInput = document.getElementById('dateFilter').value; 
 
     list.innerHTML = "";
     loader.style.display = "block";
 
     try {
-        // Fetch data based on Group
+        // Fetch data rekap pembimbing berdasarkan kelompok
         const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
-        // Debugging: Cek data di Console browser jika masih error
-        console.log("Data diterima:", data);
-
+        console.log("Data Mentah dari Sheet:", data); // Cek di Console (F12)
         currentData = data; 
         loader.style.display = "none";
 
-        // Filter Logic yang Lebih Aman
+        // --- FILTER LOGIC ---
+        // Jika user tidak memilih tanggal, TAMPILKAN SEMUA.
+        // Jika user memilih tanggal, lakukan pencocokan.
         const filtered = data.filter(item => {
-            // Jika filter tanggal kosong, tampilkan semua
-            if (!dateInput) return true;
+            if (!dateInput) return true; // Tampilkan semua jika filter kosong
+            
+            // Ambil tanggal dari data sheet (Misal: "14/02/2026" atau "2026-02-14")
+            const tglSheet = item.Tanggal || item.tanggal;
+            if(!tglSheet) return false;
 
-            // Konversi format tanggal agar cocok
-            // Data Sheet mungkin: "14/02/2026" atau "2/14/2026"
-            // Input HTML: "2026-02-14"
-            
-            // Cara gampang: Cek apakah string tanggal sheet mengandung bagian dari input
-            // Contoh: ambil bagian tanggal saja "14" atau bulan "02" (ini filter kasar tapi efektif)
-            
-            // OPSI TERBAIK: Ubah format input HTML ke format umum (DD/MM/YYYY) atau sebaliknya
-            // Kita coba match string sederhana dulu:
-            const sheetDate = item.Tanggal || ""; // Pakai 'Tanggal' (Huruf Besar)
-            
-            // Cek apakah tanggal sheet mengandung tahun-bulan-hari input (tergantung format sheet)
-            // Jika format sheet "2/14/2026", dan input "2026-02-14", string match gagal.
-            
-            // Solusi: Parse Date
-            const d1 = new Date(dateInput); // Dari Input
-            const d2 = new Date(sheetDate); // Dari Sheet
-            
-            // Bandingkan Tanggal, Bulan, Tahun
-            return d1.getDate() === d2.getDate() && 
-                   d1.getMonth() === d2.getMonth() && 
-                   d1.getFullYear() === d2.getFullYear();
+            return isSameDate(tglSheet, dateInput);
         });
 
+        // Jika data kosong
         if(filtered.length === 0) {
-            list.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.6">
-                Belum ada laporan. <br><small>(Coba hapus filter tanggal atau pilih tanggal lain)</small>
+            list.innerHTML = `
+            <div style="text-align:center; padding:30px; opacity:0.6">
+                <p>📭 Belum ada laporan masuk.</p>
+                ${dateInput ? '<small>Coba hapus filter tanggal untuk melihat semua riwayat.</small>' : ''}
             </div>`;
             return;
         }
 
+        // Render List Siswa
         filtered.forEach(item => {
-            // PENTING: Gunakan item.Nama (Huruf Besar) sesuai header sheet
+            // Deteksi Nama (Coba berbagai variasi Key jaga-jaga)
             const namaSiswa = item.Nama || item.nama || "Tanpa Nama";
             const tglSiswa = item.Tanggal || item.tanggal || "-";
             
-            // Cek apakah sudah dinilai (item.Catatan atau item.Nilai)
-            const isGraded = (item.Catatan && item.Catatan !== "") ? "Sudah Dinilai" : "Belum Dinilai";
-            const gradeClass = (item.Catatan && item.Catatan !== "") ? "done" : "";
+            // Cek Status Penilaian (Kolom 'Catatan' diisi pembimbing)
+            // Pastikan di Sheet kolomnya bernama "Catatan" (bukan Catatan2) atau sesuaikan disini
+            const nilai = item.Catatan || ""; 
+            const isGraded = (nilai !== "") ? "Sudah Dinilai" : "Belum Dinilai";
+            const gradeClass = (nilai !== "") ? "done" : "";
 
             const card = document.createElement("div");
             card.className = "student-card";
@@ -304,55 +292,69 @@ async function loadData() {
                 </div>
                 <div class="st-status ${gradeClass}">${isGraded}</div>
             `;
-            // Simpan seluruh object item ke tombol agar bisa dibuka di modal
+            
+            // Simpan data item ke tombol click
             card.onclick = () => showDetail(item);
             list.appendChild(card);
         });
 
     } catch(e) {
-        console.error(e);
+        console.error("Error Load Data:", e);
         loader.style.display = "none";
-        alert("Gagal memuat data. Cek Console Browser.");
+        list.innerHTML = `<div style="color:red; text-align:center; margin-top:20px;">Gagal memuat data.<br><small>${e.message}</small></div>`;
     }
 }
 
-// 3. SHOW DETAIL (MODAL + ACCORDION)
+// Helper: Membandingkan Tanggal yang formatnya beda-beda
+function isSameDate(dateStringSheet, dateInputHTML) {
+    try {
+        // Buat objek Date dari kedua sumber
+        const d1 = new Date(dateStringSheet); // Sheet
+        const d2 = new Date(dateInputHTML);   // HTML Input
+
+        // Bandingkan Tanggal, Bulan, Tahun
+        return d1.getDate() === d2.getDate() &&
+               d1.getMonth() === d2.getMonth() &&
+               d1.getFullYear() === d2.getFullYear();
+    } catch (e) {
+        return false; // Jika error parsing, anggap tidak cocok
+    }
+}
+
+// ==========================================
+// 3. TAMPILKAN DETAIL (MODAL)
+// ==========================================
 function showDetail(item) {
-    // Gunakan 'RowId' atau 'No' jika ada dari sheet sebagai ID unik
-    // Jika tidak ada ID, kita harus hati-hati saat menyimpan. 
-    // Asumsi: Apps Script mengirimkan properti 'row' atau 'id'.
+    // Ambil ID Unik (Row ID dari Apps Script)
     selectedRowId = item.row || item.id; 
     
     document.getElementById("modalName").textContent = item.Nama || item.nama;
     document.getElementById("modalDate").textContent = item.Tanggal || item.tanggal;
     
-    // Isi Form Penilaian dengan data lama (jika ada)
-    // Sesuaikan key dengan header sheet: 'Catatan' (untuk nilai/catatan pembimbing)
+    // Isi Form Penilaian sebelumnya
     document.getElementById("inputCatatan").value = item.Catatan || ""; 
     
     const container = document.getElementById("accordionContainer");
-    container.innerHTML = ""; // Reset
+    container.innerHTML = ""; 
 
     // Loop Kegiatan
     activities.forEach(act => {
-        // PENTING: Akses data dengan format HeaderSheet + "_" + Suffix
-        // Contoh: "Sahur_Status", "Sahur_Waktu"
+        // Key Mapping: Sahur_Status, Sahur_Waktu, dll.
         const status = item[`${act}_Status`] || "-";
         const waktu = item[`${act}_Waktu`] || "-";
         const ket = item[`${act}_Ket`] || "-";
         const foto = item[`${act}_Foto`]; 
         
-        const statusIcon = (String(status).toLowerCase() === "ya") ? "✅" : "❌";
+        const statusIcon = (String(status).toLowerCase().includes("ya")) ? "✅" : "❌";
         
+        // Logika Foto
         let photoHtml = "";
-        // Cek Foto (Hanya jika bukan sholat & string foto cukup panjang/valid URL)
-        if (!noPhotoActs.includes(act) && foto && foto.length > 5) {
+        if (!noPhotoActs.includes(act) && foto && foto.length > 20) {
             photoHtml = `
                 <div class="data-row">
                     <span class="data-label">📸 Foto Bukti</span>
                     <img src="${foto}" class="img-preview" alt="Bukti" onerror="this.style.display='none'">
-                </div>
-            `;
+                </div>`;
         } else if (!noPhotoActs.includes(act)) {
              photoHtml = `<div class="data-row"><span class="data-label">📸 Foto Bukti</span><span style="color:#aaa; font-style:italic">Tidak ada foto</span></div>`;
         }
@@ -378,31 +380,32 @@ function showDetail(item) {
                     <span class="data-value" style="color:#d1fae5; font-style:italic">"${ket}"</span>
                 </div>
             </div>
-        </div>
-        `;
+        </div>`;
         container.innerHTML += html;
     });
 
     document.getElementById("detailModal").style.display = "block";
 }
 
-// 4. LOGIC ACCORDION
+// Accordion Toggle
 function toggleAcc(header) {
     const content = header.nextElementSibling;
+    // Tutup yang lain
     document.querySelectorAll('.acc-content').forEach(el => {
         if(el !== content) el.classList.remove('show');
     });
     content.classList.toggle('show');
 }
 
-// 5. SIMPAN PENILAIAN
+// ==========================================
+// 4. SIMPAN PENILAIAN
+// ==========================================
 async function saveGrade() {
     const btn = document.querySelector(".btn-save");
-    // const nilai = document.getElementById("inputNilai").value; // Jika mau pakai nilai angka
     const catatan = document.getElementById("inputCatatan").value;
 
     if(!selectedRowId) {
-        alert("ID Baris tidak ditemukan. Pastikan script backend mengirimkan nomor baris (row).");
+        alert("Error: ID Baris tidak ditemukan. Pastikan script Google Apps mengirimkan 'row' atau 'id'.");
         return;
     }
 
@@ -411,14 +414,14 @@ async function saveGrade() {
 
     const fd = new FormData();
     fd.append("action", "simpanCatatan");
-    fd.append("id", selectedRowId); // ID baris di Google Sheet
-    fd.append("catatan", catatan); // Kolom 'Catatan' di sheet akan diisi ini
+    fd.append("id", selectedRowId); 
+    fd.append("catatan", catatan); 
 
     try {
         await fetch(WEB_APP_URL, { method: "POST", body: fd });
         alert("✅ Penilaian berhasil disimpan!");
         closeModal();
-        loadData(); // Refresh list
+        loadData(); // Refresh data agar status berubah
     } catch(e) {
         alert("Gagal menyimpan: " + e.message);
     } finally {
@@ -430,16 +433,16 @@ async function saveGrade() {
 // Utils
 function closeModal() { document.getElementById("detailModal").style.display = "none"; }
 function logout() { localStorage.removeItem("user"); location.href="index.html"; }
-
-// Klik luar modal
 window.onclick = function(event) {
     const modal = document.getElementById("detailModal");
     if (event.target == modal) closeModal();
 }
 
-// Load awal
+// Jalankan Load Data saat halaman siap
 loadData();
 </script>
+
+```
 
 </body>
 </html>
