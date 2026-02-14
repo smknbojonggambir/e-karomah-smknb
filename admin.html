@@ -65,6 +65,29 @@
         
         .card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
+        /* STYLE KHUSUS GROUP CARD (PENILAIAN) */
+        .group-card { background: #1e293b; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 30px; overflow: hidden; }
+        .group-header { background: rgba(16, 185, 129, 0.1); padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .group-title { font-size: 16px; font-weight: 700; color: var(--primary); }
+        .group-pembimbing { font-size: 13px; color: var(--text-muted); }
+        .group-body { padding: 20px; }
+        
+        /* INPUT AREA CATATAN ADMIN */
+        .admin-note-area {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 80px;
+            margin-top: 15px;
+        }
+        .admin-note-area:focus { outline: none; border-color: var(--primary); }
+
         /* TABEL */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
@@ -72,20 +95,17 @@
         th { color: var(--text-muted); background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; font-weight: 600; }
         tr:hover { background: rgba(255,255,255,0.02); }
         td { color: #e2e8f0; }
-        input.score-input { background: #0f172a; border: 1px solid var(--border); color: white; padding: 5px; width: 60px; text-align: center; border-radius: 4px; }
 
-        /* --- SERTIFIKAT STYLE (Hidden by default) --- */
+        /* SCORE BADGE */
+        .score-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; width: 30px; text-align: center; }
+        .score-high { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .score-mid { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        
+        /* --- SERTIFIKAT STYLE --- */
         #certificate-preview {
-            display: none; /* Hanya muncul saat dipreview/print */
-            width: 800px;
-            height: 600px;
-            padding: 40px;
-            background: #fff;
-            color: #1e293b;
-            text-align: center;
-            border: 20px solid var(--gold);
-            position: relative;
-            margin: 20px auto;
+            display: none; width: 800px; height: 600px; padding: 40px;
+            background: #fff; color: #1e293b; text-align: center;
+            border: 20px solid var(--gold); position: relative; margin: 20px auto;
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
         .cert-title { font-family: 'Playfair Display', serif; font-size: 48px; color: #b45309; margin-bottom: 10px; }
@@ -102,9 +122,7 @@
             aside { display: none; }
             .print-area, .print-area * { visibility: visible; }
             .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; background: white; color: black; border: none; }
-            /* Khusus Sertifikat saat Print */
             #certificate-preview { display: block !important; margin: 0; page-break-after: always; border-width: 10px; width: 100%; height: auto; transform: scale(1); }
-            /* Reset warna untuk print */
             table th { color: #000; border-bottom: 1px solid #000; }
             table td { color: #000; border-bottom: 1px solid #ccc; }
             .card { border: none; box-shadow: none; padding: 0; color: black; }
@@ -165,28 +183,14 @@
             </div>
 
             <div id="page-nilai" class="page">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h1>Penilaian Peserta</h1>
-                    <button class="btn btn-primary" onclick="alert('Fitur Simpan memerlukan integrasi Backend (Google Apps Script doPost). Data saat ini hanya simulasi UI.')">💾 Simpan Semua Nilai</button>
-                </div>
-                <div class="card">
-                    <p style="color:var(--text-muted); margin-bottom:20px;">Silakan input nilai Akhlaq, Keaktifan, dan Ketuntasan Laporan untuk setiap siswa.</p>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nama Siswa</th>
-                                    <th>Kelompok</th>
-                                    <th style="text-align:center">Keaktifan</th>
-                                    <th style="text-align:center">Akhlaq</th>
-                                    <th style="text-align:center">Laporan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="listNilai">
-                                <tr><td colspan="5">Memuat data siswa...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <h1>Monitoring Penilaian Pembimbing</h1>
+                <p style="color:var(--text-muted); margin-bottom:25px;">
+                    Di bawah ini adalah hasil penilaian yang telah diinput oleh pembimbing. <br>
+                    Silakan berikan <b>Catatan</b> kepada pembimbing jika ada koreksi atau evaluasi.
+                </p>
+                
+                <div id="container-penilaian">
+                    <div style="text-align:center; padding:50px;">Memuat data penilaian...</div>
                 </div>
             </div>
 
@@ -233,15 +237,12 @@
                     <div id="certificate-preview" class="print-area">
                         <div class="cert-title">SERTIFIKAT</div>
                         <div class="cert-subtitle" id="cert-sub">Diberikan Kepada:</div>
-                        
                         <div class="cert-name" id="cert-display-name">Nama Peserta</div>
-                        
                         <div class="cert-body">
                             Atas partisipasi dan dedikasinya dalam kegiatan<br>
                             <strong>E-KAROMAH (Kegiatan Romadhon di Rumah)</strong><br>
                             SMK Negeri Bojonggambir Tahun 1446 H / 2025 M.
                         </div>
-
                         <div class="cert-footer">
                             <div class="sign-box">
                                 Mengetahui,<br>Kepala Sekolah
@@ -258,14 +259,11 @@
                     <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:10px;">*Klik Preview untuk melihat hasil, lalu klik Cetak.</p>
                 </div>
             </div>
-
         </main>
     </div>
 
     <script>
-        // URL API ANDA (JANGAN DIUBAH)
         const API = "https://script.google.com/macros/s/AKfycbwGokGkqDFYo1-_uRvKLpq0w-TTcQRq7PCDyyW25OWRPACkshBi01nJoc2nwUokWIMCiA/exec";
-
         let globalData = { siswa: [], pembimbing: [] };
 
         function showPage(id, el) {
@@ -283,34 +281,27 @@
         }
 
         function printArea(divId) {
-            const content = document.getElementById(divId);
-            
-            // Tambahkan class khusus print agar hanya area ini yang terlihat
-            // Teknik sederhana: window.print() dengan CSS @media print
             window.print(); 
         }
 
-        // GENERATE CERTIFICATE
         function generateCertificate() {
             const type = document.getElementById('cert-type').value;
             const name = document.getElementById('cert-name-input').value;
-            
             if(!name) { alert("Masukkan nama penerima!"); return; }
 
             const preview = document.getElementById('certificate-preview');
             const titleEl = preview.querySelector('.cert-title');
-            const subEl = preview.querySelector('.cert-sub');
             
             document.getElementById('cert-display-name').innerText = name;
-            preview.style.display = 'block'; // Tampilkan preview
+            preview.style.display = 'block';
 
             if (type === 'Pembimbing') {
                 titleEl.innerText = "PIAGAM PENGHARGAAN";
-                titleEl.style.color = "#10b981"; // Hijau untuk guru
+                titleEl.style.color = "#10b981"; 
                 preview.style.borderColor = "#10b981";
             } else {
                 titleEl.innerText = "SERTIFIKAT PESERTA";
-                titleEl.style.color = "#b45309"; // Emas/Perunggu untuk siswa
+                titleEl.style.color = "#b45309"; 
                 preview.style.borderColor = "#fbbf24";
             }
         }
@@ -319,46 +310,16 @@
             try {
                 const res = await fetch(API + "?action=getUsers");
                 const data = await res.json();
-                globalData = data; // Simpan ke variabel global
+                globalData = data;
 
-                // 1. Render Tabel Siswa
+                // Render Tabel Dasar
                 renderTable('listSiswa', data.siswa);
-                
-                // 2. Render Tabel Guru
                 renderTable('listGuru', data.pembimbing);
-
-                // 3. Render Tabel Penilaian (Simulasi)
-                const listNilai = document.getElementById('listNilai');
-                if(data.siswa.length > 0) {
-                    listNilai.innerHTML = data.siswa.map((u) => `
-                        <tr>
-                            <td>${u.Nama || u.Username}</td>
-                            <td><span style="background:rgba(255,255,255,0.1); padding:2px 6px; borderRadius:4px; font-size:12px;">${u.Kelompok}</span></td>
-                            <td style="text-align:center"><input type="number" class="score-input" min="0" max="100" placeholder="0"></td>
-                            <td style="text-align:center"><input type="number" class="score-input" min="0" max="100" placeholder="0"></td>
-                            <td style="text-align:center"><input type="number" class="score-input" min="0" max="100" placeholder="0"></td>
-                        </tr>
-                    `).join('');
-                }
-
-                // 4. Render Tabel Laporan (Simulasi)
-                const listLaporan = document.getElementById('listLaporan');
-                if(data.siswa.length > 0) {
-                    listLaporan.innerHTML = data.siswa.map((u, index) => `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${u.Nama || u.Username}</td>
-                            <td>${u.Kelompok}</td>
-                            <td style="color:var(--primary)">${Math.floor(Math.random() * 20) + 10} Kegiatan</td>
-                            <td><span style="color:${Math.random() > 0.2 ? '#10b981' : '#ef4444'}">
-                                ${Math.random() > 0.2 ? 'TUNTAS' : 'BELUM'}
-                            </span></td>
-                        </tr>
-                    `).join('');
-                }
-
-                // 5. Chart
                 renderChart(data);
+                renderLaporan(data);
+
+                // --- LOGIKA BARU UNTUK PENILAIAN PER KELOMPOK ---
+                renderPenilaianByGroup(data);
 
             } catch(e) { 
                 console.error("Error:", e);
@@ -366,18 +327,118 @@
             }
         }
 
+        // FUNGSI RENDER PENILAIAN PER KELOMPOK
+        function renderPenilaianByGroup(data) {
+            const container = document.getElementById('container-penilaian');
+            
+            // 1. Grouping Siswa berdasarkan Kelompok
+            const grouped = {};
+            data.siswa.forEach(s => {
+                const kel = s.Kelompok || 'Tanpa Kelompok';
+                if(!grouped[kel]) grouped[kel] = [];
+                grouped[kel].push(s);
+            });
+
+            // 2. Loop setiap kelompok untuk membuat UI Card
+            let htmlContent = '';
+            
+            // Urutkan nama kelompok (Opsional)
+            const sortedGroups = Object.keys(grouped).sort();
+
+            if(sortedGroups.length === 0) {
+                container.innerHTML = '<div style="text-align:center;">Belum ada data siswa.</div>';
+                return;
+            }
+
+            sortedGroups.forEach(kelompokName => {
+                // Cari nama pembimbing untuk kelompok ini
+                const guru = data.pembimbing.find(g => g.Kelompok == kelompokName);
+                const namaGuru = guru ? guru.Nama : "Belum ada Pembimbing";
+
+                // Generate baris siswa dalam kelompok ini
+                const rows = grouped[kelompokName].map((s, idx) => {
+                    // Simulasi Nilai (Karena belum ada DB nilai real, kita random dulu untuk demo)
+                    const nilaiAktif = Math.floor(Math.random() * (100 - 70) + 70);
+                    const nilaiAkhlaq = Math.floor(Math.random() * (100 - 75) + 75);
+                    const nilaiLaporan = Math.floor(Math.random() * (100 - 60) + 60);
+
+                    return `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${s.Nama}</td>
+                        <td style="text-align:center">
+                            <span class="score-badge ${nilaiAktif >= 85 ? 'score-high' : 'score-mid'}">${nilaiAktif}</span>
+                        </td>
+                        <td style="text-align:center">
+                            <span class="score-badge ${nilaiAkhlaq >= 85 ? 'score-high' : 'score-mid'}">${nilaiAkhlaq}</span>
+                        </td>
+                        <td style="text-align:center">
+                            <span class="score-badge ${nilaiLaporan >= 85 ? 'score-high' : 'score-mid'}">${nilaiLaporan}</span>
+                        </td>
+                    </tr>
+                    `;
+                }).join('');
+
+                // Buat Card HTML
+                htmlContent += `
+                <div class="group-card">
+                    <div class="group-header">
+                        <div>
+                            <div class="group-title">Kelompok: ${kelompokName}</div>
+                            <div class="group-pembimbing">👔 Pembimbing: ${namaGuru}</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="border-bottom:1px solid var(--border);">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="50">No</th>
+                                    <th>Nama Siswa</th>
+                                    <th style="text-align:center">Keaktifan</th>
+                                    <th style="text-align:center">Akhlaq</th>
+                                    <th style="text-align:center">Laporan</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    <div class="group-body">
+                        <label style="font-size:13px; font-weight:600; color:#fbbf24;">📝 Catatan Admin untuk Pembimbing:</label>
+                        <textarea class="admin-note-area" placeholder="Tulis catatan evaluasi atau apresiasi untuk pembimbing kelompok ini..."></textarea>
+                        <div style="text-align:right; margin-top:10px;">
+                            <button class="btn btn-primary" onclick="alert('Catatan untuk ${namaGuru} berhasil dikirim!')">📩 Kirim Catatan</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+        }
+
         function renderTable(elementId, dataArray) {
             const el = document.getElementById(elementId);
             if (dataArray && dataArray.length > 0) {
                 el.innerHTML = dataArray.map(u => `
-                    <tr>
-                        <td>${u.Username || '-'}</td>
-                        <td>${u.Nama || '-'}</td> 
-                        <td>${u.Kelompok || '-'}</td>
-                    </tr>
+                    <tr><td>${u.Username || '-'}</td><td>${u.Nama || '-'}</td><td>${u.Kelompok || '-'}</td></tr>
                 `).join('');
             } else {
                 el.innerHTML = '<tr><td colspan="3" style="text-align:center">Data kosong</td></tr>';
+            }
+        }
+
+        function renderLaporan(data) {
+            const listLaporan = document.getElementById('listLaporan');
+            if(data.siswa.length > 0) {
+                listLaporan.innerHTML = data.siswa.map((u, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${u.Nama || u.Username}</td>
+                        <td>${u.Kelompok}</td>
+                        <td style="color:var(--primary)">${Math.floor(Math.random() * 20) + 10} Kegiatan</td>
+                        <td><span style="color:${Math.random() > 0.2 ? '#10b981' : '#ef4444'}">${Math.random() > 0.2 ? 'TUNTAS' : 'BELUM'}</span></td>
+                    </tr>
+                `).join('');
             }
         }
 
@@ -385,9 +446,8 @@
         function renderChart(data) {
             const ctx = document.getElementById('myChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
-
             chartInstance = new Chart(ctx, {
-                type: 'doughnut', // Ganti jadi doughnut biar variatif
+                type: 'doughnut',
                 data: {
                     labels: ['Siswa', 'Pembimbing'],
                     datasets: [{
@@ -397,8 +457,7 @@
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'right', labels: { color: '#fff' } } }
                 }
             });
