@@ -1,123 +1,181 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel Siswa - E-KAROMAH</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --primary: #10b981; /* Emerald */
-  --gold: #fbbf24;    /* Emas */
-  --bg-dark: #022c22; /* Hijau Malam */
-  --glass: rgba(6, 78, 59, 0.6);
-  --text: #f0fdf4;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel Siswa - E-KAROMAH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981; /* Emerald */
+            --primary-dark: #047857;
+            --gold: #fbbf24;    /* Emas */
+            --bg-dark: #022c22; /* Hijau Malam */
+            --glass: rgba(6, 78, 59, 0.6);
+            --text: #f0fdf4;
+            --danger: #ef4444;
+        }
 
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
-  color: var(--text);
-  padding-bottom: 100px;
-}
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #020617 100%);
+            color: var(--text);
+            padding-bottom: 100px; /* Ruang untuk tombol submit melayang */
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* Header Sticky */
-.header-container {
-  background: rgba(2, 44, 34, 0.95);
-  position: sticky; top: 0; z-index: 100;
-  padding: 15px 20px;
-  border-bottom: 2px solid var(--gold);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-  display: flex; justify-content: space-between; align-items: center;
-}
-.header-container h2 { margin:0; font-size:16px; color:var(--gold); }
-.btn-logout { background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; text-decoration:underline; }
+        /* --- Header Sticky --- */
+        .header-container {
+            background: rgba(2, 44, 34, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-container h2 { margin:0; font-size:16px; color:var(--gold); display:flex; align-items:center; gap:8px;}
+        .btn-logout { background:rgba(239,68,68,0.2); border:1px solid var(--danger); color:var(--danger); padding:5px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; }
 
-.container { max-width: 800px; margin: auto; padding: 20px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
 
-/* Info User */
-.user-info {
-  background: linear-gradient(to right, #059669, #047857);
-  padding: 15px; border-radius: 12px; margin-bottom: 20px;
-  border: 1px solid rgba(255,255,255,0.1); font-size: 13px;
-}
-.user-info b { color: var(--gold); font-size: 15px; }
+        /* --- User Info Card --- */
+        .user-card {
+            background: linear-gradient(to right, #059669, #047857);
+            padding: 20px; border-radius: 16px; margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1); font-size: 13px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative; overflow: hidden;
+        }
+        .user-card::before {
+            content: ""; position: absolute; top:-20px; right:-20px; width:100px; height:100px;
+            background: rgba(255,255,255,0.1); border-radius:50%;
+        }
+        .user-label { color: #a7f3d0; font-size: 11px; display: block; margin-bottom: 2px; }
+        .user-val { color: white; font-size: 16px; font-weight: 600; display: block; margin-bottom: 8px; }
+        .loc-badge { 
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; 
+            font-size: 11px; color: var(--gold); border: 1px dashed var(--gold);
+        }
 
-/* Accordion Style untuk Kegiatan */
-.activity-card {
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px; margin-bottom: 10px;
-  overflow: hidden;
-}
+        /* --- Accordion Activity --- */
+        .activity-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; margin-bottom: 12px;
+            overflow: hidden; transition: 0.3s;
+        }
+        .activity-card.active { border-color: var(--primary); background: rgba(6, 78, 59, 0.4); }
 
-.activity-header {
-  padding: 15px;
-  background: rgba(6, 78, 59, 0.4);
-  cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center;
-  transition: 0.3s;
-}
-.activity-header:hover { background: rgba(6, 78, 59, 0.7); }
-.activity-header h4 { margin:0; font-size:14px; color:#a7f3d0; font-weight:500; }
-.toggle-icon { font-size: 18px; color: var(--gold); transition: 0.3s; }
+        .activity-header {
+            padding: 16px;
+            cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .activity-header h4 { margin:0; font-size:14px; color:#e2e8f0; font-weight:500; }
+        .toggle-icon { 
+            width: 24px; height: 24px; background: rgba(255,255,255,0.1); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: var(--gold); transition: 0.3s; 
+        }
+        .activity-card.active .toggle-icon { transform: rotate(180deg); background: var(--primary); color: white; }
+        .activity-card.active h4 { color: var(--primary); font-weight: 700; }
 
-/* Input Area (Hidden by default) */
-.activity-body {
-  display: none; padding: 15px;
-  background: rgba(0,0,0,0.3);
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-.activity-body.open { display: block; }
+        /* --- Input Area --- */
+        .activity-body {
+            display: none; padding: 0 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
+        .activity-body.open { display: block; }
 
-/* Form Elements */
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #d1fae5; }
+        .form-group { margin-top: 15px; }
+        .form-label { display: block; font-size: 12px; margin-bottom: 6px; color: #94a3b8; }
 
-input[type="time"], input[type="text"], input[type="file"] {
-  width: 100%; padding: 10px;
-  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px; color: white; box-sizing: border-box; font-family:inherit;
-}
-input:focus { outline:none; border-color:var(--gold); }
+        /* Custom Inputs */
+        input[type="time"], input[type="text"], input[type="file"] {
+            width: 100%; padding: 12px;
+            background: #0f172a; border: 1px solid #334155;
+            border-radius: 10px; color: white; box-sizing: border-box; 
+            font-family:inherit; font-size: 13px;
+        }
+        input:focus { outline:none; border-color:var(--primary); }
+        
+        /* Status Checkbox Button */
+        .status-wrapper {
+            margin-top: 15px;
+            position: relative;
+        }
+        .chk-hidden { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        .chk-label {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: #334155; padding: 12px; border-radius: 10px;
+            color: #cbd5e1; font-weight: 600; font-size: 13px; cursor: pointer;
+            transition: 0.2s; border: 2px solid transparent;
+        }
+        .chk-hidden:checked ~ .chk-label {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
 
-/* Custom Checkbox (Status) */
-.status-wrapper {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--primary);
-}
-.status-wrapper input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold); }
+        /* Submit Floating Button */
+        .fab-container {
+            position: fixed; bottom: 0; left:0; right:0; 
+            padding: 15px 20px 25px;
+            background: linear-gradient(to top, #020617 80%, transparent 100%);
+            max-width: 600px; margin: auto; z-index: 90;
+        }
+        .submit-btn {
+            width: 100%; padding: 16px;
+            background: var(--gold); color: #022c22;
+            border: none; border-radius: 14px;
+            font-weight: 700; font-size: 16px;
+            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.4);
+            cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+        .submit-btn:disabled { background: #64748b; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
 
-/* Submit Button */
-.fab-container {
-  position: fixed; bottom: 20px; left:0; right:0; padding: 0 20px;
-  max-width: 800px; margin: auto; z-index: 99;
-}
-.submit-btn {
-  width: 100%; padding: 15px;
-  background: var(--gold); color: #022c22;
-  border: none; border-radius: 12px;
-  font-weight: 700; font-size: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  cursor: pointer; transition: 0.2s;
-}
-.submit-btn:active { transform: scale(0.98); }
+        /* Loading Overlay */
+        #loaderOverlay {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.85); z-index: 200;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { to {transform: rotate(360deg);} }
 
-</style>
+    </style>
 </head>
 <body>
 
 <div class="header-container">
-    <h2>🕌 Jurnal Ramadhan</h2>
+    <h2>🌙 E-KAROMAH</h2>
     <button class="btn-logout" onclick="logout()">Keluar</button>
 </div>
 
 <div class="container">
-    <div class="user-info">
-        Assalamualaikum, <b id="namaSiswa">Siswa</b><br>
-        <span style="opacity:0.8">Kelompok: <span id="kelompokSiswa">-</span></span>
-        <div id="locStatus" style="font-size:11px; margin-top:5px; color:#fbbf24;">📍 Mengambil lokasi...</div>
+    <div class="user-card">
+        <span class="user-label">Nama Siswa</span>
+        <span class="user-val" id="namaSiswa">Memuat...</span>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span class="user-label">Kelompok</span>
+                <span style="color:white; font-weight:500;" id="kelompokSiswa">-</span>
+            </div>
+            <div id="locStatus" class="loc-badge">
+                <span id="gpsIcon">📡</span> <span id="gpsText">Mencari GPS...</span>
+            </div>
+        </div>
     </div>
 
     <form id="formLaporan" onsubmit="kirimLaporan(event)">
@@ -126,179 +184,247 @@ input:focus { outline:none; border-color:var(--gold); }
         <input type="hidden" name="kelompok" id="inputKelompok">
         <input type="hidden" name="latlong" id="inputLatLong">
 
+        <h3 style="color:var(--gold); font-size:14px; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">📋 Kegiatan Harian</h3>
+        
         <div id="activitiesContainer"></div>
 
-        <div class="form-group" style="margin-top:20px;">
-            <label>📝 Catatan Tambahan (Opsional)</label>
-            <input type="text" name="Catatan" placeholder="Tulis catatan harianmu...">
+        <div class="activity-card" style="margin-top:20px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
+            <div class="activity-header" style="cursor:default;">
+                <h4 style="color:#60a5fa;">📝 Catatan Tambahan</h4>
+            </div>
+            <div class="activity-body open" style="padding-top:0;">
+                <input type="text" name="Catatan" placeholder="Apa yang kamu rasakan hari ini? (Opsional)" style="background: rgba(0,0,0,0.3);">
+            </div>
         </div>
 
         <div class="fab-container">
-            <button type="submit" class="submit-btn">🚀 KIRIM LAPORAN</button>
+            <button type="submit" class="submit-btn" id="btnSubmit">
+                <span>🚀 KIRIM LAPORAN</span>
+            </button>
         </div>
     </form>
 </div>
 
+<div id="loaderOverlay">
+    <div class="spinner"></div>
+    <h3 style="color:white; font-size:16px;">Sedang Mengirim...</h3>
+    <p style="color:#94a3b8; font-size:12px;">Mohon jangan tutup halaman ini.</p>
+</div>
+
 <script>
 // ==========================================
-// CONFIG: GANTI URL DI BAWAH INI
+// CONFIGURATION
 // ==========================================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHBpOUspomuKZ75MGmMoD0ZYuYxjif5FmGfPb6AoVzGC3fFjUmwD1wOfJKggb0F3cYhQ/exec"; 
 
 // DAFTAR KEGIATAN
+// ID harus sama persis dengan Header di Google Sheet
 const activities = [
-    { id: "Sahur", label: "Sahur" },
-    { id: "Subuh", label: "Sholat Subuh" },
-    { id: "Olahraga", label: "Olahraga / Fisik" },
-    { id: "Keluarga", label: "Membantu Keluarga" },
-    { id: "Dzuhur", label: "Sholat Dzuhur" },
-    { id: "Pesantren", label: "Pesantren Kilat" },
-    { id: "Ashar", label: "Sholat Ashar" },
-    { id: "Aksi", label: "Aksi Sosial" },
-    { id: "Buka", label: "Buka Puasa" },
-    { id: "Magrib", label: "Sholat Magrib" },
-    { id: "Isya", label: "Sholat Isya" },
-    { id: "Tarawih", label: "Sholat Tarawih" },
-    { id: "Tadarus", label: "Tadarus Al-Qur'an" },
-    { id: "Tidur", label: "Istirahat / Tidur" }
+    { id: "Sahur", label: "🍽️ Makan Sahur" },
+    { id: "Subuh", label: "🕌 Sholat Subuh" },
+    { id: "Olahraga", label: "🏃‍♂️ Olahraga / Fisik" },
+    { id: "Keluarga", label: "🧹 Membantu Orang Tua" },
+    { id: "Dzuhur", label: "🕌 Sholat Dzuhur" },
+    { id: "Pesantren", label: "📖 Pesantren Kilat/Sekolah" },
+    { id: "Ashar", label: "🕌 Sholat Ashar" },
+    { id: "Aksi", label: "🤝 Aksi Sosial / Berbagi" },
+    { id: "Buka", label: "🥤 Buka Puasa" },
+    { id: "Magrib", label: "🕌 Sholat Magrib" },
+    { id: "Isya", label: "🕌 Sholat Isya" },
+    { id: "Tarawih", label: "📿 Sholat Tarawih" },
+    { id: "Tadarus", label: "📖 Tadarus Al-Qur'an" },
+    { id: "Tidur", label: "😴 Tidur Malam" }
 ];
 
-// LIST ID YANG TIDAK PERLU UPLOAD FOTO (SHOLAT)
-const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
+// List ID yang TIDAK mewajibkan/menampilkan upload foto (Agar lebih ringan)
+const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
 
-// 1. CEK LOGIN
+// 1. CEK LOGIN (Keamanan Sederhana)
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'siswa'){
-    alert("Harap login sebagai siswa.");
+    alert("⛔ Akses Ditolak. Harap login sebagai Siswa.");
     location.href = 'index.html';
 }
 
-// 2. SET DATA AWAL
+// 2. SET DATA USER KE UI
 document.getElementById('namaSiswa').textContent = user.nama;
 document.getElementById('kelompokSiswa').textContent = user.kelompok;
 document.getElementById('inputNama').value = user.nama;
 document.getElementById('inputKelompok').value = user.kelompok;
 
-// 3. AMBIL LOKASI (LatLong)
+// 3. AMBIL LOKASI (GPS)
+const gpsText = document.getElementById('gpsText');
+const gpsIcon = document.getElementById('gpsIcon');
+
 if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
         (pos) => {
-            const loc = `${pos.coords.latitude},${pos.coords.longitude}`;
+            const lat = pos.coords.latitude.toFixed(5);
+            const long = pos.coords.longitude.toFixed(5);
+            const loc = `${lat},${long}`;
+            
             document.getElementById('inputLatLong').value = loc;
-            document.getElementById('locStatus').textContent = "📍 Lokasi terkunci: " + loc;
+            gpsText.textContent = "Lokasi Terkunci";
+            gpsText.style.color = "#34d399";
+            gpsIcon.textContent = "📍";
         },
         (err) => {
-            document.getElementById('locStatus').textContent = "⚠️ Gagal ambil lokasi (Aktifkan GPS)";
-        }
+            gpsText.textContent = "Gagal ambil lokasi";
+            gpsText.style.color = "#ef4444";
+            gpsIcon.textContent = "⚠️";
+            console.warn("GPS Error: " + err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
     );
 } else {
-    document.getElementById('locStatus').textContent = "❌ GPS tidak didukung browser ini";
+    gpsText.textContent = "GPS tidak support";
 }
 
-// 4. GENERATE FORM KEGIATAN
+// 4. RENDER FORM KEGIATAN (ACCORDION)
 const container = document.getElementById("activitiesContainer");
+
 activities.forEach(act => {
-    // Cek apakah kegiatan ini butuh foto atau tidak
+    // Cek apakah butuh foto
     const needPhoto = !noPhotoList.includes(act.id);
+    const photoInputHtml = needPhoto ? `
+        <div class="form-group">
+            <label class="form-label">📸 Foto Bukti</label>
+            <input type="file" accept="image/*" id="file_${act.id}">
+            <input type="hidden" name="${act.id}_Foto" id="base64_${act.id}">
+            <small style="color:#64748b; font-size:10px;">*Wajib diisi</small>
+        </div>` : '';
 
     const html = `
-    <div class="activity-card">
-        <div class="activity-header" onclick="toggleAccordion(this)">
+    <div class="activity-card" id="card_${act.id}">
+        <div class="activity-header" onclick="toggleAccordion('${act.id}')">
             <h4>${act.label}</h4>
-            <span class="toggle-icon">+</span>
+            <div class="toggle-icon" id="icon_${act.id}">▼</div>
         </div>
-        <div class="activity-body">
+        <div class="activity-body" id="body_${act.id}">
             
             <div class="status-wrapper">
-                <input type="checkbox" name="${act.id}_Status" value="Ya" id="chk_${act.id}">
-                <label for="chk_${act.id}" style="margin:0; font-weight:600; cursor:pointer; color:#fff">
-                    ✅ Tandai Sudah Dilaksanakan
+                <input type="checkbox" name="${act.id}_Status" value="Ya" id="chk_${act.id}" class="chk-hidden" onchange="updateCardStyle('${act.id}')">
+                <label for="chk_${act.id}" class="chk-label">
+                    <span id="lbl_icon_${act.id}">⬜</span> Saya Melaksanakan
                 </label>
             </div>
 
-            <div class="form-group" style="margin-top:15px">
-                <label>⏰ Waktu Pelaksanaan</label>
+            <div class="form-group">
+                <label class="form-label">⏰ Pukul Berapa?</label>
                 <input type="time" name="${act.id}_Waktu">
             </div>
 
-            <div class="form-group" style="${needPhoto ? '' : 'display:none'}">
-                <label>📸 Foto Bukti</label>
-                <input type="file" accept="image/*" id="file_${act.id}">
-            </div>
+            ${photoInputHtml}
             
-            <input type="hidden" name="${act.id}_Foto" id="base64_${act.id}">
-
             <div class="form-group">
-                <label>📝 Keterangan</label>
-                <input type="text" name="${act.id}_Ket" placeholder="Ket. singkat...">
+                <label class="form-label">📝 Keterangan Singkat</label>
+                <input type="text" name="${act.id}_Ket" placeholder="Contoh: Di Masjid / Di Rumah">
             </div>
         </div>
     </div>`;
     container.innerHTML += html;
 });
 
-// 5. FUNGSI ACCORDION
-function toggleAccordion(header) {
-    const body = header.nextElementSibling;
-    const icon = header.querySelector('.toggle-icon');
+// --- INTERACTION FUNCTIONS ---
+
+function toggleAccordion(id) {
+    const body = document.getElementById(`body_${id}`);
+    const card = document.getElementById(`card_${id}`);
     
+    // Tutup yang lain (Optional, biar rapi)
     document.querySelectorAll('.activity-body').forEach(el => {
-        if(el !== body) el.classList.remove('open');
+        if(el.id !== `body_${id}`) el.classList.remove('open');
     });
-    document.querySelectorAll('.toggle-icon').forEach(el => {
-        if(el !== icon) el.textContent = '+';
+    document.querySelectorAll('.activity-card').forEach(el => {
+        if(el.id !== `card_${id}` && !el.classList.contains('filled')) el.classList.remove('active');
     });
 
     body.classList.toggle('open');
-    icon.textContent = body.classList.contains('open') ? '-' : '+';
+    card.classList.toggle('active');
 }
 
-// 6. PROSES UPLOAD & SUBMIT
+function updateCardStyle(id) {
+    const chk = document.getElementById(`chk_${id}`);
+    const lblIcon = document.getElementById(`lbl_icon_${id}`);
+    const card = document.getElementById(`card_${id}`);
+    
+    if(chk.checked) {
+        lblIcon.textContent = "✅";
+        card.classList.add('filled'); // Penanda visual sudah diisi
+        card.style.borderLeft = "4px solid var(--primary)";
+    } else {
+        lblIcon.textContent = "⬜";
+        card.classList.remove('filled');
+        card.style.borderLeft = "1px solid rgba(255,255,255,0.05)";
+    }
+}
+
+// 5. PROSES UPLOAD & SUBMIT
 async function kirimLaporan(e) {
     e.preventDefault();
-    const btn = document.querySelector('.submit-btn');
-    btn.innerHTML = "⏳ Mengirim...";
+    
+    // Validasi Sederhana: Minimal 1 kegiatan dicentang
+    const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    if(checkedBoxes.length === 0){
+        alert("⚠️ Mohon tandai minimal satu kegiatan yang sudah dilaksanakan.");
+        return;
+    }
+
+    const btn = document.getElementById('btnSubmit');
+    const overlay = document.getElementById('loaderOverlay');
+    
+    overlay.style.display = 'flex'; // Show loading full screen
     btn.disabled = true;
 
     try {
-        // A. Proses file input menjadi Base64 (Hanya jika input file ada & diisi)
+        // A. Proses Konversi Foto ke Base64
         for (let act of activities) {
-            const fileInput = document.getElementById(`file_${act.id}`);
-            const hiddenInput = document.getElementById(`base64_${act.id}`);
-            
-            // Cek apakah elemen file input ada dan memiliki file
-            if (fileInput && fileInput.files.length > 0) {
-                hiddenInput.value = await convertToBase64(fileInput.files[0]);
-            } else {
-                hiddenInput.value = ""; // Kosong
+            // Cek jika kegiatan tersebut butuh foto
+            if (!noPhotoList.includes(act.id)) {
+                const fileInput = document.getElementById(`file_${act.id}`);
+                const hiddenInput = document.getElementById(`base64_${act.id}`);
+                const checkBox = document.getElementById(`chk_${act.id}`);
+                
+                // Jika dicentang tapi foto kosong
+                if (checkBox.checked && fileInput.files.length === 0) {
+                    throw new Error(`⚠️ Foto bukti untuk "${act.label}" wajib diisi jika dilaksanakan.`);
+                }
+
+                // Jika ada file, convert
+                if (fileInput && fileInput.files.length > 0) {
+                    // Kompresi ringan (opsional) atau langsung convert
+                    hiddenInput.value = await convertToBase64(fileInput.files[0]);
+                } else {
+                    hiddenInput.value = "";
+                }
             }
         }
 
-        // B. Kirim Data
+        // B. Persiapan Data
         const form = document.getElementById('formLaporan');
         const fd = new FormData(form);
 
-        // Handle checkbox status (agar terkirim "Tidak" jika tidak dicentang)
+        // Tambahkan status "Tidak" untuk checkbox yang kosong
         activities.forEach(act => {
              if(!form.querySelector(`[name="${act.id}_Status"]`).checked){
                  fd.append(`${act.id}_Status`, "Tidak");
              }
         });
 
+        // C. Kirim ke Google Script
         const response = await fetch(WEB_APP_URL, {
             method: "POST",
             body: fd
         });
 
-        // Cek response
-        const result = await response.text();
-        alert("✅ Alhamdulillah! Laporan berhasil dikirim.");
+        // D. Sukses
+        alert("✅ Alhamdulillah! Laporan harian berhasil dikirim.");
         window.location.reload(); 
 
     } catch (err) {
         console.error(err);
-        alert("❌ Gagal mengirim: " + err.message);
-        btn.innerHTML = "🚀 KIRIM LAPORAN";
+        alert(err.message); // Tampilkan error (misal foto kurang)
+        overlay.style.display = 'none';
         btn.disabled = false;
     }
 }
@@ -314,7 +440,7 @@ function convertToBase64(file) {
 }
 
 function logout(){
-    if(confirm("Yakin ingin keluar?")){
+    if(confirm("Apakah kamu yakin ingin keluar?")){
         localStorage.removeItem("user");
         location.href = "index.html";
     }
