@@ -1,254 +1,371 @@
+// PASTE URL SCRIPT BARU ANDA DI SINI
 const CHAT_URL = "https://script.google.com/macros/s/AKfycbx9ziBKETSpxXTARK6uyFbZaLIVoHO5xodyF_r8rxrFOXwIonB1U7L1KpHNXnOAmF49Kg/exec";
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    // ================= USER =================
+    // ================= CONFIG & STATE =================
     const user = {
-        username: localStorage.getItem("username") || "guest",
-        nama: localStorage.getItem("nama") || "User",
+        username: localStorage.getItem("username") || "guest" + Math.floor(Math.random()*1000),
+        nama: localStorage.getItem("nama") || "Tamu",
         kelompok: localStorage.getItem("kelompok") || "Umum",
         role: localStorage.getItem("role") || "siswa"
     };
 
-    let selectedKelompok = user.kelompok;
+    let chatState = {
+        view: 'list', // 'list' atau 'chat'
+        target: 'group', // 'group' atau username orang lain
+        targetName: user.kelompok // Nama tampilan header
+    };
 
-    // ================= ICONS (SVG) =================
-    const iconSend = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-    const iconChat = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
-    const iconClose = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+    // ================= ICONS =================
+    const icons = {
+        send: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`,
+        chat: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+        close: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        back: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`,
+        group: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+        user: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`
+    };
 
     // ================= STYLE =================
     document.head.insertAdjacentHTML("beforeend", `
     <style>
         :root {
-            --chat-primary: #008069;
-            --chat-bg: #e5ddd5;
-            --msg-me: #dcf8c6;
-            --msg-other: #ffffff;
+            --c-primary: #008069; 
+            --c-bg: #e5ddd5;
+            --c-me: #dcf8c6;
+            --c-other: #ffffff;
+            --c-text: #000000;
         }
         
-        /* Tombol Mengambang */
         #chatBtn {
             position: fixed; bottom: 20px; right: 20px;
-            background: var(--chat-primary); color: white;
+            background: var(--c-primary); color: white;
             width: 60px; height: 60px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             cursor: pointer; z-index: 9999;
-            transition: transform 0.3s ease;
+            transition: transform 0.2s;
         }
-        #chatBtn:hover { transform: scale(1.1); }
+        #chatBtn:active { transform: scale(0.9); }
 
-        /* Kotak Chat */
         #chatBox {
             position: fixed; bottom: 90px; right: 20px;
             width: 350px; height: 500px;
-            background: #fff;
-            border-radius: 12px;
+            background: #fff; border-radius: 12px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.2);
             display: none; flex-direction: column;
             z-index: 9999; overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            animation: slideIn 0.3s ease-out;
+            font-family: sans-serif;
+            border: 1px solid #ddd;
         }
 
-        /* Header */
+        /* HEADER */
         #chatHeader {
-            background: var(--chat-primary); color: white;
-            padding: 15px; display: flex;
-            justify-content: space-between; align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background: var(--c-primary); color: white;
+            padding: 10px 15px; display: flex; align-items: center;
+            height: 50px; flex-shrink: 0;
         }
-        #headerTitle { font-weight: 600; font-size: 16px; }
-        #btnClose { cursor: pointer; opacity: 0.8; }
-        #btnClose:hover { opacity: 1; }
+        #headerInfo { flex: 1; margin-left: 10px; }
+        #headerTitle { font-weight: bold; font-size: 15px; }
+        #headerStatus { font-size: 11px; opacity: 0.9; }
+        .icon-btn { cursor: pointer; padding: 5px; display: flex; align-items: center; }
 
-        /* Area Pesan */
+        /* VIEWS */
+        #viewList, #viewChat {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* USER LIST STYLE */
+        #userListContainer {
+            flex: 1; overflow-y: auto; padding: 10px; background: #f5f5f5;
+        }
+        .user-card {
+            background: white; padding: 12px;
+            margin-bottom: 8px; border-radius: 8px;
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        .user-card:hover { background: #f0f0f0; }
+        .u-icon {
+            width: 40px; height: 40px; background: #ddd;
+            border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; color: #555;
+        }
+        .u-icon.grp { background: #e0f2f1; color: var(--c-primary); }
+        .u-info { flex: 1; }
+        .u-name { font-weight: bold; color: var(--c-text); font-size: 14px; }
+        .u-role { font-size: 11px; color: #666; text-transform: capitalize; }
+        .role-badge { 
+            font-size: 10px; padding: 2px 6px; border-radius: 4px; 
+            background: #eee; color: #555; margin-left: auto; 
+        }
+        .role-admin { background: #ffebee; color: #c62828; }
+        .role-pembimbing { background: #e3f2fd; color: #1565c0; }
+
+        /* CHAT MESSAGES STYLE */
         #chatMessages {
             flex: 1; overflow-y: auto; padding: 15px;
-            background-color: var(--chat-bg);
+            background-color: var(--c-bg);
             background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
             display: flex; flex-direction: column; gap: 8px;
         }
-
-        /* Bubble Pesan */
         .msg {
-            color: #000000 !important; /* PAKSA TEKS JADI HITAM */
-            max-width: 80%; padding: 8px 12px;
-            border-radius: 8px; font-size: 14px;
-            line-height: 1.4; position: relative;
+            max-width: 80%; padding: 8px 12px; border-radius: 8px; 
+            font-size: 14px; position: relative; word-wrap: break-word;
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            word-wrap: break-word;
+            color: var(--c-text) !important; /* Paksa Hitam */
         }
-        .me {
-            background: var(--msg-me);
-            align-self: flex-end;
-            border-top-right-radius: 0;
-        }
-        .other {
-            background: var(--msg-other);
-            align-self: flex-start;
-            border-top-left-radius: 0;
-        }
-        .sender-name {
-            font-size: 11px; font-weight: bold;
-            color: #d85a07; margin-bottom: 2px; display: block;
-        }
+        .me { background: var(--c-me); align-self: flex-end; border-top-right-radius: 0; }
+        .other { background: var(--c-other); align-self: flex-start; border-top-left-radius: 0; }
+        .sender-name { font-size: 10px; font-weight: bold; color: #d85a07; display: block; margin-bottom: 2px; }
 
-        /* Input Area */
+        /* INPUT AREA */
         .input-area {
-            padding: 10px; background: #f0f0f0;
-            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: #f0f0f0; display: flex; gap: 10px; align-items: center;
         }
         #chatInput {
-            flex: 1; padding: 10px 15px; border-radius: 20px;
-            border: 1px solid #ccc; outline: none; font-size: 14px;
-            color: #000000 !important; /* PAKSA INPUT JADI HITAM */
-            background: #ffffff;
+            flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ccc;
+            outline: none; font-size: 14px; color: black; background: white;
         }
-        #chatInput:focus { border-color: var(--chat-primary); }
-        #chatSend {
-            background: var(--chat-primary); color: white;
-            border: none; width: 40px; height: 40px;
-            border-radius: 50%; cursor: pointer;
+        #sendBtn {
+            background: var(--c-primary); color: white; border: none;
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
-        #chatSend:hover { opacity: 0.9; }
 
-        /* Scrollbar Halus */
-        #chatMessages::-webkit-scrollbar { width: 6px; }
-        #chatMessages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Mobile Responsive */
+        /* Mobile */
         @media (max-width: 480px) {
-            #chatBox { width: 90%; right: 5%; bottom: 85px; height: 60vh; }
+            #chatBox { width: 100%; height: 100%; bottom: 0; right: 0; border-radius: 0; }
+            #chatBtn { bottom: 20px; right: 20px; }
         }
     </style>
     `);
 
-    // ================= HTML STRUCTURE =================
+    // ================= HTML =================
     document.body.insertAdjacentHTML("beforeend", `
-    <div id="chatBtn" title="Buka Chat">${iconChat}</div>
+    <div id="chatBtn">${icons.chat}</div>
+    
     <div id="chatBox">
         <div id="chatHeader">
-            <div>
-                <div id="headerTitle">Grup: ${selectedKelompok}</div>
-                <div style="font-size:11px; opacity:0.9;">🟢 Online</div>
+            <div id="btnBack" class="icon-btn" style="display:none;">${icons.back}</div>
+            <div id="headerInfo">
+                <div id="headerTitle">Chat Room</div>
+                <div id="headerStatus">Pilih Kontak</div>
             </div>
-            <div id="btnClose">${iconClose}</div>
+            <div id="btnClose" class="icon-btn">${icons.close}</div>
         </div>
-        <div id="chatMessages">
-            <div style="text-align:center; color:#555; font-size:12px; margin-top:10px;">
-                Memuat percakapan...
+
+        <div id="viewList">
+            <div id="userListContainer">
+                <div style="text-align:center; padding:20px; color:#666;">Memuat kontak...</div>
             </div>
         </div>
-        <div class="input-area">
-            <input id="chatInput" type="text" placeholder="Ketik pesan..." autocomplete="off">
-            <button id="chatSend">${iconSend}</button>
+
+        <div id="viewChat" style="display:none;">
+            <div id="chatMessages"></div>
+            <div class="input-area">
+                <input id="chatInput" type="text" placeholder="Ketik pesan..." autocomplete="off">
+                <button id="sendBtn">${icons.send}</button>
+            </div>
         </div>
     </div>
     `);
 
-    // ================= LOGIC & EVENTS =================
-    const btn = document.getElementById("chatBtn");
-    const box = document.getElementById("chatBox");
-    const closeBtn = document.getElementById("btnClose");
-    const msgContainer = document.getElementById("chatMessages");
+    // ================= DOM ELEMENTS =================
+    const els = {
+        box: document.getElementById('chatBox'),
+        btn: document.getElementById('chatBtn'),
+        close: document.getElementById('btnClose'),
+        back: document.getElementById('btnBack'),
+        list: document.getElementById('viewList'),
+        chat: document.getElementById('viewChat'),
+        uContainer: document.getElementById('userListContainer'),
+        msgs: document.getElementById('chatMessages'),
+        input: document.getElementById('chatInput'),
+        send: document.getElementById('sendBtn'),
+        title: document.getElementById('headerTitle'),
+        status: document.getElementById('headerStatus')
+    };
 
-    // Toggle Chat
+    // ================= LOGIC =================
+    
+    // 1. Toggle Chat Window
     function toggleChat() {
-        if(box.style.display === "flex"){
-            box.style.display = "none";
-            btn.style.display = "flex";
+        if(els.box.style.display === 'flex') {
+            els.box.style.display = 'none';
+            els.btn.style.display = 'flex';
         } else {
-            box.style.display = "flex";
-            btn.style.display = "none"; 
-            loadChat(); 
+            els.box.style.display = 'flex';
+            els.btn.style.display = 'none';
+            switchView('list'); // Default buka list dulu
+            loadUsers();
+        }
+    }
+    els.btn.onclick = toggleChat;
+    els.close.onclick = toggleChat;
+
+    // 2. Navigasi
+    els.back.onclick = () => {
+        switchView('list');
+        chatState.target = null; // Reset target
+    };
+
+    function switchView(viewName) {
+        chatState.view = viewName;
+        if(viewName === 'list') {
+            els.list.style.display = 'flex';
+            els.chat.style.display = 'none';
+            els.back.style.display = 'none';
+            els.title.innerText = "Daftar Kontak";
+            els.status.innerText = user.kelompok;
+            loadUsers(); // Refresh user list
+        } else {
+            els.list.style.display = 'none';
+            els.chat.style.display = 'flex';
+            els.back.style.display = 'flex';
+            els.title.innerText = chatState.targetName;
+            els.status.innerText = chatState.target === 'group' ? 'Grup Diskusi' : 'Chat Pribadi';
+            els.msgs.innerHTML = '<div style="text-align:center;margin-top:20px;color:#888;">Memuat pesan...</div>';
+            loadChat(); // Load pesan
         }
     }
 
-    btn.onclick = toggleChat;
-    closeBtn.onclick = toggleChat;
-
-    // Send Logic
-    document.getElementById("chatSend").onclick = sendChat;
-    document.getElementById("chatInput").addEventListener("keypress", e => {
-        if(e.key === "Enter") sendChat();
-    });
-
-    async function sendChat(){
-        const input = document.getElementById("chatInput");
-        const pesan = input.value.trim();
-        if(!pesan) return;
-
-        appendMessage({
-            username: user.username,
-            nama: "Anda",
-            pesan: pesan
-        }, true);
+    // 3. Render User List
+    async function loadUsers() {
+        if(chatState.view !== 'list') return;
         
-        input.value = "";
-        
-        try{
+        try {
+            const res = await fetch(`${CHAT_URL}?action=getUsers&kelompok=${user.kelompok}`);
+            const users = await res.json();
+            
+            let html = '';
+            
+            // A. Tombol Grup (Selalu ada paling atas)
+            html += `
+            <div class="user-card" onclick="startChat('group', 'Grup ${user.kelompok}')">
+                <div class="u-icon grp">${icons.group}</div>
+                <div class="u-info">
+                    <div class="u-name">Grup ${user.kelompok}</div>
+                    <div class="u-role">Diskusi Kelompok</div>
+                </div>
+            </div>
+            <div style="font-size:12px; font-weight:bold; color:#888; margin:10px 0 5px;">ANGGOTA & PEMBIMBING</div>
+            `;
+
+            // B. Tombol User Lain
+            users.forEach(u => {
+                if(u.username === user.username) return; // Jangan tampilkan diri sendiri
+                
+                let badge = '';
+                if(u.role === 'admin') badge = `<span class="role-badge role-admin">Admin</span>`;
+                else if(u.role === 'pembimbing') badge = `<span class="role-badge role-pembimbing">Guru</span>`;
+                
+                html += `
+                <div class="user-card" onclick="startChat('${u.username}', '${u.nama}')">
+                    <div class="u-icon">${icons.user}</div>
+                    <div class="u-info">
+                        <div class="u-name">${u.nama}</div>
+                        <div class="u-role">${u.role}</div>
+                    </div>
+                    ${badge}
+                </div>
+                `;
+            });
+
+            els.uContainer.innerHTML = html;
+        } catch(e) {
+            console.error(e);
+            els.uContainer.innerHTML = '<div style="color:red;text-align:center;">Gagal memuat kontak</div>';
+        }
+    }
+
+    // 4. Start Chat Function (Global scope helper)
+    window.startChat = function(targetId, targetDisplayName) {
+        chatState.target = targetId;
+        chatState.targetName = targetDisplayName;
+        switchView('chat');
+    };
+
+    // 5. Load Chat Messages
+    async function loadChat() {
+        if(chatState.view !== 'chat') return;
+
+        try {
+            // Fetch dengan param TARGET
+            const url = `${CHAT_URL}?action=getChat&kelompok=${user.kelompok}&username=${user.username}&target=${chatState.target}`;
+            const res = await fetch(url);
+            const messages = await res.json();
+
+            let html = '';
+            if(messages.length === 0) html = '<div style="text-align:center;color:#999;margin-top:20px;">Belum ada pesan.</div>';
+
+            messages.forEach(m => {
+                const isMe = m.username === user.username;
+                html += `
+                <div class="msg ${isMe ? 'me' : 'other'}">
+                    ${!isMe && chatState.target === 'group' ? `<span class="sender-name">${m.nama}</span>` : ''}
+                    ${m.pesan}
+                </div>
+                `;
+            });
+
+            // Cek scroll position sebelum update
+            const isAtBottom = els.msgs.scrollHeight - els.msgs.scrollTop <= els.msgs.clientHeight + 100;
+            
+            els.msgs.innerHTML = html;
+
+            if(isAtBottom || messages.length < 5) {
+                els.msgs.scrollTop = els.msgs.scrollHeight;
+            }
+
+        } catch(e) {
+            console.log("Error loading chat", e);
+        }
+    }
+
+    // 6. Send Message
+    els.send.onclick = sendMessage;
+    els.input.addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
+
+    async function sendMessage() {
+        const txt = els.input.value.trim();
+        if(!txt) return;
+
+        // Optimistic UI
+        const tempMsg = `
+            <div class="msg me" style="opacity:0.7">
+                ${txt} <small>⏳</small>
+            </div>`;
+        els.msgs.insertAdjacentHTML('beforeend', tempMsg);
+        els.msgs.scrollTop = els.msgs.scrollHeight;
+        els.input.value = '';
+
+        try {
             await fetch(CHAT_URL, {
                 method: "POST",
                 body: JSON.stringify({
                     action: "sendChat",
                     username: user.username,
                     nama: user.nama,
-                    kelompok: selectedKelompok,
+                    kelompok: user.kelompok,
                     role: user.role,
-                    pesan: pesan
+                    pesan: txt,
+                    target: chatState.target // Kirim target (grup atau username personal)
                 })
             });
-            loadChat(); 
-        } catch(err){
-            console.log("Send error:", err);
+            loadChat(); // Refresh segera
+        } catch(e) {
+            alert("Gagal mengirim pesan");
         }
     }
 
-    // Helper untuk render pesan
-    function appendMessage(c, isMe) {
-        const nameHtml = !isMe ? `<span class="sender-name">${c.nama}</span>` : "";
-        return `
-            <div class="msg ${isMe ? 'me' : 'other'}">
-                ${nameHtml}
-                ${c.pesan}
-            </div>
-        `;
-    }
-
-    // Load Chat
-    async function loadChat(){
-        if(box.style.display !== "flex") return; 
-
-        try{
-            const res = await fetch(`${CHAT_URL}?action=getChat&kelompok=${selectedKelompok}`);
-            const data = await res.json();
-
-            let html = "";
-            data.slice(-50).forEach(c => {
-                const isMe = c.username === user.username;
-                html += appendMessage(c, isMe);
-            });
-            
-            const isScrolledToBottom = msgContainer.scrollHeight - msgContainer.scrollTop <= msgContainer.clientHeight + 100;
-
-            msgContainer.innerHTML = html;
-
-            if(isScrolledToBottom) {
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }
-        } catch(err){
-            console.log("Load error:", err);
+    // Auto Refresh setiap 4 detik
+    setInterval(() => {
+        if(els.box.style.display === 'flex' && chatState.view === 'chat') {
+            loadChat();
         }
-    }
-
-    setInterval(loadChat, 3000);
+    }, 4000);
 
 });
