@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pembimbing - E-KAROMAH</title>
+    <title>Panel Pembimbing - E-KAROMAH</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #10b981;
-            --accent: #f59e0b;
-            --bg-gradient: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
-            --glass: rgba(255, 255, 255, 0.05);
+            --gold: #fbbf24;
+            --bg-dark: #022c22; 
+            --glass: rgba(6, 78, 59, 0.85);
             --border: rgba(255, 255, 255, 0.15);
             --text: #f0fdf4;
             --danger: #ef4444;
@@ -19,250 +19,390 @@
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: var(--bg-gradient);
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
             color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding-bottom: 50px;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            background: rgba(6, 78, 59, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-
+        /* --- Header --- */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            border-bottom: 2px solid rgba(245, 158, 11, 0.3);
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-            gap: 15px;
+            background: rgba(2, 44, 34, 0.95);
+            padding: 15px 20px;
+            position: sticky; top: 0; z-index: 10;
+            border-bottom: 2px solid var(--gold);
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .mentor-profile h2 { margin: 0; font-size: 16px; color: var(--gold); }
+        .mentor-profile span { font-size: 12px; opacity: 0.8; }
+        .btn-logout { background: transparent; border: none; color: #ef4444; cursor: pointer; text-decoration: underline; font-size: 13px; }
+
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+
+        /* --- Filter Section --- */
+        .filter-box {
+            background: rgba(255,255,255,0.05);
+            padding: 15px; border-radius: 10px; margin-bottom: 20px;
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        input[type="date"] {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            color: white; padding: 8px; border-radius: 5px;
+        }
+        .btn-refresh {
+            background: var(--primary); color: white; border: none; padding: 8px 15px;
+            border-radius: 5px; cursor: pointer; font-weight: 600;
         }
 
-        .profile-info h2 { margin: 0; font-size: 24px; color: var(--accent); }
-        .profile-info p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; color: #a7f3d0; }
-
-        .header-btn { display: flex; gap: 10px; }
-
-        button {
-            padding: 10px 16px;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-family: inherit;
-            transition: transform 0.2s, opacity 0.2s;
-            font-size: 14px;
-        }
-
-        button:hover { opacity: 0.9; transform: translateY(-2px); }
-        .refresh-btn { background: var(--primary); }
-        .logout-btn { background: var(--danger); }
-        
-        .save-btn { 
-            background: var(--accent); 
-            color: #064e3b;
-            font-weight: 600;
-            width: 100%; 
-            margin-top: 8px;
-            padding: 8px;
-            font-size: 13px;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            border-radius: 12px;
+        /* --- Tabel List Siswa --- */
+        .card-list { display: flex; flex-direction: column; gap: 10px; }
+        .student-card {
+            background: var(--glass);
             border: 1px solid var(--border);
-            background: rgba(0,0,0,0.2);
+            padding: 15px; border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.3s; cursor: pointer;
         }
+        .student-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+        
+        .st-info h3 { margin: 0; font-size: 16px; color: var(--gold); }
+        .st-info p { margin: 3px 0 0; font-size: 12px; opacity: 0.8; }
+        .st-status {
+            font-size: 11px; padding: 4px 8px; border-radius: 15px;
+            background: rgba(0,0,0,0.3); color: #ccc;
+        }
+        .st-status.done { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid var(--primary); }
 
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        
-        thead { background: rgba(5, 150, 105, 0.3); }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
+        /* --- MODAL DETAIL (POPUP) --- */
+        .modal {
+            display: none; position: fixed; z-index: 100;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
+        .modal-content {
+            background: #064e3b;
+            margin: 5% auto; padding: 0;
+            width: 90%; max-width: 600px;
+            border-radius: 15px;
+            border: 1px solid var(--gold);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+            position: relative;
+        }
+        .modal-header {
+            padding: 15px 20px; background: rgba(0,0,0,0.2);
             border-bottom: 1px solid var(--border);
-            font-size: 14px;
-            vertical-align: top;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .close-modal { font-size: 24px; color: #ef4444; cursor: pointer; font-weight: bold; }
+
+        /* --- Accordion Style di Modal --- */
+        .modal-body { padding: 20px; }
+        
+        .acc-item { margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; }
+        .acc-header {
+            background: rgba(0,0,0,0.3); padding: 12px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
+        }
+        .acc-header h4 { margin: 0; font-size: 14px; color: #a7f3d0; }
+        .acc-content {
+            display: none; padding: 15px; background: rgba(0,0,0,0.15);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .acc-content.show { display: block; }
+
+        /* Style Data di dalam Accordion */
+        .data-row { margin-bottom: 10px; font-size: 13px; }
+        .data-label { color: var(--gold); font-size: 11px; display: block; margin-bottom: 3px; }
+        .data-value { color: white; display: flex; align-items: center; gap: 8px; }
+        
+        .img-preview { 
+            width: 100%; max-width: 200px; margin-top: 5px; 
+            border-radius: 8px; border: 1px solid #555;
         }
 
-        th { font-weight: 600; color: var(--accent); white-space: nowrap; }
-        tr:hover { background: rgba(255,255,255,0.03); }
-
-        textarea {
-            width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 13px;
-            resize: vertical;
-            min-height: 60px;
-            box-sizing: border-box;
+        /* --- Form Penilaian --- */
+        .grading-section {
+            margin-top: 20px; padding-top: 20px;
+            border-top: 2px dashed var(--border);
         }
-
-        textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
-
-        #loading { text-align: center; padding: 40px; display: none; }
-        .spinner {
-            width: 30px; height: 30px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: var(--accent);
-            animation: spin 1s infinite linear;
-            margin: 0 auto 15px;
+        .grading-section h4 { color: var(--gold); margin-bottom: 10px; }
+        textarea, input[type="text"] {
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border); color: white; border-radius: 5px;
+            box-sizing: border-box; margin-bottom: 10px; font-family: inherit;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 600px) {
-            header { flex-direction: column; align-items: flex-start; }
-            .header-btn { width: 100%; margin-top: 10px; }
-            button { flex: 1; display:flex; justify-content:center; align-items:center; }
+        .btn-save {
+            width: 100%; padding: 12px; background: var(--gold); color: #022c22;
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
         }
+        .btn-save:hover { opacity: 0.9; }
+
+        /* Loader */
+        #loading { text-align: center; padding: 30px; display: none; }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { to {transform: rotate(360deg);} }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div class="profile-info">
-            <h2 id="groupName">Kelompok ...</h2>
-            <p id="mentorName">👤 Pembimbing: ...</p>
-        </div>
-        <div class="header-btn">
-            <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
-        </div>
-    </header>
+<header>
+    <div class="mentor-profile">
+        <h2 id="mName">Pembimbing</h2>
+        <span id="mGroup">Kelompok ...</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Keluar</button>
+</header>
 
-    <div id="loading">
-        <div class="spinner"></div>
-        <span>Mengambil berkah data...</span>
+<div class="container">
+    <div class="filter-box">
+        <span style="font-size:13px">📅 Filter Tanggal:</span>
+        <input type="date" id="dateFilter">
+        <button class="btn-refresh" onclick="loadData()">Lihat Data</button>
     </div>
 
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th width="15%">Tanggal</th>
-                    <th width="20%">Nama Siswa</th>
-                    <th width="10%">Hadir</th>
-                    <th width="30%">Kegiatan</th>
-                    <th width="25%">Catatan Pembimbing</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-            </tbody>
-        </table>
+    <div id="loading"><div class="spinner"></div>Memuat laporan siswa...</div>
+    
+    <div id="studentList" class="card-list"></div>
+</div>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h3 style="margin:0; color:var(--gold)" id="modalName">Nama Siswa</h3>
+                <small id="modalDate" style="color:#ccc">Tanggal</small>
+            </div>
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            <div id="accordionContainer"></div>
+
+            <div class="grading-section">
+                <h4>📝 Penilaian & Catatan</h4>
+                <div style="margin-bottom:10px">
+                    <span class="data-label">Nilai (0-100) / Predikat</span>
+                    <input type="text" id="inputNilai" placeholder="Contoh: 90 atau Baik">
+                </div>
+                <div>
+                    <span class="data-label">Catatan untuk Siswa</span>
+                    <textarea id="inputCatatan" rows="3" placeholder="Berikan semangat atau evaluasi..."></textarea>
+                </div>
+                <button class="btn-save" onclick="saveGrade()">💾 SIMPAN PENILAIAN</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // ==========================================
-    // CONFIG: GANTI URL DI BAWAH INI
-    // ==========================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec"; 
+// ================= CONFIG =================
+const WEB_APP_URL = "URL_WEB_APP_ANDA_DISINI"; 
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    
-    if (!user || user.role !== "pembimbing") {
-        alert("Akses Ditolak. Silakan login sebagai Pembimbing.");
-        window.location.href = "index.html";
-    } else {
-        document.getElementById("groupName").textContent = "✨ Kelompok: " + user.kelompok;
-        document.getElementById("mentorName").textContent = "👤 Pembimbing: " + (user.nama || user.username);
-        loadData();
-    }
+// Data Kegiatan (Urutan sesuai Sheet)
+const activities = [
+    "Sahur", "Subuh", "Olahraga", "Keluarga", 
+    "Dzuhur", "Pesantren", "Ashar", "Aksi", 
+    "Buka", "Magrib", "Isya", "Tarawih", "Tadarus", "Tidur"
+];
 
-    function loadData() {
-        const tbody = document.getElementById("tableBody");
-        const loading = document.getElementById("loading");
+// Kegiatan yang TIDAK PUNYA FOTO (untuk menyembunyikan kolom foto)
+const noPhotoActs = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
+
+let currentData = [];
+let selectedRowId = null;
+
+// 1. CEK LOGIN
+const user = JSON.parse(localStorage.getItem("user"));
+if(!user || user.role !== 'pembimbing'){
+    alert("Akses ditolak."); location.href='index.html';
+}
+document.getElementById('mName').textContent = user.nama;
+document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
+document.getElementById('dateFilter').valueAsDate = new Date(); // Set today
+
+// 2. LOAD DATA
+async function loadData() {
+    const list = document.getElementById("studentList");
+    const loader = document.getElementById("loading");
+    const dateVal = document.getElementById('dateFilter').value; // Format YYYY-MM-DD
+
+    list.innerHTML = "";
+    loader.style.display = "block";
+
+    try {
+        // Fetch data based on Group
+        const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
+        const res = await fetch(url);
+        const data = await res.json();
         
-        tbody.innerHTML = "";
-        loading.style.display = "block";
+        currentData = data; // Simpan data global
+        loader.style.display = "none";
 
-        fetch(`${SCRIPT_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`)
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = "none";
-                
-                if (data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; opacity: 0.6;">Belum ada laporan masuk untuk kelompok ${user.kelompok}.</td></tr>`;
-                    return;
-                }
-
-                data.forEach(item => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${item.tanggal}</td>
-                        <td style="font-weight:600; color:#fbbf24">${item.nama}</td>
-                        <td>${item.hadir}</td>
-                        <td>${item.kegiatan}</td>
-                        <td>
-                            <textarea id="note-${item.id}" placeholder="Berikan nasihat/nilai...">${item.catatan}</textarea>
-                            <button class="save-btn" onclick="saveNote(${item.id})">💾 Simpan</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                loading.style.display = "none";
-                alert("Gagal memuat data. Periksa koneksi internet.");
-            });
-    }
-
-    function saveNote(rowId) {
-        const noteValue = document.getElementById(`note-${rowId}`).value;
-        const btn = event.target;
-        const originalText = btn.innerHTML;
+        // Filter by Date (Simple Client Side Filter)
+        // Data sheet biasanya format "YYYY-MM-DD" atau "DD/MM/YYYY". Asumsikan Sheet sudah standar ISO atau kita filter stringnya.
+        // Disini kita tampilkan semua dulu, logic filter bisa diperketat.
         
-        btn.innerHTML = "⏳ ...";
-        btn.disabled = true;
-
-        const formData = new FormData();
-        formData.append('action', 'simpanCatatan');
-        formData.append('id', rowId);
-        formData.append('catatan', noteValue);
-
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(result => {
-            alert("✅ Catatan berhasil disimpan!");
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        })
-        .catch(error => {
-            alert("❌ Gagal menyimpan.");
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+        const filtered = data.filter(item => {
+            // Cocokkan tanggal (hanya jika user memilih tanggal)
+            if(!dateVal) return true;
+            return item.tanggal.includes(dateVal);
         });
-    }
 
-    function logout() {
-        if(confirm("Yakin ingin keluar?")) {
-            localStorage.removeItem("user");
-            window.location.href = "index.html";
+        if(filtered.length === 0) {
+            list.innerHTML = `<div style="text-align:center; padding:20px; opacity:0.6">Belum ada laporan pada tanggal ini.</div>`;
+            return;
         }
+
+        filtered.forEach(item => {
+            // Cek apakah sudah dinilai
+            const isGraded = (item.nilai && item.nilai !== "") ? "Sudah Dinilai" : "Belum Dinilai";
+            const gradeClass = (item.nilai && item.nilai !== "") ? "done" : "";
+
+            const card = document.createElement("div");
+            card.className = "student-card";
+            card.innerHTML = `
+                <div class="st-info">
+                    <h3>${item.nama}</h3>
+                    <p>📅 ${item.tanggal} | 📍 Lokasi Ada</p>
+                </div>
+                <div class="st-status ${gradeClass}">${isGraded}</div>
+            `;
+            card.onclick = () => showDetail(item);
+            list.appendChild(card);
+        });
+
+    } catch(e) {
+        console.error(e);
+        loader.style.display = "none";
+        alert("Gagal memuat data.");
     }
+}
+
+// 3. SHOW DETAIL (MODAL + ACCORDION)
+function showDetail(item) {
+    selectedRowId = item.id; // Simpan ID baris untuk save
+    document.getElementById("modalName").textContent = item.nama;
+    document.getElementById("modalDate").textContent = item.tanggal;
+    
+    // Isi Form Penilaian dengan data lama (jika ada)
+    document.getElementById("inputNilai").value = item.nilai || "";
+    document.getElementById("inputCatatan").value = item.catatan_pembimbing || "";
+
+    const container = document.getElementById("accordionContainer");
+    container.innerHTML = ""; // Reset
+
+    // Loop Kegiatan untuk membuat Accordion
+    activities.forEach(act => {
+        // Ambil data dari object item (pastikan key JSON dari Apps Script sesuai)
+        // Format key di JSON biasanya: "Sahur_Status", "Sahur_Waktu", dll.
+        const status = item[`${act}_Status`] || "-";
+        const waktu = item[`${act}_Waktu`] || "-";
+        const ket = item[`${act}_Ket`] || "-";
+        const foto = item[`${act}_Foto`]; // Base64 atau Link
+        
+        // Ikon status
+        const statusIcon = (status === "Ya" || status === "Hadir") ? "✅" : "❌";
+        
+        // Logic Sembunyikan Foto
+        let photoHtml = "";
+        if (!noPhotoActs.includes(act) && foto && foto.length > 10) {
+            photoHtml = `
+                <div class="data-row">
+                    <span class="data-label">📸 Foto Bukti</span>
+                    <img src="${foto}" class="img-preview" alt="Bukti">
+                </div>
+            `;
+        } else if (!noPhotoActs.includes(act)) {
+             photoHtml = `<div class="data-row"><span class="data-label">📸 Foto Bukti</span><span style="color:#aaa; font-style:italic">Tidak ada foto</span></div>`;
+        }
+
+        const html = `
+        <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+                <h4>${act}</h4>
+                <span>${statusIcon}</span>
+            </div>
+            <div class="acc-content">
+                <div class="data-row">
+                    <span class="data-label">Status Pelaksanaan</span>
+                    <span class="data-value">${statusIcon} ${status}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">⏰ Waktu</span>
+                    <span class="data-value">${waktu}</span>
+                </div>
+                ${photoHtml}
+                <div class="data-row">
+                    <span class="data-label">📝 Keterangan Siswa</span>
+                    <span class="data-value" style="color:#d1fae5; font-style:italic">"${ket}"</span>
+                </div>
+            </div>
+        </div>
+        `;
+        container.innerHTML += html;
+    });
+
+    // Buka Modal
+    document.getElementById("detailModal").style.display = "block";
+}
+
+// 4. LOGIC ACCORDION
+function toggleAcc(header) {
+    const content = header.nextElementSibling;
+    // Tutup yang lain biar rapi (opsional)
+    document.querySelectorAll('.acc-content').forEach(el => {
+        if(el !== content) el.classList.remove('show');
+    });
+    content.classList.toggle('show');
+}
+
+// 5. SIMPAN PENILAIAN
+async function saveGrade() {
+    const btn = document.querySelector(".btn-save");
+    const nilai = document.getElementById("inputNilai").value;
+    const catatan = document.getElementById("inputCatatan").value;
+
+    if(!selectedRowId) return;
+
+    btn.innerHTML = "⏳ Menyimpan...";
+    btn.disabled = true;
+
+    const fd = new FormData();
+    fd.append("action", "simpanCatatan");
+    fd.append("id", selectedRowId);
+    fd.append("nilai", nilai); // Pastikan backend handle kolom 'nilai'
+    fd.append("catatan", catatan);
+
+    try {
+        await fetch(WEB_APP_URL, { method: "POST", body: fd });
+        alert("✅ Penilaian berhasil disimpan!");
+        closeModal();
+        loadData(); // Refresh list
+    } catch(e) {
+        alert("Gagal menyimpan.");
+    } finally {
+        btn.innerHTML = "💾 SIMPAN PENILAIAN";
+        btn.disabled = false;
+    }
+}
+
+// Utils
+function closeModal() { document.getElementById("detailModal").style.display = "none"; }
+function logout() { localStorage.removeItem("user"); location.href="index.html"; }
+
+// Klik di luar modal tutup modal
+window.onclick = function(event) {
+    const modal = document.getElementById("detailModal");
+    if (event.target == modal) closeModal();
+}
+
+// Load awal
+loadData();
 </script>
 
 </body>
