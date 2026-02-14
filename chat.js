@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function(){
     document.head.insertAdjacentHTML("beforeend", `
     <style>
         :root {
-            --chat-primary: #008069; /* Warna Utama mirip WA */
+            --chat-primary: #008069;
             --chat-bg: #e5ddd5;
             --msg-me: #dcf8c6;
             --msg-other: #ffffff;
@@ -67,12 +67,13 @@ document.addEventListener("DOMContentLoaded", function(){
         #chatMessages {
             flex: 1; overflow-y: auto; padding: 15px;
             background-color: var(--chat-bg);
-            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png"); /* Pattern background optional */
+            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
             display: flex; flex-direction: column; gap: 8px;
         }
 
         /* Bubble Pesan */
         .msg {
+            color: #000000 !important; /* PAKSA TEKS JADI HITAM */
             max-width: 80%; padding: 8px 12px;
             border-radius: 8px; font-size: 14px;
             line-height: 1.4; position: relative;
@@ -102,6 +103,8 @@ document.addEventListener("DOMContentLoaded", function(){
         #chatInput {
             flex: 1; padding: 10px 15px; border-radius: 20px;
             border: 1px solid #ccc; outline: none; font-size: 14px;
+            color: #000000 !important; /* PAKSA INPUT JADI HITAM */
+            background: #ffffff;
         }
         #chatInput:focus { border-color: var(--chat-primary); }
         #chatSend {
@@ -140,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function(){
             <div id="btnClose">${iconClose}</div>
         </div>
         <div id="chatMessages">
-            <div style="text-align:center; color:#888; font-size:12px; margin-top:10px;">
+            <div style="text-align:center; color:#555; font-size:12px; margin-top:10px;">
                 Memuat percakapan...
             </div>
         </div>
@@ -164,8 +167,8 @@ document.addEventListener("DOMContentLoaded", function(){
             btn.style.display = "flex";
         } else {
             box.style.display = "flex";
-            btn.style.display = "none"; // Hide button when chat is open (optional)
-            loadChat(); // Load immediately when opened
+            btn.style.display = "none"; 
+            loadChat(); 
         }
     }
 
@@ -183,7 +186,6 @@ document.addEventListener("DOMContentLoaded", function(){
         const pesan = input.value.trim();
         if(!pesan) return;
 
-        // Optimistic UI: Tampilkan pesan user langsung sebelum request selesai
         appendMessage({
             username: user.username,
             nama: "Anda",
@@ -204,17 +206,14 @@ document.addEventListener("DOMContentLoaded", function(){
                     pesan: pesan
                 })
             });
-            loadChat(); // Refresh to sync
+            loadChat(); 
         } catch(err){
             console.log("Send error:", err);
-            // Opsional: Beri notifikasi error di UI
         }
     }
 
     // Helper untuk render pesan
     function appendMessage(c, isMe) {
-        // Cek agar tidak duplikat jika dipanggil loop (untuk loadChat)
-        // Di sini kita biarkan simple string injection
         const nameHtml = !isMe ? `<span class="sender-name">${c.nama}</span>` : "";
         return `
             <div class="msg ${isMe ? 'me' : 'other'}">
@@ -226,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
     // Load Chat
     async function loadChat(){
-        if(box.style.display !== "flex") return; // Jangan load jika chat tertutup
+        if(box.style.display !== "flex") return; 
 
         try{
             const res = await fetch(`${CHAT_URL}?action=getChat&kelompok=${selectedKelompok}`);
@@ -238,7 +237,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 html += appendMessage(c, isMe);
             });
             
-            // Cek apakah user sedang scroll ke atas. Jika ya, jangan auto-scroll ke bawah.
             const isScrolledToBottom = msgContainer.scrollHeight - msgContainer.scrollTop <= msgContainer.clientHeight + 100;
 
             msgContainer.innerHTML = html;
@@ -251,7 +249,6 @@ document.addEventListener("DOMContentLoaded", function(){
         }
     }
 
-    // Auto refresh setiap 3 detik
     setInterval(loadChat, 3000);
 
 });
