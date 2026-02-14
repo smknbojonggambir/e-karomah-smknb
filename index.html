@@ -8,10 +8,11 @@
 
 <style>
 :root {
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  --glass: rgba(255, 255, 255, 0.05);
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --accent: #fbbf24;
+  --bg-gradient: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+  --glass: rgba(0, 0, 0, 0.4);
   --border: rgba(255, 255, 255, 0.1);
   --text: #f8fafc;
 }
@@ -26,27 +27,27 @@ body {
   align-items: center;
   min-height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
-/* Background Decoration */
+/* Dekorasi Bulan Sabit (CSS Only) */
 body::before {
   content: '';
   position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(37,99,235,0.4) 0%, rgba(0,0,0,0) 70%);
-  top: -50px;
-  left: -50px;
+  top: -50px; left: -50px;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  box-shadow: 40px 40px 0 0 rgba(251, 191, 36, 0.1); /* Moon shape */
   z-index: -1;
 }
+
+/* Dekorasi Cahaya */
 body::after {
   content: '';
   position: absolute;
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(147,51,234,0.3) 0%, rgba(0,0,0,0) 70%);
-  bottom: 0;
-  right: 0;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(0,0,0,0) 70%);
+  bottom: 0; right: 0;
   z-index: -1;
 }
 
@@ -59,13 +60,13 @@ body::after {
   max-width: 340px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(251, 191, 36, 0.3); /* Gold border */
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
   animation: floatUp 0.8s ease-out;
 }
 
 @keyframes floatUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -74,71 +75,68 @@ body::after {
   background: white;
   padding: 8px;
   border-radius: 50%;
-  margin-bottom: 10px;
-  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+  margin-bottom: 15px;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); /* Gold glow */
 }
 
 h2 {
-  margin: 5px 0 15px;
+  margin: 5px 0 20px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   font-size: 22px;
+  color: var(--accent);
 }
 
-/* --- STYLE UNTUK KALIMAT BARU --- */
+/* Welcome Box */
 .welcome-msg {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  padding: 12px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 15px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .welcome-msg h3 {
   margin: 0 0 4px;
   font-size: 15px;
-  color: #60a5fa; /* Light Blue */
+  color: #6ee7b7;
   font-weight: 600;
 }
 
 .welcome-msg p {
   margin: 0;
   font-size: 12px;
-  color: #cbd5e1;
+  color: #d1fae5;
   font-style: italic;
-  opacity: 1;
 }
-/* -------------------------------- */
 
-.login-hint {
-  margin: 0 0 15px;
-  font-size: 13px;
-  opacity: 0.6;
-}
+.login-hint { margin: 0 0 15px; font-size: 13px; opacity: 0.7; }
 
 input, select {
   width: 100%;
   padding: 14px 16px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
   border-radius: 12px;
   color: white;
   outline: none;
   font-family: inherit;
   box-sizing: border-box;
-  margin: 6px 0;
+  margin: 8px 0;
   transition: 0.3s;
 }
 
+input::placeholder { color: #94a3b8; }
+
 input:focus, select:focus {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
 }
 
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23fbbf24%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 15px top 50%;
   background-size: 10px auto;
@@ -147,32 +145,29 @@ select {
 button {
   width: 100%;
   padding: 14px;
-  margin-top: 20px;
+  margin-top: 25px;
   background: var(--primary);
-  color: white;
+  color: #022c22;
   border: none;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 16px;
   cursor: pointer;
   transition: transform 0.2s, background 0.2s;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
 button:hover {
-  background: var(--primary-hover);
+  background: var(--accent);
   transform: translateY(-2px);
 }
 
-button:active {
-  transform: scale(0.98);
-}
-
 #msg {
-  margin-top: 15px;
+  margin-top: 20px;
   font-size: 13px;
   min-height: 20px;
   font-weight: 500;
+  color: #fbbf24;
 }
 </style>
 </head>
@@ -184,29 +179,27 @@ button:active {
   <h2>E-KAROMAH SMKNB</h2>
   
   <div class="welcome-msg">
-    <h3>Yuk, Catat Amal Ibadahmu Hari Ini!</h3>
-    <p>Isi jurnal ibadahmu dengan jujur ya!</p>
+    <h3>🌙 Marhaban Ya Ramadhan</h3>
+    <p>Mari catat amal kebaikanmu hari ini.</p>
   </div>
-  <p class="login-hint">Silakan Login untuk melanjutkan</p>
 
   <select id="role">
-    <option value="">Pilih Role</option>
-    <option value="siswa">Siswa</option>
-    <option value="pembimbing">Pembimbing</option>
-    <option value="admin">Admin</option>
+    <option value="" style="color:black">Pilih Role</option>
+    <option value="siswa" style="color:black">Siswa</option>
+    <option value="pembimbing" style="color:black">Pembimbing</option>
+    <option value="admin" style="color:black">Admin</option>
   </select>
 
   <input id="user" placeholder="Username" autocomplete="off">
   <input id="pass" type="password" placeholder="Password">
 
-  <button onclick="login()">Masuk</button>
+  <button onclick="login()">MASUK</button>
 
   <div id="msg"></div>
 </div>
 
 <script>
-// SCRIPT ASLI (TIDAK DIUBAH LOGIKANYA)
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwcNcbQuESVMgdbQ2sN6491troCOv0cxKGa2A3-ZNQVCfUcBE3JCy2MdOgH0O2pjmz5kw/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec";
 
 async function login(){
   if(!role.value){ msg.innerHTML="⚠️ Pilih role terlebih dahulu"; return; }
@@ -240,6 +233,3 @@ async function login(){
 
 </body>
 </html>
-
-
-
