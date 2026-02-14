@@ -2,41 +2,94 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - E-KAROMAH</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #10b981; --gold: #fbbf24; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --border: rgba(255,255,255,0.1); }
+        :root { 
+            --primary: #10b981; 
+            --gold: #fbbf24; 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --text: #f1f5f9; 
+            --border: rgba(255,255,255,0.1); 
+            --danger: #ef4444;
+        }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); }
+        
+        /* LAYOUT UTAMA */
         .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-        aside { background: #020617; padding: 20px; border-right: 1px solid var(--border); }
+        
+        /* SIDEBAR */
+        aside { 
+            background: #020617; 
+            padding: 20px; 
+            border-right: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; /* Memisahkan menu atas dan logout bawah */
+        }
         .brand { font-size: 20px; font-weight: 700; color: var(--gold); margin-bottom: 40px; display: block; }
-        .nav-item { padding: 12px; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 5px; transition: 0.3s; }
-        .nav-item:hover { background: rgba(255,255,255,0.05); }
-        .nav-item.active { background: rgba(16, 185, 129, 0.15); color: var(--primary); }
+        
+        .nav-group { display: flex; flex-direction: column; gap: 5px; }
+        .nav-item { padding: 12px; color: #94a3b8; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+        .nav-item.active { background: rgba(16, 185, 129, 0.15); color: var(--primary); font-weight: 600; }
+        
+        /* LOGOUT BUTTON */
+        .btn-logout { 
+            padding: 12px; 
+            color: #fca5a5; 
+            border: 1px solid rgba(239, 68, 68, 0.3); 
+            border-radius: 8px; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: 0.3s; 
+            font-weight: 600;
+        }
+        .btn-logout:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* KONTEN UTAMA */
         main { padding: 30px; height: 100vh; overflow-y: auto; box-sizing: border-box; }
-        .page { display: none; animation: fadeIn 0.3s ease; }
+        
+        /* HALAMAN (TABS) */
+        .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
+        
+        /* COMPONENTS */
+        h1 { margin-top: 0; margin-bottom: 20px; font-weight: 600; font-size: 24px; }
+        .card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* TABEL */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
-        th { color: #94a3b8; background: rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 1px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { color: #94a3b8; background: rgba(0,0,0,0.2); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; font-weight: 600; }
         tr:hover { background: rgba(255,255,255,0.02); }
+        td { color: #e2e8f0; }
     </style>
 </head>
 <body>
+
     <div class="layout">
         <aside>
-            <div class="brand">🌙 E-KAROMAH</div>
-            <div class="nav-item active" onclick="showPage('dash', this)">📊 Dashboard</div>
-            <div class="nav-item" onclick="showPage('siswa', this)">👥 Data Siswa</div>
-            <div class="nav-item" onclick="showPage('guru', this)">👔 Data Pembimbing</div>
+            <div class="nav-group">
+                <div class="brand">🌙 E-KAROMAH</div>
+                <div class="nav-item active" onclick="showPage('dash', this)">📊 Dashboard</div>
+                <div class="nav-item" onclick="showPage('siswa', this)">👥 Data Siswa</div>
+                <div class="nav-item" onclick="showPage('guru', this)">👔 Data Pembimbing</div>
+            </div>
+            
+            <div class="btn-logout" onclick="logout()">🚪 Logout</div>
         </aside>
+
         <main>
             <div id="page-dash" class="page active">
-                <h1>Overview</h1>
-                <div class="card"><canvas id="myChart" height="100"></canvas></div>
+                <h1>Dashboard Overview</h1>
+                <div class="card">
+                    <canvas id="myChart" height="100"></canvas>
+                </div>
             </div>
 
             <div id="page-siswa" class="page">
@@ -46,12 +99,12 @@
                         <thead>
                             <tr>
                                 <th>Username</th>
-                                <th>Nama</th>
+                                <th>Nama Lengkap</th>
                                 <th>Kelompok</th>
                             </tr>
                         </thead>
                         <tbody id="listSiswa">
-                            <tr><td colspan="3">Memuat data...</td></tr>
+                            <tr><td colspan="3" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -64,12 +117,12 @@
                         <thead>
                             <tr>
                                 <th>Username</th>
-                                <th>Nama</th>
+                                <th>Nama Lengkap</th>
                                 <th>Kelompok</th>
                             </tr>
                         </thead>
                         <tbody id="listGuru">
-                            <tr><td colspan="3">Memuat data...</td></tr>
+                            <tr><td colspan="3" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -78,67 +131,122 @@
     </div>
 
     <script>
+        // URL Web App Google Apps Script Anda
         const API = "https://script.google.com/macros/s/AKfycbyHBpOUspomuKZ75MGmMoD0ZYuYxjif5FmGfPb6AoVzGC3fFjUmwD1wOfJKggb0F3cYhQ/exec";
 
+        // --- FUNGSI NAVIGASI ---
         function showPage(id, el) {
+            // Sembunyikan semua page
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // Reset state tombol nav
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Aktifkan page yang dipilih
             document.getElementById('page-' + id).classList.add('active');
             el.classList.add('active');
         }
 
+        // --- FUNGSI LOGOUT ---
+        function logout() {
+            if(confirm("Apakah Anda yakin ingin keluar dari Admin Dashboard?")) {
+                localStorage.removeItem("user"); // Hapus data sesi login
+                window.location.href = "index.html"; // Redirect ke halaman login
+            }
+        }
+
+        // --- FUNGSI LOAD DATA ---
         async function loadData() {
             try {
                 const res = await fetch(API + "?action=getUsers");
                 const data = await res.json();
                 
-                // Render Siswa - Menggunakan key 'Nama' sesuai header GS
-                document.getElementById('listSiswa').innerHTML = data.siswa.length > 0 ? 
-                    data.siswa.map(u => 
-                        `<tr>
+                // 1. Render Tabel Siswa
+                // Perhatikan: Menggunakan u.Nama (sesuai header sheet) bukan Nama Lengkap
+                const tBodySiswa = document.getElementById('listSiswa');
+                if (data.siswa && data.siswa.length > 0) {
+                    tBodySiswa.innerHTML = data.siswa.map(u => `
+                        <tr>
+                            <td>${u.Username || '-'}</td>
+                            <td>${u.Nama || '-'}</td> 
+                            <td>${u.Kelompok || '-'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tBodySiswa.innerHTML = '<tr><td colspan="3" style="text-align:center">Tidak ada data siswa.</td></tr>';
+                }
+
+                // 2. Render Tabel Pembimbing
+                const tBodyGuru = document.getElementById('listGuru');
+                if (data.pembimbing && data.pembimbing.length > 0) {
+                    tBodyGuru.innerHTML = data.pembimbing.map(u => `
+                        <tr>
                             <td>${u.Username || '-'}</td>
                             <td>${u.Nama || '-'}</td>
                             <td>${u.Kelompok || '-'}</td>
-                        </tr>`
-                    ).join('') : '<tr><td colspan="3" style="text-align:center">Tidak ada data siswa</td></tr>';
+                        </tr>
+                    `).join('');
+                } else {
+                    tBodyGuru.innerHTML = '<tr><td colspan="3" style="text-align:center">Tidak ada data pembimbing.</td></tr>';
+                }
 
-                // Render Pembimbing - Menggunakan key 'Nama' sesuai header GS
-                document.getElementById('listGuru').innerHTML = data.pembimbing.length > 0 ? 
-                    data.pembimbing.map(u => 
-                        `<tr>
-                            <td>${u.Username || '-'}</td>
-                            <td>${u.Nama || '-'}</td>
-                            <td>${u.Kelompok || '-'}</td>
-                        </tr>`
-                    ).join('') : '<tr><td colspan="3" style="text-align:center">Tidak ada data pembimbing</td></tr>';
-
+                // 3. Render Grafik
                 renderChart(data);
+
             } catch(e) { 
-                console.error("Error loading data:", e);
-                document.getElementById('listSiswa').innerHTML = '<tr><td colspan="3">Gagal memuat data.</td></tr>';
+                console.error("Gagal mengambil data:", e);
+                document.getElementById('listSiswa').innerHTML = '<tr><td colspan="3" style="color:#ef4444; text-align:center;">Gagal memuat data. Cek koneksi internet.</td></tr>';
+                document.getElementById('listGuru').innerHTML = '<tr><td colspan="3" style="color:#ef4444; text-align:center;">Gagal memuat data.</td></tr>';
             }
         }
 
+        // --- FUNGSI CHART ---
+        let chartInstance = null;
         function renderChart(data) {
             const ctx = document.getElementById('myChart').getContext('2d');
-            new Chart(ctx, {
+            
+            // Hapus chart lama jika ada (untuk mencegah overlay saat refresh)
+            if(chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Siswa', 'Pembimbing'],
                     datasets: [{
-                        label: 'Total User',
+                        label: 'Total Pengguna',
                         data: [data.siswa.length, data.pembimbing.length],
-                        backgroundColor: ['#10b981', '#fbbf24']
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)', // Hijau (Siswa)
+                            'rgba(251, 191, 36, 0.7)'  // Kuning (Guru)
+                        ],
+                        borderColor: [
+                            '#10b981',
+                            '#fbbf24'
+                        ],
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } } }
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false } // Sembunyikan legend default
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8', stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
                 }
             });
         }
 
+        // Jalankan saat halaman dibuka
         loadData();
     </script>
 </body>
