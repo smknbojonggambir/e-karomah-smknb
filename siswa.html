@@ -3,57 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>E-KAROMAH SMKNB - Siswa</title>
+<title>E-KAROMAH - Panel Siswa</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --primary: #3b82f6;
-  --bg: #0f172a;
-  --card-bg: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.1);
+  --primary: #10b981;
+  --accent: #fbbf24;
+  --bg-gradient: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+  --card-bg: rgba(6, 78, 59, 0.5);
+  --border: rgba(255, 255, 255, 0.15);
   --text: #f1f5f9;
-  --success: #10b981;
 }
 
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background: var(--bg);
+  background: var(--bg-gradient);
   color: var(--text);
   min-height: 100vh;
-  padding-bottom: 80px; /* Space for fixed button */
+  padding-bottom: 80px;
 }
 
-/* Header & Info */
+/* Header Sticky */
 .header-container {
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(2, 44, 34, 0.95);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 100;
   padding: 15px 20px;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  border-bottom: 2px solid var(--accent);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  display: flex; justify-content: space-between; align-items: center;
 }
 
-h2 { margin: 0; font-size: 18px; color: var(--primary); }
+h2 { margin: 0; font-size: 18px; color: var(--accent); }
+.logout-mini { font-size: 12px; color: #ef4444; cursor: pointer; text-decoration: underline; }
+
+.container { max-width: 800px; margin: auto; padding: 20px; }
 
 .user-info-card {
-  background: linear-gradient(135deg, #1e293b, #334155);
-  margin: 20px;
+  background: linear-gradient(135deg, #064e3b, #047857);
   padding: 20px;
   border-radius: 16px;
   border: 1px solid var(--border);
   font-size: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
-.user-info-card b { color: var(--primary); }
-
-.container {
-  max-width: 800px;
-  margin: auto;
-  padding: 0 20px;
-}
+.user-info-card b { color: var(--accent); }
 
 /* Form Sections */
 .section {
@@ -62,33 +61,31 @@ h2 { margin: 0; font-size: 18px; color: var(--primary); }
   border-radius: 16px;
   margin-bottom: 16px;
   border: 1px solid var(--border);
-  transition: transform 0.2s;
 }
 
 .section h4 {
   margin: 0 0 15px 0;
   font-size: 16px;
   font-weight: 500;
-  display: flex;
-  align-items: center;
+  display: flex; align-items: center; color: #a7f3d0;
 }
 .section h4::before {
   content: '';
   display: inline-block;
-  width: 4px;
-  height: 16px;
-  background: var(--primary);
+  width: 4px; height: 16px;
+  background: var(--accent);
   margin-right: 10px;
   border-radius: 2px;
 }
 
-/* Custom Radio Buttons (Segmented Control) */
+/* Radio Buttons Styling (Pills) */
 .radio-group {
   display: flex;
   background: rgba(0,0,0,0.3);
   padding: 4px;
   border-radius: 12px;
   margin-bottom: 15px;
+  gap: 5px;
 }
 
 .radio-group label {
@@ -98,336 +95,165 @@ h2 { margin: 0; font-size: 18px; color: var(--primary); }
   cursor: pointer;
   border-radius: 8px;
   transition: 0.3s;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   position: relative;
   overflow: hidden;
+  color: #94a3b8;
 }
 
-/* Sembunyikan radio asli */
-.radio-group input[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-}
+.radio-group input { position: absolute; opacity: 0; }
 
-/* Style saat dipilih - Menggunakan CSS logic simple */
-.radio-group label:has(input:checked) {
+/* Active State for Radio */
+.radio-group input:checked + span {
   background: var(--primary);
-  color: white;
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
-}
-/* Fallback untuk browser lama yg tidak support :has */
-.radio-selected {
-  background: var(--primary) !important;
-  color: white !important;
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
+  color: #022c22;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
 }
 
-/* Detail Area */
-.hidden { display: none; }
-.detail-area {
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-input, textarea, button {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin: 8px 0;
-  box-sizing: border-box;
-  background: rgba(0,0,0,0.2);
-  color: white;
-  font-family: inherit;
-}
-
-input:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: rgba(0,0,0,0.4);
-}
-
-textarea { resize: vertical; min-height: 60px; }
-
-/* Custom File Input Styling */
-input[type="file"]::file-selector-button {
-  margin-right: 15px;
-  padding: 8px 16px;
+.radio-label-text {
+  display: block; width: 100%; height: 100%; padding: 8px 0;
   border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-input[type="file"]::file-selector-button:hover {
-  background: var(--primary);
 }
 
-/* Floating Actions */
-.action-bar {
+/* Input Text */
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+input[type="text"]:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    background: rgba(0,0,0,0.5);
+}
+
+/* Floating Action Button (Submit) */
+.fab-container {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 15px 20px;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 10px;
-  z-index: 99;
+  bottom: 20px;
+  left: 0; right: 0;
+  padding: 0 20px;
+  max-width: 800px;
+  margin: auto;
+  pointer-events: none; /* Supaya klik tembus di area kosong */
 }
 
-#btnKirim {
-  background: var(--success);
-  color: white;
-  font-weight: 600;
+.submit-btn {
+  pointer-events: auto;
+  width: 100%;
+  background: var(--accent);
+  color: #022c22;
   border: none;
-  margin: 0;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
-#btnKirim:active { transform: scale(0.98); }
+.submit-btn:active { transform: scale(0.98); }
 
-.btn-logout {
-  background: #ef4444;
-  width: auto;
-  min-width: 100px;
-  margin: 0;
-}
-
-#loader {
-  text-align: center;
-  font-size: 14px;
-  color: var(--primary);
-  font-weight: 600;
-  margin-bottom: 10px;
-}
 </style>
 </head>
-
 <body>
 
 <div class="header-container">
-  <div style="display:flex; justify-content:space-between; align-items:center; max-width:800px; margin:auto;">
-    <h2>E-KAROMAH</h2>
-    <span style="font-size:12px; opacity:0.7">Dashboard Siswa</span>
-  </div>
+    <h2>🕌 Panel Siswa</h2>
+    <span class="logout-mini" onclick="logout()">Logout</span>
 </div>
 
 <div class="container">
-
-  <div class="user-info-card">
-    <div id="info"></div>
-    <div style="margin-top:10px; pt-10px; border-top:1px solid var(--border);">
-      <small style="opacity:0.7">Pembimbing:</small><br>
-      <input type="text" id="pembimbing" readonly style="background:transparent; border:none; padding:0; margin:0; font-weight:600; color:var(--text);">
+    
+    <div class="user-info-card">
+        Selamat Datang, <b id="namaSiswa">Siswa</b><br>
+        Kelompok: <span id="kelompokSiswa">-</span>
     </div>
-  </div>
 
-  <input type="hidden" id="lat">
-  <input type="hidden" id="long">
+    <form id="laporanForm" onsubmit="kirimLaporan(event)">
+        
+        <div class="section">
+            <h4>Kehadiran</h4>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="hadir" value="Hadir" checked>
+                    <span class="radio-label-text">Hadir</span>
+                </label>
+                <label>
+                    <input type="radio" name="hadir" value="Izin">
+                    <span class="radio-label-text">Izin</span>
+                </label>
+                <label>
+                    <input type="radio" name="hadir" value="Sakit">
+                    <span class="radio-label-text">Sakit</span>
+                </label>
+            </div>
+        </div>
 
-  <div id="dynamicForm"></div>
+        <div class="section">
+            <h4>Kegiatan Ibadah</h4>
+            <textarea name="kegiatan" rows="4" placeholder="Contoh: Sholat Dhuha, Tadarus Al-Quran Juz 1..."></textarea>
+        </div>
 
-  <div style="height:60px;"></div>
-
-</div>
-
-<div class="action-bar">
-  <button class="btn-logout" onclick="logout()">Keluar</button>
-  <button id="btnKirim">KIRIM LAPORAN</button>
-</div>
-
-<div id="loader" class="hidden" style="position:fixed; bottom:80px; left:0; right:0; background:rgba(0,0,0,0.8); color:white; padding:10px; z-index:200;">
-  ⏳ Sedang mengirim data...
+        <div class="fab-container">
+            <button type="submit" class="submit-btn">🚀 KIRIM LAPORAN</button>
+        </div>
+    </form>
 </div>
 
 <script>
+    // Konfigurasi
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec"; // Ganti URL ini
+    const user = JSON.parse(localStorage.getItem("user"));
 
-/* ================= CONFIG ================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwcNcbQuESVMgdbQ2sN6491troCOv0cxKGa2A3-ZNQVCfUcBE3JCy2MdOgH0O2pjmz5kw/exec";
-
-/* ================= LOGIN CHECK ================= */
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user || user.role!=="siswa"){ location.href="index.html"; }
-
-const nama     = user.nama;
-const kelompok = user.kelompok;
-
-/* ================= ELEMENT ================= */
-const info        = document.getElementById("info");
-const pembimbing  = document.getElementById("pembimbing");
-const lat         = document.getElementById("lat");
-const longi       = document.getElementById("long");
-const dynamicForm = document.getElementById("dynamicForm");
-const loader      = document.getElementById("loader");
-const btnKirim    = document.getElementById("btnKirim");
-
-/* ================= INFO ================= */
-info.innerHTML = `
-  <div style="font-size:18px; font-weight:600; margin-bottom:4px;">${nama}</div>
-  <div style="opacity:0.8;">Kelompok: ${kelompok}</div>
-`;
-
-/* ================= GPS ================= */
-function getLocation(){
-  if(!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos=>{
-    lat.value    = pos.coords.latitude;
-    longi.value = pos.coords.longitude;
-  });
-}
-
-/* ================= FORM GENERATOR (UPDATED UI) ================= */
-
-// Helper untuk visual active state pada radio button
-function updateRadioVisual(name, val) {
-  const labels = document.querySelectorAll(`label[data-group="${name}"]`);
-  labels.forEach(l => {
-    if(l.dataset.val === val) l.classList.add('radio-selected');
-    else l.classList.remove('radio-selected');
-  });
-}
-
-function toggle(id, show, radioName, radioVal){
-  document.getElementById(id).classList.toggle("hidden", !show);
-  // Panggil visual update
-  if(radioName) updateRadioVisual(radioName, radioVal);
-}
-
-function radioSection(title, id, withFoto=false, withTime=false){
-  // Struktur HTML diupdate untuk modern styling (tanpa mengubah ID input)
-  return `
-  <div class="section">
-    <h4>${title}</h4>
-    
-    <div class="radio-group">
-      <label data-group="${id}" data-val="Ya">
-        <input type="radio" name="${id}" value="Ya" 
-        onclick="toggle('${id}_d', true, '${id}', 'Ya')"> 
-        Dilakukan
-      </label>
-
-      <label data-group="${id}" data-val="Tidak">
-        <input type="radio" name="${id}" value="Tidak" 
-        onclick="toggle('${id}_d', false, '${id}', 'Tidak')"> 
-        Tidak
-      </label>
-    </div>
-
-    <div id="${id}_d" class="hidden detail-area">
-      ${withTime ? `<label style="font-size:12px; opacity:0.7">Waktu Pelaksanaan</label><input type="time" id="${id}_waktu">` : ""}
-      
-      ${withFoto ? `<label style="font-size:12px; opacity:0.7">Bukti Foto</label><input type="file" id="${id}_foto" accept="image/*">` : ""}
-      
-      <textarea id="${id}_ket" placeholder="Tulis catatan atau keterangan tambahan..."></textarea>
-    </div>
-  </div>
-  `;
-}
-
-/* ================= GENERATE ================= */
-function generateForm(){
-  dynamicForm.innerHTML =
-    radioSection("Makan Sahur","sahur",true,true)+
-    radioSection("Sholat Subuh","subuh")+
-    radioSection("Olahraga Pagi","olahraga",true)+
-    radioSection("Membantu Keluarga","keluarga",true)+
-    radioSection("Sholat Dzuhur","dzuhur")+
-    radioSection("Kegiatan Pesantren","pesantren",true)+
-    radioSection("Sholat Ashar","ashar")+
-    radioSection("Aksi Sosial/Kebaikan","aksi",true)+
-    radioSection("Buka Puasa","buka",true)+
-    radioSection("Sholat Magrib","magrib")+
-    radioSection("Sholat Isya","isya")+
-    radioSection("Sholat Tarawih","tarawih")+
-    radioSection("Tadarus Al-Quran","tadarus",true)+
-    radioSection("Tidur Malam","tidur",false,true);
-}
-
-/* ================= PEMBIMBING ================= */
-async function loadPembimbing(){
-  try {
-    const r = await fetch(WEB_APP_URL + "?action=getPembimbing&kelompok=" + encodeURIComponent(kelompok));
-    pembimbing.value = await r.text();
-  } catch(e) { pembimbing.value = "Gagal memuat"; }
-}
-
-/* ================= SUBMIT ================= */
-btnKirim.onclick = kirim;
-
-async function kirim(){
-  // Simple validation visual
-  if(!confirm("Apakah Anda yakin ingin mengirim laporan ini?")) return;
-
-  loader.classList.remove("hidden");
-  btnKirim.disabled = true;
-  btnKirim.innerText = "Mengirim...";
-
-  let fd = new FormData();
-  fd.append("action","simpan");
-  fd.append("nama",nama);
-  fd.append("kelompok",kelompok);
-  fd.append("pembimbing",pembimbing.value);
-  fd.append("lat",lat.value);
-  fd.append("long",longi.value);
-
-  const list=["sahur","subuh","olahraga","keluarga","dzuhur","pesantren","ashar","aksi","buka","magrib","isya","tarawih","tadarus","tidur"];
-
-  for(let id of list){
-    let st=document.querySelector(`input[name="${id}"]:checked`);
-    fd.append(id+"_status",st?st.value:"Tidak");
-
-    let w=document.getElementById(id+"_waktu");
-    if(w) fd.append(id+"_waktu",w.value||"");
-
-    let k=document.getElementById(id+"_ket");
-    if(k) fd.append(id+"_ket",k.value||"");
-
-    let f=document.getElementById(id+"_foto");
-    if(f && f.files[0]){
-      let reader=new FileReader();
-      await new Promise(r=>{
-        reader.onload=()=>{
-          fd.append(id+"_foto",reader.result);
-          r();
-        };
-        reader.readAsDataURL(f.files[0]);
-      });
+    if(!user || user.role !== 'siswa'){
+        alert("Silakan login sebagai siswa.");
+        location.href = 'index.html';
+    } else {
+        document.getElementById('namaSiswa').textContent = user.nama;
+        document.getElementById('kelompokSiswa').textContent = user.kelompok;
     }
-  }
 
-  try {
-    await fetch(WEB_APP_URL,{ method:"POST", body:fd });
-    alert("✅ Laporan berhasil dikirim!");
-    location.reload();
-  } catch(err) {
-    alert("❌ Gagal mengirim laporan. Periksa koneksi internet.");
-    loader.classList.add("hidden");
-    btnKirim.disabled = false;
-    btnKirim.innerText = "KIRIM LAPORAN";
-  }
-}
+    function logout(){
+        if(confirm("Keluar aplikasi?")){
+            localStorage.removeItem("user");
+            location.href = "index.html";
+        }
+    }
 
-/* ================= LOGOUT ================= */
-function logout(){
-  localStorage.clear();
-  location.href="index.html";
-}
+    function kirimLaporan(e){
+        e.preventDefault();
+        const btn = document.querySelector('.submit-btn');
+        const form = document.getElementById('laporanForm');
+        
+        btn.innerHTML = "⏳ Mengirim...";
+        btn.disabled = true;
 
-/* ================= INIT ================= */
-generateForm();
-loadPembimbing();
-getLocation();
+        const fd = new FormData(form);
+        fd.append("action", "inputSiswa");
+        fd.append("nama", user.nama);
+        fd.append("kelompok", user.kelompok);
 
+        fetch(WEB_APP_URL, { method: "POST", body: fd })
+        .then(r => r.text())
+        .then(res => {
+            alert("✅ Laporan Berhasil Dikirim!");
+            form.reset();
+        })
+        .catch(err => alert("❌ Gagal mengirim: " + err))
+        .finally(() => {
+            btn.innerHTML = "🚀 KIRIM LAPORAN";
+            btn.disabled = false;
+        });
+    }
 </script>
+
 </body>
 </html>
