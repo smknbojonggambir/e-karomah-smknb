@@ -1,463 +1,323 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Panel Siswa - E-KAROMAH</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #10b981; /* Emerald */
-            --primary-dark: #047857;
-            --gold: #fbbf24;    /* Emas */
-            --bg-dark: #022c22; /* Hijau Malam */
-            --glass: rgba(6, 78, 59, 0.6);
-            --text: #f0fdf4;
-            --danger: #ef4444;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Siswa - E-KAROMAH</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #064e3b 0%, #020617 100%);
-            color: var(--text);
-            padding-bottom: 100px; /* Ruang untuk tombol submit melayang */
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
+:root{
+--primary:#10b981;
+--primary-dark:#047857;
+--gold:#fbbf24;
+--bg-dark:#022c22;
+--glass:rgba(6,78,59,0.6);
+--text:#f0fdf4;
+--danger:#ef4444;
+}
 
-        /* --- Header Sticky --- */
-        .header-container {
-            background: rgba(2, 44, 34, 0.95);
-            backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 100;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .header-container h2 { margin:0; font-size:16px; color:var(--gold); display:flex; align-items:center; gap:8px;}
-        .btn-logout { background:rgba(239,68,68,0.2); border:1px solid var(--danger); color:var(--danger); padding:5px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; }
+body{
+margin:0;
+font-family:'Poppins',sans-serif;
+background:linear-gradient(135deg,#064e3b 0%,#020617 100%);
+color:var(--text);
+padding-bottom:120px;
+-webkit-tap-highlight-color:transparent;
+}
 
-        .container { max-width: 600px; margin: auto; padding: 20px; }
+/* HEADER */
+.header-container{
+background:rgba(2,44,34,0.95);
+backdrop-filter:blur(10px);
+position:sticky;top:0;z-index:100;
+padding:15px 20px;
+border-bottom:1px solid rgba(251,191,36,0.3);
+display:flex;justify-content:space-between;align-items:center;
+}
 
-        /* --- User Info Card --- */
-        .user-card {
-            background: linear-gradient(to right, #059669, #047857);
-            padding: 20px; border-radius: 16px; margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.1); font-size: 13px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative; overflow: hidden;
-        }
-        .user-card::before {
-            content: ""; position: absolute; top:-20px; right:-20px; width:100px; height:100px;
-            background: rgba(255,255,255,0.1); border-radius:50%;
-        }
-        .user-label { color: #a7f3d0; font-size: 11px; display: block; margin-bottom: 2px; }
-        .user-val { color: white; font-size: 16px; font-weight: 600; display: block; margin-bottom: 8px; }
-        .loc-badge { 
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; 
-            font-size: 11px; color: var(--gold); border: 1px dashed var(--gold);
-        }
+.header-container h2{
+margin:0;font-size:16px;color:var(--gold);
+}
 
-        /* --- Accordion Activity --- */
-        .activity-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px; margin-bottom: 12px;
-            overflow: hidden; transition: 0.3s;
-        }
-        .activity-card.active { border-color: var(--primary); background: rgba(6, 78, 59, 0.4); }
-        .activity-card.filled { border-left: 4px solid var(--primary); }
+.btn-logout{
+background:rgba(239,68,68,0.2);
+border:1px solid var(--danger);
+color:var(--danger);
+padding:5px 12px;
+border-radius:20px;
+font-size:11px;
+font-weight:600;
+cursor:pointer;
+}
 
-        .activity-header {
-            padding: 16px;
-            cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .activity-header h4 { margin:0; font-size:14px; color:#e2e8f0; font-weight:500; }
-        .toggle-icon { 
-            width: 24px; height: 24px; background: rgba(255,255,255,0.1); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 16px; color: var(--gold); transition: 0.3s; 
-        }
-        .activity-card.active .toggle-icon { transform: rotate(180deg); background: var(--primary); color: white; }
-        .activity-card.active h4 { color: var(--primary); font-weight: 700; }
+.container{max-width:600px;margin:auto;padding:20px}
 
-        /* --- Input Area --- */
-        .activity-body {
-            display: none; padding: 0 16px 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            animation: slideDown 0.3s ease;
-        }
-        @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
-        .activity-body.open { display: block; }
+/* USER CARD */
+.user-card{
+background:linear-gradient(to right,#059669,#047857);
+padding:20px;border-radius:16px;margin-bottom:25px;
+font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
 
-        .form-group { margin-top: 15px; }
-        .form-label { display: block; font-size: 12px; margin-bottom: 6px; color: #94a3b8; }
+.user-label{color:#a7f3d0;font-size:11px}
+.user-val{color:white;font-size:16px;font-weight:600}
 
-        /* Custom Inputs */
-        input[type="time"], input[type="text"], input[type="file"] {
-            width: 100%; padding: 12px;
-            background: #0f172a; border: 1px solid #334155;
-            border-radius: 10px; color: white; box-sizing: border-box; 
-            font-family:inherit; font-size: 13px;
-        }
-        input:focus { outline:none; border-color:var(--primary); }
-        
-        /* Status Checkbox Button */
-        .status-wrapper {
-            margin-top: 15px;
-            position: relative;
-        }
-        .chk-hidden { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
-        .chk-label {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: #334155; padding: 12px; border-radius: 10px;
-            color: #cbd5e1; font-weight: 600; font-size: 13px; cursor: pointer;
-            transition: 0.2s; border: 2px solid transparent;
-        }
-        .chk-hidden:checked ~ .chk-label {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
+.loc-badge{
+display:inline-flex;align-items:center;gap:5px;
+background:rgba(0,0,0,0.2);
+padding:4px 10px;border-radius:20px;
+font-size:11px;color:var(--gold);
+}
 
-        /* Submit Floating Button */
-        .fab-container {
-            position: fixed; bottom: 0; left:0; right:0; 
-            padding: 15px 20px 25px;
-            background: linear-gradient(to top, #020617 80%, transparent 100%);
-            max-width: 600px; margin: auto; z-index: 90;
-        }
-        .submit-btn {
-            width: 100%; padding: 16px;
-            background: var(--gold); color: #022c22;
-            border: none; border-radius: 14px;
-            font-weight: 700; font-size: 16px;
-            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.4);
-            cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
-        .submit-btn:disabled { background: #64748b; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+/* ACTIVITY */
+.activity-card{
+background:rgba(30,41,59,0.6);
+border:1px solid rgba(255,255,255,0.05);
+border-radius:12px;margin-bottom:12px;
+overflow:hidden;
+}
 
-        /* Loading Overlay */
-        #loaderOverlay {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.85); z-index: 200;
-            flex-direction: column; justify-content: center; align-items: center; text-align: center;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1);
-            border-top-color: var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 15px;
-        }
-        @keyframes spin { to {transform: rotate(360deg);} }
+.activity-header{
+padding:16px;
+cursor:pointer;
+display:flex;justify-content:space-between;
+}
 
-    </style>
+.activity-body{
+display:none;padding:0 16px 20px;
+}
+
+.activity-body.open{display:block}
+
+input[type="time"],input[type="text"],input[type="file"]{
+width:100%;padding:12px;
+background:#0f172a;
+border:1px solid #334155;
+border-radius:10px;
+color:white;
+box-sizing:border-box;
+margin-top:5px;
+}
+
+.chk-hidden{display:none}
+
+.chk-label{
+display:flex;justify-content:center;
+background:#334155;
+padding:10px;border-radius:10px;
+cursor:pointer;margin-top:10px;
+}
+
+/* CHAT */
+.chat-box{
+background:rgba(15,23,42,0.8);
+border:1px solid rgba(255,255,255,0.05);
+border-radius:12px;
+padding:12px;
+height:220px;
+overflow-y:auto;
+font-size:12px;
+margin-bottom:10px;
+}
+
+.chat-input-wrap{
+display:flex;gap:8px;margin-bottom:20px;
+}
+
+.chat-input-wrap input{
+flex:1;
+}
+
+.chat-btn{
+background:var(--primary);
+border:none;padding:10px 14px;
+border-radius:10px;color:white;font-weight:600;
+cursor:pointer;
+}
+
+/* SUBMIT */
+.fab-container{
+position:fixed;bottom:0;left:0;right:0;
+padding:15px 20px 25px;
+background:linear-gradient(to top,#020617 80%,transparent);
+max-width:600px;margin:auto;
+}
+
+.submit-btn{
+width:100%;padding:16px;
+background:var(--gold);color:#022c22;
+border:none;border-radius:14px;
+font-weight:700;font-size:16px;
+cursor:pointer;
+}
+</style>
 </head>
 <body>
 
 <div class="header-container">
-    <h2>🌙 E-KAROMAH</h2>
-    <button class="btn-logout" onclick="logout()">Keluar</button>
+<h2>🌙 E-KAROMAH</h2>
+<button class="btn-logout" onclick="logout()">Keluar</button>
 </div>
 
 <div class="container">
-    <div class="user-card">
-        <span class="user-label">Nama Siswa</span>
-        <span class="user-val" id="namaSiswa">Memuat...</span>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <span class="user-label">Kelompok</span>
-                <span style="color:white; font-weight:500;" id="kelompokSiswa">-</span>
-            </div>
-            <div id="locStatus" class="loc-badge">
-                <span id="gpsIcon">📡</span> <span id="gpsText">Mencari GPS...</span>
-            </div>
-        </div>
-    </div>
 
-    <form id="formLaporan" onsubmit="return false;">
-        <input type="hidden" id="inputNama">
-        <input type="hidden" id="inputKelompok">
-        <input type="hidden" id="inputPembimbing">
-        <input type="hidden" id="inputLatLong">
-
-        <h3 style="color:var(--gold); font-size:14px; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">📋 Kegiatan Harian</h3>
-        
-        <div id="activitiesContainer"></div>
-
-        <div class="activity-card" style="margin-top:20px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
-            <div class="activity-header" style="cursor:default;">
-                <h4 style="color:#60a5fa;">📝 Catatan Tambahan</h4>
-            </div>
-            <div class="activity-body open" style="padding-top:0;">
-                <input type="text" id="inputCatatan" placeholder="Apa yang kamu rasakan hari ini? (Opsional)" style="background: rgba(0,0,0,0.3);">
-            </div>
-        </div>
-
-        <div class="fab-container">
-            <button type="button" class="submit-btn" id="btnSubmit" onclick="kirimLaporan()">
-                <span>🚀 KIRIM LAPORAN</span>
-            </button>
-        </div>
-    </form>
+<div class="user-card">
+<span class="user-label">Nama</span>
+<span class="user-val" id="namaSiswa"></span>
+<span class="user-label">Kelompok</span>
+<div id="kelompokSiswa"></div>
 </div>
 
-<div id="loaderOverlay">
-    <div class="spinner"></div>
-    <h3 style="color:white; font-size:16px;">Sedang Mengirim...</h3>
-    <p style="color:#94a3b8; font-size:12px;">Mohon jangan tutup halaman ini.</p>
+<form id="formLaporan" onsubmit="return false;">
+<input type="hidden" id="inputNama">
+<input type="hidden" id="inputKelompok">
+<input type="hidden" id="inputLatLong">
+
+<h3 style="color:var(--gold)">📋 Kegiatan Harian</h3>
+<div id="activitiesContainer"></div>
+
+<div style="margin-top:20px">
+<input type="text" id="inputCatatan" placeholder="Catatan tambahan...">
+</div>
+
+<!-- ================= CHAT KELOMPOK ================= -->
+<h3 style="color:var(--gold);margin-top:30px">💬 Chat Kelompok</h3>
+
+<div id="chatBox" class="chat-box"></div>
+
+<div class="chat-input-wrap">
+<input type="text" id="chatInput" placeholder="Tulis pesan...">
+<button type="button" class="chat-btn" onclick="kirimChat()">Kirim</button>
+</div>
+
+<div class="fab-container">
+<button type="button" class="submit-btn" onclick="kirimLaporan()">
+🚀 KIRIM LAPORAN
+</button>
+</div>
+
+</form>
 </div>
 
 <script>
-// ==========================================
-// CONFIGURATION
-// ==========================================
-// ⚠️ GANTI URL DI BAWAH INI DENGAN HASIL DEPLOY TERBARU ANDA
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx0KQIA3-U-uRVSr_kTxIHjLhJm-O5cUXsLj7noiT2ww3j2CFjtv-_W97CsFUTB3bHG8Q/exec"; 
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwNiMVctO_IjVpVxMaAJKPKi2oOebGBDwOlFVJnQJ1pCoxNiOwGscPMwFrCfLhJmyxBkQ/exec";
 
-// DAFTAR KEGIATAN
-const activities = [
-    { id: "Sahur", label: "🍽️ Makan Sahur" },
-    { id: "Subuh", label: "🕌 Sholat Subuh" },
-    { id: "Olahraga", label: "🏃‍♂️ Olahraga / Fisik" },
-    { id: "Keluarga", label: "🧹 Membantu Orang Tua" },
-    { id: "Dzuhur", label: "🕌 Sholat Dzuhur" },
-    { id: "Pesantren", label: "📖 Pesantren Kilat/Sekolah" },
-    { id: "Ashar", label: "🕌 Sholat Ashar" },
-    { id: "Aksi", label: "🤝 Aksi Sosial / Berbagi" },
-    { id: "Buka", label: "🥤 Buka Puasa" },
-    { id: "Magrib", label: "🕌 Sholat Magrib" },
-    { id: "Isya", label: "🕌 Sholat Isya" },
-    { id: "Tarawih", label: "📿 Sholat Tarawih" },
-    { id: "Tadarus", label: "📖 Tadarus Al-Qur'an" },
-    { id: "Tidur", label: "😴 Tidur Malam" }
+const activities=[
+{id:"Subuh",label:"🕌 Sholat Subuh"},
+{id:"Dzuhur",label:"🕌 Sholat Dzuhur"},
+{id:"Ashar",label:"🕌 Sholat Ashar"},
+{id:"Magrib",label:"🕌 Sholat Magrib"},
+{id:"Isya",label:"🕌 Sholat Isya"},
+{id:"Tarawih",label:"📿 Sholat Tarawih"},
+{id:"Tadarus",label:"📖 Tadarus"}
 ];
 
-// List ID yang TIDAK mewajibkan/menampilkan upload foto
-const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
+const user=JSON.parse(localStorage.getItem("user"));
+if(!user||user.role!=="siswa"){location.href="index.html"}
 
-// 1. CEK LOGIN
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user || user.role !== 'siswa'){
-    alert("⛔ Akses Ditolak. Harap login sebagai Siswa.");
-    // Redirect ke halaman login jika ada, jika ini satu file, abaikan
-    location.href = 'index.html'; 
-}
+document.getElementById("namaSiswa").textContent=user.nama;
+document.getElementById("kelompokSiswa").textContent=user.kelompok;
+document.getElementById("inputNama").value=user.nama;
+document.getElementById("inputKelompok").value=user.kelompok;
 
-// 2. SET DATA USER KE UI
-if(user){
-    document.getElementById('namaSiswa').textContent = user.nama;
-    document.getElementById('kelompokSiswa').textContent = user.kelompok;
-    document.getElementById('inputNama').value = user.nama;
-    document.getElementById('inputKelompok').value = user.kelompok;
-    // Cari pembimbing dari localstorage atau biarkan kosong jika tidak disimpan
-    // document.getElementById('inputPembimbing').value = user.pembimbing || "";
-}
-
-// 3. AMBIL LOKASI (GPS)
-const gpsText = document.getElementById('gpsText');
-const gpsIcon = document.getElementById('gpsIcon');
-
-if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            const lat = pos.coords.latitude.toFixed(5);
-            const long = pos.coords.longitude.toFixed(5);
-            const loc = `${lat},${long}`;
-            
-            document.getElementById('inputLatLong').value = loc;
-            gpsText.textContent = "Lokasi Terkunci";
-            gpsText.style.color = "#34d399";
-            gpsIcon.textContent = "📍";
-        },
-        (err) => {
-            gpsText.textContent = "Gagal ambil lokasi";
-            gpsText.style.color = "#ef4444";
-            gpsIcon.textContent = "⚠️";
-            console.warn("GPS Error: " + err.message);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-    );
-} else {
-    gpsText.textContent = "GPS tidak support";
-}
-
-// 4. RENDER FORM KEGIATAN
-const container = document.getElementById("activitiesContainer");
-
-activities.forEach(act => {
-    const needPhoto = !noPhotoList.includes(act.id);
-    const photoInputHtml = needPhoto ? `
-        <div class="form-group">
-            <label class="form-label">📸 Foto Bukti <span style="color:#ef4444">*</span></label>
-            <input type="file" accept="image/*" id="file_${act.id}">
-        </div>` : '';
-
-    const html = `
-    <div class="activity-card" id="card_${act.id}">
-        <div class="activity-header" onclick="toggleAccordion('${act.id}')">
-            <h4>${act.label}</h4>
-            <div class="toggle-icon" id="icon_${act.id}">▼</div>
-        </div>
-        <div class="activity-body" id="body_${act.id}">
-            
-            <div class="status-wrapper">
-                <input type="checkbox" id="chk_${act.id}" class="chk-hidden" onchange="updateCardStyle('${act.id}')">
-                <label for="chk_${act.id}" class="chk-label">
-                    <span id="lbl_icon_${act.id}">⬜</span> Saya Melaksanakan
-                </label>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">⏰ Pukul Berapa?</label>
-                <input type="time" id="time_${act.id}">
-            </div>
-
-            ${photoInputHtml}
-            
-            <div class="form-group">
-                <label class="form-label">📝 Keterangan Singkat</label>
-                <input type="text" id="ket_${act.id}" placeholder="Contoh: Di Masjid / Di Rumah">
-            </div>
-        </div>
-    </div>`;
-    container.innerHTML += html;
+/* RENDER KEGIATAN */
+const container=document.getElementById("activitiesContainer");
+activities.forEach(act=>{
+container.innerHTML+=`
+<div class="activity-card">
+<div class="activity-header" onclick="this.nextElementSibling.classList.toggle('open')">
+${act.label}
+</div>
+<div class="activity-body">
+<label><input type="checkbox" id="chk_${act.id}"> Dilaksanakan</label>
+<input type="time" id="time_${act.id}">
+<input type="text" id="ket_${act.id}" placeholder="Keterangan">
+</div>
+</div>`;
 });
 
-// --- UI FUNCTIONS ---
-function toggleAccordion(id) {
-    const body = document.getElementById(`body_${id}`);
-    const card = document.getElementById(`card_${id}`);
-    
-    // Auto-close yang lain
-    document.querySelectorAll('.activity-body').forEach(el => {
-        if(el.id !== `body_${id}`) el.classList.remove('open');
-    });
-    document.querySelectorAll('.activity-card').forEach(el => {
-        if(el.id !== `card_${id}` && !el.classList.contains('filled')) el.classList.remove('active');
-    });
+/* SUBMIT */
+async function kirimLaporan(){
+let payload={
+action:"simpan",
+nama:user.nama,
+kelompok:user.kelompok,
+Catatan:document.getElementById("inputCatatan").value
+};
 
-    body.classList.toggle('open');
-    card.classList.toggle('active');
+activities.forEach(act=>{
+const chk=document.getElementById("chk_"+act.id);
+if(chk.checked){
+payload[act.id+"_Status"]="Ya";
+payload[act.id+"_Waktu"]=document.getElementById("time_"+act.id).value;
+payload[act.id+"_Ket"]=document.getElementById("ket_"+act.id).value;
+}else{
+payload[act.id+"_Status"]="Tidak";
+}
+});
+
+await fetch(WEB_APP_URL,{
+method:"POST",
+body:JSON.stringify(payload)
+});
+
+alert("Laporan terkirim");
+location.reload();
 }
 
-function updateCardStyle(id) {
-    const chk = document.getElementById(`chk_${id}`);
-    const lblIcon = document.getElementById(`lbl_icon_${id}`);
-    const card = document.getElementById(`card_${id}`);
-    
-    if(chk.checked) {
-        lblIcon.textContent = "✅";
-        card.classList.add('filled');
-        card.style.borderLeft = "4px solid var(--primary)";
-    } else {
-        lblIcon.textContent = "⬜";
-        card.classList.remove('filled');
-        card.style.borderLeft = "1px solid rgba(255,255,255,0.05)";
-    }
+/* ================= CHAT ================= */
+
+function loadChat(){
+fetch(WEB_APP_URL+"?action=getChat")
+.then(res=>res.json())
+.then(data=>{
+const box=document.getElementById("chatBox");
+box.innerHTML="";
+data.filter(c=>c.kelompok===user.kelompok)
+.forEach(c=>{
+const isMe=c.nama===user.nama;
+box.innerHTML+=`
+<div style="text-align:${isMe?'right':'left'};margin-bottom:6px">
+<span style="
+display:inline-block;
+background:${isMe?'var(--primary)':'#334155'};
+padding:6px 10px;
+border-radius:10px;
+max-width:70%">
+${c.pesan}
+</span>
+</div>`;
+});
+box.scrollTop=box.scrollHeight;
+});
 }
 
-// 5. PROSES SUBMIT (JSON)
-async function kirimLaporan() {
-    // Validasi: Minimal 1 kegiatan
-    const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
-    if(checkedBoxes.length === 0){
-        alert("⚠️ Mohon tandai minimal satu kegiatan yang sudah dilaksanakan.");
-        return;
-    }
+function kirimChat(){
+const pesan=document.getElementById("chatInput").value.trim();
+if(!pesan)return;
 
-    const btn = document.getElementById('btnSubmit');
-    const overlay = document.getElementById('loaderOverlay');
-    
-    overlay.style.display = 'flex';
-    btn.disabled = true;
-
-    try {
-        // --- MEMBANGUN OBJECT JSON UNTUK DIKIRIM ---
-        let payload = {
-            action: "simpan",
-            nama: document.getElementById('inputNama').value,
-            kelompok: document.getElementById('inputKelompok').value,
-            pembimbing: document.getElementById('inputPembimbing').value,
-            latlong: document.getElementById('inputLatLong').value,
-            Catatan: document.getElementById('inputCatatan').value
-        };
-
-        // Loop setiap kegiatan untuk mengisi payload
-        for (let act of activities) {
-            const chk = document.getElementById(`chk_${act.id}`);
-            const time = document.getElementById(`time_${act.id}`);
-            const ket = document.getElementById(`ket_${act.id}`);
-            const fileInput = document.getElementById(`file_${act.id}`);
-
-            if (chk.checked) {
-                payload[`${act.id}_Status`] = "Ya";
-                payload[`${act.id}_Waktu`] = time.value;
-                payload[`${act.id}_Ket`] = ket.value;
-
-                // Proses Foto
-                if (!noPhotoList.includes(act.id)) {
-                    if (fileInput.files.length > 0) {
-                        // Convert ke Base64
-                        payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
-                    } else {
-                        throw new Error(`⚠️ Foto bukti untuk "${act.label}" wajib diisi.`);
-                    }
-                }
-            } else {
-                payload[`${act.id}_Status`] = "Tidak";
-            }
-        }
-
-        // --- KIRIM KE GOOGLE SCRIPT ---
-        // Menggunakan 'no-cors' tidak disarankan karena kita butuh respon JSON
-        // Kita kirim sebagai text biasa yang berisi JSON string
-        
-        console.log("Mengirim data...", payload);
-
-        const response = await fetch(WEB_APP_URL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if(result.status === "ok"){
-             alert("✅ Alhamdulillah! Laporan berhasil dikirim.");
-             window.location.reload(); 
-        } else {
-             throw new Error("Gagal menyimpan data di server.");
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert(err.message);
-        overlay.style.display = 'none';
-        btn.disabled = false;
-    }
+fetch(WEB_APP_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"sendChat",
+nama:user.nama,
+kelompok:user.kelompok,
+pesan:pesan
+})
+}).then(()=>{
+document.getElementById("chatInput").value="";
+loadChat();
+});
 }
 
-// Helper: Convert File to Base64
-function convertToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
+setInterval(loadChat,5000);
+loadChat();
 
 function logout(){
-    if(confirm("Yakin ingin keluar?")){
-        localStorage.removeItem("user");
-        location.href = "index.html"; // Sesuaikan dengan nama file login anda
-    }
+localStorage.removeItem("user");
+location.href="index.html";
 }
 </script>
-
 </body>
 </html>
