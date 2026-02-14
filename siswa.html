@@ -141,11 +141,11 @@ input:focus { outline:none; border-color:var(--gold); }
 
 <script>
 // ==========================================
-// CONFIG
+// CONFIG: GANTI URL DI BAWAH INI
 // ==========================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoY-pOhMN5zRptRwO8GQjOIGPyN6YL6uZywUCs3QL8aWDNyAHugqgLTcee_z4jcRZZEw/exec"; // Ganti URL Script Google App Anda
+const WEB_APP_URL = "URL_WEB_APP_ANDA_DISINI"; 
 
-// DAFTAR KEGIATAN SESUAI KOLOM DATA ANDA
+// DAFTAR KEGIATAN
 const activities = [
     { id: "Sahur", label: "Sahur" },
     { id: "Subuh", label: "Sholat Subuh" },
@@ -162,6 +162,9 @@ const activities = [
     { id: "Tadarus", label: "Tadarus Al-Qur'an" },
     { id: "Tidur", label: "Istirahat / Tidur" }
 ];
+
+// LIST ID YANG TIDAK PERLU UPLOAD FOTO (SHOLAT)
+const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
 
 // 1. CEK LOGIN
 const user = JSON.parse(localStorage.getItem("user"));
@@ -192,9 +195,12 @@ if(navigator.geolocation){
     document.getElementById('locStatus').textContent = "❌ GPS tidak didukung browser ini";
 }
 
-// 4. GENERATE FORM KEGIATAN (Render HTML)
+// 4. GENERATE FORM KEGIATAN
 const container = document.getElementById("activitiesContainer");
 activities.forEach(act => {
+    // Cek apakah kegiatan ini butuh foto atau tidak
+    const needPhoto = !noPhotoList.includes(act.id);
+
     const html = `
     <div class="activity-card">
         <div class="activity-header" onclick="toggleAccordion(this)">
@@ -215,11 +221,12 @@ activities.forEach(act => {
                 <input type="time" name="${act.id}_Waktu">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="${needPhoto ? '' : 'display:none'}">
                 <label>📸 Foto Bukti</label>
                 <input type="file" accept="image/*" id="file_${act.id}">
-                <input type="hidden" name="${act.id}_Foto" id="base64_${act.id}">
             </div>
+            
+            <input type="hidden" name="${act.id}_Foto" id="base64_${act.id}">
 
             <div class="form-group">
                 <label>📝 Keterangan</label>
@@ -235,7 +242,6 @@ function toggleAccordion(header) {
     const body = header.nextElementSibling;
     const icon = header.querySelector('.toggle-icon');
     
-    // Tutup yang lain (opsional, biar rapi)
     document.querySelectorAll('.activity-body').forEach(el => {
         if(el !== body) el.classList.remove('open');
     });
@@ -243,7 +249,6 @@ function toggleAccordion(header) {
         if(el !== icon) el.textContent = '+';
     });
 
-    // Toggle current
     body.classList.toggle('open');
     icon.textContent = body.classList.contains('open') ? '-' : '+';
 }
@@ -252,19 +257,20 @@ function toggleAccordion(header) {
 async function kirimLaporan(e) {
     e.preventDefault();
     const btn = document.querySelector('.submit-btn');
-    btn.innerHTML = "⏳ Mengompres & Mengirim...";
+    btn.innerHTML = "⏳ Mengirim...";
     btn.disabled = true;
 
     try {
-        // A. Proses semua file input menjadi Base64
+        // A. Proses file input menjadi Base64 (Hanya jika input file ada & diisi)
         for (let act of activities) {
             const fileInput = document.getElementById(`file_${act.id}`);
             const hiddenInput = document.getElementById(`base64_${act.id}`);
             
-            if (fileInput.files.length > 0) {
+            // Cek apakah elemen file input ada dan memiliki file
+            if (fileInput && fileInput.files.length > 0) {
                 hiddenInput.value = await convertToBase64(fileInput.files[0]);
             } else {
-                hiddenInput.value = ""; // Kosong jika tidak ada foto
+                hiddenInput.value = ""; // Kosong
             }
         }
 
@@ -272,7 +278,7 @@ async function kirimLaporan(e) {
         const form = document.getElementById('formLaporan');
         const fd = new FormData(form);
 
-        // Tambahan logik checkbox (karena unchecked checkbox tidak terkirim di FormData)
+        // Handle checkbox status (agar terkirim "Tidak" jika tidak dicentang)
         activities.forEach(act => {
              if(!form.querySelector(`[name="${act.id}_Status"]`).checked){
                  fd.append(`${act.id}_Status`, "Tidak");
@@ -284,10 +290,10 @@ async function kirimLaporan(e) {
             body: fd
         });
 
-        const result = await response.text(); // Biasanya return text/json dari Apps Script
-        
+        // Cek response
+        const result = await response.text();
         alert("✅ Alhamdulillah! Laporan berhasil dikirim.");
-        window.location.reload(); // Refresh halaman
+        window.location.reload(); 
 
     } catch (err) {
         console.error(err);
@@ -302,7 +308,7 @@ function convertToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result); // Mengambil string base64
+        reader.onload = () => resolve(reader.result);
         reader.onerror = error => reject(error);
     });
 }
