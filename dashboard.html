@@ -1,89 +1,274 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard - E-KAROMAH</title>
-<meta name="viewport" content="width=device-width">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pembimbing - E-KAROMAH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-<style>
-body{
-  background:#020617;
-  color:white;
-  font-family:system-ui;
-}
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
 
-header{
-  background:#1e293b;
-  padding:15px;
-  text-align:center;
-}
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
 
-.card{
-  background:#1e293b;
-  margin:15px;
-  padding:15px;
-  border-radius:12px;
-}
-</style>
+        .profile-info h2 { margin: 0; font-size: 24px; color: var(--primary); }
+        .profile-info p { margin: 5px 0 0; font-size: 14px; opacity: 0.8; }
+
+        .header-btn { display: flex; gap: 10px; }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: inherit;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        .refresh-btn { background: var(--primary); }
+        .logout-btn { background: var(--danger); }
+        .save-btn { 
+            background: #f59e0b; 
+            width: 100%; 
+            margin-top: 8px;
+            padding: 6px;
+            font-size: 12px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        
+        thead { background: rgba(59, 130, 246, 0.2); }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        th { font-weight: 600; color: #93c5fd; white-space: nowrap; }
+        tr:hover { background: rgba(255,255,255,0.03); }
+
+        /* Styling untuk Textarea Catatan */
+        textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 50px;
+            box-sizing: border-box; /* Agar padding tidak merusak lebar */
+        }
+
+        textarea:focus { outline: 1px solid var(--primary); }
+
+        #loading { text-align: center; padding: 40px; display: none; }
+        .spinner {
+            width: 30px; height: 30px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s infinite linear;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; align-items: flex-start; }
+            .header-btn { width: 100%; }
+            button { flex: 1; }
+        }
+    </style>
 </head>
-
 <body>
 
-<header>
-<h2>📊 Dashboard Statistik</h2>
-<a href="admin.html" style="color:#38bdf8">⬅️ Kembali</a>
-</header>
+<div class="container">
+    <header>
+        <div class="profile-info">
+            <h2 id="groupName">Kelompok ...</h2>
+            <p id="mentorName">Pembimbing: ...</p>
+        </div>
+        <div class="header-btn">
+            <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </div>
+    </header>
 
-<div class="card">
+    <div id="loading">
+        <div class="spinner"></div>
+        <span>Mengambil data laporan siswa...</span>
+    </div>
 
-<canvas id="chart1"></canvas>
-
-</div>
-
-<div class="card">
-
-<canvas id="chart2"></canvas>
-
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th width="15%">Tanggal</th>
+                    <th width="20%">Nama Siswa</th>
+                    <th width="10%">Hadir</th>
+                    <th width="30%">Kegiatan</th>
+                    <th width="25%">Catatan Pembimbing</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
+    // ==========================================
+    // CONFIG: GANTI URL DI BAWAH INI
+    // ==========================================
+    const SCRIPT_URL = "URL_WEB_APP_ANDA_DISINI"; 
 
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbxLR_m_WV59sIKvYVf5GgwMiKjVYxY0fG3gwJvqgrNyDJbsrd-y9QrYxIYrrWkmF5wMFw/exec";
+    // Cek Login saat halaman dibuka
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    // Validasi Akses
+    if (!user || user.role !== "pembimbing") {
+        alert("Akses Ditolak. Silakan login sebagai Pembimbing.");
+        window.location.href = "index.html";
+    } else {
+        // Set Header Info
+        document.getElementById("groupName").textContent = "Rekap Kelompok: " + user.kelompok;
+        document.getElementById("mentorName").textContent = "Pembimbing: " + (user.nama || user.username);
+        
+        // Load data pertama kali
+        loadData();
+    }
 
-async function loadChart(){
+    // Fungsi Load Data dari Google Sheet
+    function loadData() {
+        const tbody = document.getElementById("tableBody");
+        const loading = document.getElementById("loading");
+        
+        tbody.innerHTML = "";
+        loading.style.display = "block";
 
- const r=await fetch(WEB_APP_URL+"?action=statistik");
- const d=await r.json();
+        // Fetch data dengan parameter kelompok
+        fetch(`${SCRIPT_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`)
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = "none";
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; opacity: 0.6;">Belum ada laporan masuk untuk kelompok ${user.kelompok}.</td></tr>`;
+                    return;
+                }
 
+                data.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${item.tanggal}</td>
+                        <td style="font-weight:600; color:#93c5fd">${item.nama}</td>
+                        <td>${item.hadir}</td>
+                        <td>${item.kegiatan}</td>
+                        <td>
+                            <textarea id="note-${item.id}" placeholder="Tulis catatan/nilai...">${item.catatan}</textarea>
+                            <button class="save-btn" onclick="saveNote(${item.id})">💾 Simpan Catatan</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loading.style.display = "none";
+                alert("Gagal memuat data. Periksa koneksi internet atau URL Script.");
+            });
+    }
 
- new Chart(chart1,{
-  type:"bar",
-  data:{
-    labels:d.kelompok,
-    datasets:[{
-      label:"Jumlah Siswa",
-      data:d.jumlah
-    }]
-  }
- });
+    // Fungsi Simpan Catatan
+    function saveNote(rowId) {
+        const noteValue = document.getElementById(`note-${rowId}`).value;
+        const btn = event.target;
+        
+        // Ubah tombol jadi loading
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Menyimpan...";
+        btn.disabled = true;
 
+        const formData = new FormData();
+        formData.append('action', 'simpanCatatan');
+        formData.append('id', rowId);
+        formData.append('catatan', noteValue);
 
- new Chart(chart2,{
-  type:"pie",
-  data:{
-    labels:d.status,
-    datasets:[{
-      data:d.total
-    }]
-  }
- });
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(result => {
+            alert("✅ Catatan berhasil disimpan!");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        })
+        .catch(error => {
+            alert("❌ Gagal menyimpan.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
 
-}
-
-loadChart();
-
+    // Fungsi Logout
+    function logout() {
+        if(confirm("Yakin ingin keluar?")) {
+            localStorage.removeItem("user");
+            window.location.href = "index.html";
+        }
+    }
 </script>
 
 </body>
