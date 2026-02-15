@@ -441,28 +441,35 @@ async function convertToBase64(file) {
 }
 
 async function kirimLaporan() {
-    const checked = document.querySelectorAll('.chk-hidden:checked');
-    if(checked.length === 0) return alert("Pilih minimal 1 kegiatan!");
+    const checked = document.querySelectorAll('.chk-hidden:checked');
+    if(checked.length === 0) return alert("Pilih minimal 1 kegiatan!");
 
-    const btn = document.getElementById('btnSubmit');
-    const overlay = document.getElementById('loaderOverlay');
-    overlay.style.display = 'flex';
-    btn.disabled = true;
+    const btn = document.getElementById('btnSubmit');
+    const overlay = document.getElementById('loaderOverlay');
+    overlay.style.display = 'flex';
+    btn.disabled = true;
 
-    try {
-        const now = new Date();
-        let payload = {
-            action: "simpan",
-            Nama: document.getElementById('inputNama').value,
-            Kelompok: document.getElementById('inputKelompok').value,
-            Pembimbing: document.getElementById('inputPembimbing').value,
-            Tanggal: now.toISOString().split('T')[0],
-            Time: now.toLocaleTimeString(),
-            LatLong: document.getElementById('inputLat').value + ", " + document.getElementById('inputLong').value,
-            Catatan: document.getElementById('inputCatatan').value
-        };
+    try {
+        const now = new Date();
+        let payload = {
+            action: "simpan",
+            Nama: document.getElementById('inputNama').value,
+            Kelompok: document.getElementById('inputKelompok').value,
+            Pembimbing: document.getElementById('inputPembimbing').value,
+            Tanggal: now.toISOString().split('T')[0],
+            Time: now.toLocaleTimeString(),
+            
+            // -- PERBAIKAN DIMULAI DI SINI --
+            // Mengirim data secara terpisah maupun digabung agar terbaca oleh G-Sheet
+            Lat: document.getElementById('inputLat').value,
+            Long: document.getElementById('inputLong').value,
+            LatLong: document.getElementById('inputLat').value + ", " + document.getElementById('inputLong').value,
+            // -- PERBAIKAN SELESAI --
 
-        for (const act of activities) {
+            Catatan: document.getElementById('inputCatatan').value
+        };
+
+        for (const act of activities) {
             const isChecked = document.getElementById(`chk_${act.id}`).checked;
             payload[`${act.id}_Status`] = isChecked ? "Ya" : "Tidak";
             payload[`${act.id}_Waktu`] = isChecked ? document.getElementById(`time_${act.id}`).value : "-";
