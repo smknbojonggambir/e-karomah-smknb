@@ -99,7 +99,7 @@
             padding-bottom: 15px;
             border-bottom: 4px double #b45309; 
         }
-        .cert-logo { width: 100px; height: auto; object-fit: contain; }
+        .cert-logo { width: 100px; height: 100px; object-fit: contain; }
         .cert-identity { text-align: center; color: #000; }
         .cert-identity h2 { margin: 0; font-family: 'Times New Roman', serif; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #000; }
         .cert-identity h3 { margin: 5px 0 0 0; font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; }
@@ -114,7 +114,9 @@
         .cert-data-table td:last-child { text-align: center; font-family: 'Courier New', monospace; font-weight: bold; }
         .cert-footer { display: flex; justify-content: space-around; margin-top: 30px; }
         .sign-box { text-align: center; font-size: 14px; color: #000; }
-        .sign-line { width: 180px; border-top: 1px solid #333; margin: 60px auto 5px; }
+        .sign-ttd-wrapper { height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-top: 5px; }
+        .sign-ttd-wrapper img { max-height: 60px; max-width: 150px; object-fit: contain; }
+        .sign-line { width: 180px; border-top: 1px solid #333; margin: 5px auto; }
 
         @media print {
             body * { visibility: hidden; }
@@ -202,7 +204,38 @@
 
             <div id="page-sertifikat" class="page">
                 <h1>Generator Sertifikat</h1>
+                
                 <div class="card">
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border);">
+                        <h3 style="margin-top:0; font-size:14px; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:10px;">⚙️ Pengaturan Kop & Tanda Tangan</h3>
+                        
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:5px;">Nama Kepala Sekolah</label>
+                                <input type="text" id="input-kepsek-name" placeholder="Contoh: Drs. H. Ahmad, M.Pd." style="width:100%; box-sizing:border-box; padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid var(--border);">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:5px;">Nama Ketua Pelaksana</label>
+                                <input type="text" id="input-ketua-name" placeholder="Contoh: Budi Santoso, S.Pd.I" style="width:100%; box-sizing:border-box; padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid var(--border);">
+                            </div>
+                        </div>
+                
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:5px;">Upload Logo Sekolah</label>
+                                <input type="file" id="input-logo-file" accept="image/*" style="font-size:12px; color:var(--text-muted); width: 100%;">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:5px;">Upload TTD Kepsek (Opsional)</label>
+                                <input type="file" id="input-kepsek-sign" accept="image/*" style="font-size:12px; color:var(--text-muted); width: 100%;">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:5px;">Upload TTD Ketua (Opsional)</label>
+                                <input type="file" id="input-ketua-sign" accept="image/*" style="font-size:12px; color:var(--text-muted); width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
                         <select id="cert-type" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid var(--border);">
                             <option value="Siswa">Sertifikat Peserta (Siswa)</option>
@@ -215,7 +248,8 @@
                     
                     <div id="certificate-preview" class="print-area">
                         <div class="cert-header">
-                            <img src="https://via.placeholder.com/150x150.png" alt="Logo SMKN Bojonggambir" class="cert-logo">
+                            <img id="cert-logo-img" src="https://via.placeholder.com/150x150.png?text=LOGO" alt="Logo Sekolah" class="cert-logo">
+                            
                             <div class="cert-identity">
                                 <h3>PEMERINTAH PROVINSI JAWA BARAT</h3>
                                 <h2>SMK NEGERI BOJONGGAMBIR</h2>
@@ -240,8 +274,22 @@
                         </table>
                         
                         <div class="cert-footer">
-                            <div class="sign-box">Mengetahui,<br>Kepala Sekolah<div class="sign-line"></div><strong>H. NAMA KEPSEK, M.Pd.</strong></div>
-                            <div class="sign-box">Tasikmalaya, April 2025<br>Ketua Panitia<div class="sign-line"></div><strong>NAMA KETUA, S.Pd.I</strong></div>
+                            <div class="sign-box">
+                                Mengetahui,<br>Kepala Sekolah
+                                <div class="sign-ttd-wrapper">
+                                    <img id="cert-kepsek-img" src="" style="display:none;">
+                                </div>
+                                <div class="sign-line"></div>
+                                <strong id="cert-kepsek-display">NAMA KEPALA SEKOLAH</strong>
+                            </div>
+                            <div class="sign-box">
+                                Tasikmalaya, April 2025<br>Ketua Panitia
+                                <div class="sign-ttd-wrapper">
+                                    <img id="cert-ketua-img" src="" style="display:none;">
+                                </div>
+                                <div class="sign-line"></div>
+                                <strong id="cert-ketua-display">NAMA KETUA PELAKSANA</strong>
+                            </div>
                         </div>
                     </div>
                     
@@ -280,14 +328,50 @@
         function generateCertificate() {
             const type = document.getElementById('cert-type').value;
             const name = document.getElementById('cert-name-input').value;
-            if(!name) { alert("Masukkan nama penerima!"); return; }
+            
+            if(!name) { alert("Masukkan nama penerima terlebih dahulu!"); return; }
+
+            // --- AMBIL NILAI DARI PANEL PENGATURAN KOP & TTD ---
+            const kepsekNameInput = document.getElementById('input-kepsek-name').value;
+            const ketuaNameInput = document.getElementById('input-ketua-name').value;
+            const logoFile = document.getElementById('input-logo-file').files[0];
+            const kepsekSignFile = document.getElementById('input-kepsek-sign').files[0];
+            const ketuaSignFile = document.getElementById('input-ketua-sign').files[0];
+
+            // Terapkan nama pejabat ke layout (Gunakan fallback jika kosong)
+            document.getElementById('cert-kepsek-display').innerText = kepsekNameInput || "______________________";
+            document.getElementById('cert-ketua-display').innerText = ketuaNameInput || "______________________";
+
+            // Terapkan Logo (Jika diupload)
+            if (logoFile) {
+                document.getElementById('cert-logo-img').src = URL.createObjectURL(logoFile);
+            }
+
+            // Terapkan TTD Kepala Sekolah (Jika diupload)
+            const imgKepsekEl = document.getElementById('cert-kepsek-img');
+            if (kepsekSignFile) {
+                imgKepsekEl.src = URL.createObjectURL(kepsekSignFile);
+                imgKepsekEl.style.display = 'block';
+            } else {
+                imgKepsekEl.style.display = 'none'; // Sembunyikan jika tidak ada file
+            }
+
+            // Terapkan TTD Ketua (Jika diupload)
+            const imgKetuaEl = document.getElementById('cert-ketua-img');
+            if (ketuaSignFile) {
+                imgKetuaEl.src = URL.createObjectURL(ketuaSignFile);
+                imgKetuaEl.style.display = 'block';
+            } else {
+                imgKetuaEl.style.display = 'none'; // Sembunyikan jika tidak ada file
+            }
+            // --------------------------------------------------
 
             const preview = document.getElementById('certificate-preview');
             const titleEl = preview.querySelector('.cert-title');
             document.getElementById('cert-display-name').innerText = name;
             preview.style.display = 'block';
 
-            // Coba cari data siswa untuk mengisi total laporan sertifikat
+            // Pencarian data siswa untuk sertifikat
             let jumlahLaporan = 0;
             const siswaDitemukan = globalData.siswa.find(s => s.Nama.toLowerCase() === name.toLowerCase());
             if(siswaDitemukan) jumlahLaporan = siswaDitemukan.TotalLaporan || 0;
@@ -328,7 +412,7 @@
                 let siswaArr = [];
                 let pembimbingArr = [];
 
-                // 3. Pilah Data (Mencocokkan lowercase dari GS ke uppercase awal HTML)
+                // 3. Pilah Data
                 usersRaw.forEach(u => {
                     const role = u.role ? u.role.toLowerCase() : 'siswa';
                     
@@ -342,7 +426,6 @@
                     if (role === 'pembimbing') {
                         pembimbingArr.push(formatUser);
                     } else if (role !== 'admin') {
-                        // 4. Hitung jumlah laporan spesifik untuk siswa ini
                         const laporannya = laporanRaw.filter(l => {
                             const keyNama = Object.keys(l).find(k => k.toLowerCase().includes('nama'));
                             if (keyNama && l[keyNama]) {
@@ -360,7 +443,6 @@
                     }
                 });
 
-                // Gabungkan untuk dibaca UI HTML
                 const finalData = {
                     siswa: siswaArr,
                     pembimbing: pembimbingArr
@@ -368,7 +450,6 @@
                 
                 globalData = finalData;
                 
-                // Render semua komponen Dashboard
                 renderTable('listSiswa', finalData.siswa);
                 renderTable('listGuru', finalData.pembimbing);
                 if (document.getElementById('myChart')) renderChart(finalData);
