@@ -24,7 +24,7 @@
             background: #0f172a;
             color: var(--text);
             min-height: 100vh;
-            padding-bottom: 80px; /* Space for footer */
+            padding-bottom: 80px;
         }
 
         /* --- Header Modern --- */
@@ -85,14 +85,15 @@
         .score-preview { font-weight: bold; font-size: 12px; }
 
         /* --- MODAL DASHBOARD --- */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); overflow-y: auto; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px); overflow-y: auto; }
         .modal-content {
             background: #1e293b; margin: 20px auto; width: 95%; max-width: 600px;
             border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            /* Padding bottom agar scroll di HP enak */
             padding-bottom: 20px; 
             margin-bottom: 100px; 
+            animation: slideUp 0.3s ease-out;
         }
+        @keyframes slideUp { from {transform: translateY(20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
         
         /* Summary Box di Modal */
         .summary-box {
@@ -106,14 +107,16 @@
         /* Accordion Style */
         .modal-body { padding: 0 15px 15px; }
         .acc-item { margin-bottom: 8px; background: #0f172a; border-radius: 8px; overflow: hidden; border: 1px solid #334155; }
-        .acc-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .acc-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .acc-header:hover { background: #1e293b; }
         .acc-header h4 { margin: 0; font-size: 13px; color: #e2e8f0; }
         .acc-content { display: none; padding: 15px; background: rgba(0,0,0,0.2); border-top: 1px solid #334155; }
-        .acc-content.show { display: block; }
+        .acc-content.show { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from {opacity:0} to {opacity:1}}
 
-        .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
-        .bg-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
-        .bg-no { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .bg-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .bg-no { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
 
         /* Grading Section Pro */
         .grading-section {
@@ -126,16 +129,19 @@
         
         textarea {
             width: 100%; padding: 12px; background: #1e293b; border: 1px solid #475569;
-            color: white; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; margin-bottom: 10px;
+            color: white; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; margin-bottom: 10px; resize: vertical;
         }
         
         .btn-group { display: flex; gap: 10px; }
-        .btn-auto { flex: 1; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 500; }
-        .btn-save { flex: 2; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; }
-        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-auto { flex: 1; background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .btn-auto:hover { background: #2563eb; }
+        .btn-save { flex: 2; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: 0.2s; }
+        .btn-save:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         /* Utilities */
-        .close-modal-btn { position: absolute; right: 15px; top: 15px; background: #334155; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: white; border: 1px solid #475569; z-index: 10; }
+        .close-modal-btn { position: absolute; right: 15px; top: 15px; background: #334155; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: white; border: 1px solid #475569; z-index: 10; transition: 0.2s; }
+        .close-modal-btn:hover { background: #475569; }
         
         #loading { text-align: center; padding: 40px; color: #94a3b8; font-size: 13px; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
@@ -143,28 +149,13 @@
 
         /* FOOTER OTOMATIS */
         .footer-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #020617;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 10px 0;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 12px;
-            z-index: 50;
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #020617; border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 0; text-align: center; color: var(--text-muted);
+            font-size: 12px; z-index: 50;
         }
-        .footer-fixed a {
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        .footer-fixed a:hover {
-            color: var(--primary);
-            text-decoration: underline;
-        }
+        .footer-fixed a { color: var(--gold); text-decoration: none; font-weight: 600; transition: 0.3s; }
+        .footer-fixed a:hover { color: var(--primary); text-decoration: underline; }
         @media print { .footer-fixed { display: none; } }
     </style>
 </head>
@@ -183,7 +174,7 @@
     <div class="filter-container">
         <div class="filter-row">
             <input type="date" id="dateFilter" onchange="loadData()">
-            <button onclick="loadData()" style="background:#334155; border:1px solid #475569; color:white; border-radius:8px; padding:0 15px; cursor:pointer;">🔄</button>
+            <button onclick="loadData()" title="Refresh Data" style="background:#334155; border:1px solid #475569; color:white; border-radius:8px; padding:0 15px; cursor:pointer; font-size:18px;">🔄</button>
         </div>
         <div class="filter-chips">
             <div class="chip active" onclick="setFilter('all', this)">Semua <span class="chip-count" id="countAll">0</span></div>
@@ -227,7 +218,8 @@
             </div>
         </div>
 
-        <div class="modal-body" id="accordionContainer"></div>
+        <div class="modal-body" id="accordionContainer">
+            </div>
 
         <div class="grading-section">
             <div class="grade-control">
@@ -254,6 +246,7 @@
 
 <script>
 // ================= CONFIG & SETUP =================
+// PASTIKAN URL WEB APP SUDAH DEPLOY (New Deployment)
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9ziBKETSpxXTARK6uyFbZaLIVoHO5xodyF_r8rxrFOXwIonB1U7L1KpHNXnOAmF49Kg/exec"; 
 
 const activities = [
@@ -261,11 +254,11 @@ const activities = [
     "Dzuhur", "Pesantren", "Ashar", "Aksi", 
     "Buka", "Magrib", "Isya", "Tarawih", "Tadarus", "Tidur"
 ];
-const noPhotoActs = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih"];
+// Kegiatan yang biasanya tidak butuh foto (bisa disesuaikan)
+const noPhotoActs = ["Tidur", "Keluarga", "Aksi"]; 
 
 // Global Variables
 let rawData = [];
-let filteredData = []; // Untuk filter
 let selectedRowId = null;
 let currentFilterType = 'all';
 
@@ -285,7 +278,7 @@ document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
 document.getElementById('dateFilter').valueAsDate = new Date();
 
 // ==========================================
-// 2. FUNGSI LOAD DATA (OPTIMALISASI UTAMA)
+// 2. FUNGSI LOAD DATA (BACKEND FETCH)
 // ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
@@ -294,27 +287,28 @@ async function loadData() {
     
     list.innerHTML = "";
     loader.style.display = "block";
-    loader.innerHTML = `<div class="spinner"></div>Mencari laporan kelompok ${user.kelompok}...`;
+    loader.innerHTML = `<div class="spinner"></div>Mencari laporan siswa...`;
 
     try {
-        // Fetch data (Mengirim parameter kelompok ke server)
+        // PERBAIKAN: Pastikan backend mendukung parameter 'rekapPembimbing' 
+        // dan mengembalikan Raw Data (Baris per baris) bukan hanya rekap angka.
         const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
         // --- FILTERING ---
-        // 1. Filter Kelompok & Validitas (Double Check)
+        // 1. Filter Kelompok (Safety Check)
         let myStudents = data.filter(item => {
             const groupItem = String(item.Kelompok || "").trim().toLowerCase();
             const groupUser = String(user.kelompok || "").trim().toLowerCase();
             return groupItem === groupUser && (item.Nama || item.nama);
         });
 
-        // 2. Filter Tanggal (Jika ada input tanggal)
+        // 2. Filter Tanggal
         if(dateInput) {
             myStudents = myStudents.filter(item => {
-                // Ambil bagian tanggal saja dari string ISO/Time stamp
-                const itemDate = item.Tanggal ? item.Tanggal.substring(0, 10) : ""; 
+                // Ambil tanggal saja (YYYY-MM-DD)
+                const itemDate = item.Tanggal ? new Date(item.Tanggal).toISOString().split('T')[0] : ""; 
                 return itemDate === dateInput;
             });
         }
@@ -323,13 +317,12 @@ async function loadData() {
         updateCountChips(rawData);
 
         if(myStudents.length === 0) {
-            loader.style.display = "block";
             loader.innerHTML = `
                 <div style="padding:40px; text-align:center;">
                     <h3 style="color:#94a3b8">🍃 Tidak ada laporan</h3>
                     <p style="font-size:12px; color:#64748b">
-                        Belum ada siswa mengisi pada tanggal tersebut.<br>
-                        Coba ganti tanggal filter.
+                        Belum ada siswa mengisi pada tanggal <b>${dateInput}</b>.<br>
+                        Silakan pilih tanggal lain.
                     </p>
                 </div>`;
             return;
@@ -340,7 +333,7 @@ async function loadData() {
 
     } catch(e) {
         console.error(e);
-        loader.innerHTML = `<div style="color:var(--danger); padding:20px;">Gagal memuat data: ${e.message}</div>`;
+        loader.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">Gagal memuat data.<br><small>${e.message}</small></div>`;
     }
 }
 
@@ -356,20 +349,18 @@ function updateCountChips(data) {
 
 // Fungsi Filter Manual (Tab)
 function setFilter(type, el) {
-    // UI Active State
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
-    
     currentFilterType = type;
     renderList(rawData);
 }
 
-// 3. FUNGSI RENDER
+// 3. FUNGSI RENDER LIST SISWA
 function renderList(data) {
     const list = document.getElementById("studentList");
     list.innerHTML = "";
 
-    // Filter berdasarkan Tab yang aktif
+    // Filter Tampilan (All/Pending/Done)
     let displayData = data;
     if(currentFilterType === 'pending') {
         displayData = data.filter(item => !(item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2));
@@ -377,39 +368,37 @@ function renderList(data) {
         displayData = data.filter(item => (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2));
     }
 
-    // Sort: Belum dinilai di atas, lalu berdasarkan tanggal
+    // Sorting: Belum dinilai di atas
     displayData.sort((a,b) => {
         const aDone = (a.Nilai_Pembimbing && String(a.Nilai_Pembimbing).length > 2);
         const bDone = (b.Nilai_Pembimbing && String(b.Nilai_Pembimbing).length > 2);
-        if (aDone === bDone) return new Date(b.Tanggal) - new Date(a.Tanggal); // Sama status, urut tanggal
-        return aDone ? 1 : -1; // Belum dinilai (false) lebih dulu
+        if (aDone === bDone) return 0;
+        return aDone ? 1 : -1;
     });
 
     displayData.forEach(item => {
-        // Cek status nilai
         const isDone = (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2);
         list.appendChild(createCard(item, isDone));
     });
 }
 
-// Helper: Membuat Kartu Siswa
 function createCard(item, isDone) {
-    // Hitung Progress Kegiatan
+    // Hitung Progress Kegiatan secara dinamis dari data
     let doneCount = 0;
     activities.forEach(act => {
-        if(String(item[`${act}_Status`]).toLowerCase().includes('ya')) doneCount++;
+        // Cek berbagai kemungkinan nama kolom (Case insensitive & suffix)
+        const status = item[act] || item[act + '_Status'] || item[act + ' Status'] || "";
+        if(String(status).toLowerCase().includes('ya')) doneCount++;
     });
+    
     const progressPct = Math.round((doneCount / activities.length) * 100);
-
     const card = document.createElement("div");
-    // Tambahkan class 'priority' jika belum dinilai agar border berwarna Emas
     card.className = `student-card ${isDone ? 'done' : 'priority'}`;
     
     const badgeHtml = isDone 
         ? `<span class="badge badge-done">SUDAH DINILAI</span>` 
         : `<span class="badge badge-pending">BUTUH NILAI</span>`;
 
-    // Warna progress bar
     const progressColor = progressPct >= 80 ? '#34d399' : (progressPct >= 50 ? '#fbbf24' : '#ef4444');
 
     card.innerHTML = `
@@ -435,7 +424,7 @@ function createCard(item, isDone) {
 }
 
 // ==========================================
-// 4. DETAIL, MODAL & GRADING
+// 4. DETAIL, MODAL & PENGAMBILAN DATA LAPORAN
 // ==========================================
 function showDetail(item) {
     selectedRowId = item.row || item.id;
@@ -444,52 +433,64 @@ function showDetail(item) {
     document.getElementById("modalDate").textContent = formatTglIndo(item.Tanggal || item.tanggal);
     document.getElementById("modalCatatanSiswa").textContent = item.Catatan ? `"${item.Catatan}"` : "-";
 
-    // Reset Accordion
     const container = document.getElementById("accordionContainer");
-    container.innerHTML = "";
+    container.innerHTML = ""; // Reset
     
     let totalDone = 0;
+    let htmlContent = ""; // String buffer untuk performa
 
     activities.forEach(act => {
-        const status = item[`${act}_Status`] || "-";
+        // PERBAIKAN PENTING: Deteksi Nama Kolom
+        // Coba ambil langsung 'Sahur', jika tidak ada, coba 'Sahur_Status'
+        let status = item[act] || item[act + '_Status'] || "-";
+        let waktu = item[act + '_Waktu'] || item['Waktu_' + act] || "-";
+        let ket = item[act + '_Ket'] || item['Ket_' + act] || "-";
+        let foto = item[act + '_Foto'] || item['Foto_' + act] || "";
+
         const isYa = String(status).toLowerCase().includes("ya");
         if(isYa) totalDone++;
-        
-        const waktu = item[`${act}_Waktu`] || "-";
-        const ket = item[`${act}_Ket`] || "-";
-        const foto = item[`${act}_Foto`];
         
         const badgeClass = isYa ? "bg-ok" : "bg-no";
         const icon = isYa ? "✅" : "❌";
 
-        // Logic Foto (Teks Link)
+        // Logic Tampilan Foto
         let photoDisplay = "";
         if (!noPhotoActs.includes(act)) {
-             if (foto && foto.length > 10) {
-                photoDisplay = `<div class="data-row" style="margin-top:5px; border-top:1px dashed #334155; padding-top:5px;">
-                    <a href="${foto}" target="_blank" style="color:#34d399; font-size:12px; text-decoration:none;">📸 Buka Foto Bukti</a>
+             if (foto && foto.length > 5 && foto.startsWith('http')) {
+                photoDisplay = `
+                <div class="data-row" style="margin-top:8px; border-top:1px dashed #334155; padding-top:8px;">
+                    <a href="${foto}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#0f172a; padding:6px 12px; border-radius:6px; color:#34d399; font-size:12px; text-decoration:none; border:1px solid #1e293b;">
+                        📸 Lihat Foto Bukti
+                    </a>
                 </div>`;
+            } else if (!isYa) {
+                 photoDisplay = ""; // Kalau "Tidak", ga perlu info foto
             } else {
-                photoDisplay = `<div class="data-row" style="margin-top:5px;"><span style="color:#ef4444; font-size:11px;">Tidak ada foto</span></div>`;
+                photoDisplay = `<div style="margin-top:5px; font-size:11px; color:#64748b;">(Tidak ada foto)</div>`;
             }
         }
 
-        const html = `
+        htmlContent += `
         <div class="acc-item">
             <div class="acc-header" onclick="toggleAcc(this)">
-                <span>${icon} ${act}</span>
-                <span class="status-badge ${badgeClass}">${status}</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span>${act}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="status-badge ${badgeClass}">${status}</span>
+                </div>
             </div>
             <div class="acc-content">
-                <div style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">Jam: ${waktu}</div>
-                <div style="font-size:12px; color:#94a3b8; font-style:italic; margin-bottom:4px;">"${ket}"</div>
+                <div style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">⏱️ Waktu: ${waktu}</div>
+                <div style="font-size:12px; color:#94a3b8; font-style:italic; margin-bottom:4px;">📝 "${ket}"</div>
                 ${photoDisplay}
             </div>
         </div>`;
-        container.innerHTML += html;
     });
 
-    // Update Stats di Modal
+    container.innerHTML = htmlContent; // Render sekaligus
+
+    // Update Statistik
     document.getElementById("statTotal").textContent = totalDone;
     document.getElementById("statMissed").textContent = activities.length - totalDone;
     const pct = Math.round((totalDone/activities.length)*100);
@@ -500,12 +501,13 @@ function showDetail(item) {
     let score = pct; 
     let comment = "";
 
-    // Regex ambil nilai lama [Nilai: 80] ...
+    // Regex parse nilai lama: [Nilai: 80] Komentar...
     const match = existingVal.match(/\[Nilai:\s*(\d+)\]\s*(.*)/s);
     if(match) {
         score = match[1];
         comment = match[2];
     } else if(existingVal.length > 2) {
+        // Jika format lama cuma teks
         comment = existingVal;
     }
 
@@ -513,29 +515,30 @@ function showDetail(item) {
     updateScoreDisplay(score);
     document.getElementById("inputCatatanPembimbing").value = comment;
 
-    document.getElementById("detailModal").style.display = "block";
+    const modal = document.getElementById("detailModal");
+    modal.style.display = "block";
 }
 
-// 5. FITUR AUTO REVIEW & SAVE
+// 5. AUTO REVIEW & SAVE
 function generateAutoReview() {
     const total = parseInt(document.getElementById("statTotal").textContent);
     const missed = parseInt(document.getElementById("statMissed").textContent);
-    const sum = total + missed;
-    const pct = Math.round((total/sum)*100);
+    const sum = total + missed; // Total kegiatan
+    const pct = sum > 0 ? Math.round((total/sum)*100) : 0;
     const nama = document.getElementById("modalName").textContent.split(" ")[0];
 
     let text = "";
     if(pct === 100) {
-        text = `Sempurna! Ananda ${nama} mengerjakan semua kegiatan (${total}/${sum}). Pertahankan!`;
+        text = `Luar Biasa! Ananda ${nama} mengerjakan seluruh kegiatan (${total}/${sum}). Pertahankan semangatnya!`;
         setScoreUI(100);
-    } else if(pct >= 80) {
-        text = `Sangat Baik. Ananda ${nama} mengerjakan ${total} kegiatan. Tingkatkan terus.`;
+    } else if(pct >= 85) {
+        text = `Sangat Baik. Ananda ${nama} mengerjakan mayoritas kegiatan (${total} item). Tingkatkan lagi ketelitiannya.`;
         setScoreUI(90);
-    } else if(pct >= 60) {
-        text = `Cukup Baik. Ananda ${nama} mengerjakan ${total} kegiatan. Mohon lebih disiplin lagi.`;
+    } else if(pct >= 70) {
+        text = `Cukup Baik. Ananda ${nama} mengerjakan ${total} kegiatan. Mohon kurangi bolong-bolongnya ya.`;
         setScoreUI(75);
     } else {
-        text = `Perlu Bimbingan. Laporan Ananda ${nama} sangat sedikit (${total}/${sum}). Segera perbaiki.`;
+        text = `Perlu Perhatian. Laporan Ananda ${nama} masih banyak yang kosong (${missed} item). Mohon lebih disiplin.`;
         setScoreUI(50);
     }
     document.getElementById("inputCatatanPembimbing").value = text;
@@ -560,7 +563,7 @@ async function saveGrade() {
     const comment = document.getElementById("inputCatatanPembimbing").value.trim();
 
     if(!selectedRowId) return;
-    if(!comment) { alert("⚠️ Mohon isi catatan/komentar penilaian."); return; }
+    if(!comment) { alert("⚠️ Mohon isi catatan/komentar penilaian agar siswa tahu evaluasinya."); return; }
 
     btn.textContent = "Mengirim...";
     btn.disabled = true;
@@ -569,25 +572,25 @@ async function saveGrade() {
     const payload = `[Nilai: ${score}] ${comment}`;
     const fd = new FormData();
     fd.append("action", "simpanCatatan");
-    fd.append("id", selectedRowId);
+    fd.append("id", selectedRowId); // ID Baris di Google Sheet
     fd.append("catatan", payload);
 
     try {
         await fetch(WEB_APP_URL, {method: "POST", body: fd});
         
-        // Update Lokal & Refresh Tampilan
+        // Update data lokal agar tidak perlu fetch ulang
         const idx = rawData.findIndex(x => (x.row || x.id) == selectedRowId);
         if(idx !== -1) rawData[idx].Nilai_Pembimbing = payload;
 
-        alert("✅ Nilai Berhasil Disimpan!");
+        alert("✅ Nilai & Catatan Berhasil Disimpan!");
         closeModal();
         
-        // Refresh List (Agar status berubah jadi 'Sudah Dinilai')
+        // Refresh List
         updateCountChips(rawData);
         renderList(rawData); 
         
     } catch(e) {
-        alert("Gagal: " + e.message);
+        alert("Gagal menyimpan: " + e.message);
     } finally {
         btn.textContent = "💾 SIMPAN & KIRIM";
         btn.disabled = false;
@@ -599,21 +602,34 @@ function toggleAcc(header) {
     const content = header.nextElementSibling;
     const isVisible = content.classList.contains('show');
     
-    // Tutup semua yang lain (optional, biar rapi)
+    // Auto Close Others (Accordion effect)
     document.querySelectorAll('.acc-content').forEach(el => el.classList.remove('show'));
     
     if(!isVisible) content.classList.add('show');
 }
+
 function formatTglIndo(str) {
     if(!str) return "";
-    try { return new Date(str).toLocaleDateString('id-ID', {weekday: 'short', day:'numeric', month:'short'}); } catch(e){return str;}
+    try { 
+        const d = new Date(str);
+        return d.toLocaleDateString('id-ID', {weekday: 'short', day:'numeric', month:'short'}); 
+    } catch(e){return str;}
 }
+
 function closeModal() { document.getElementById("detailModal").style.display = "none"; }
 function logout() { localStorage.removeItem("user"); location.href="index.html"; }
+
+// Klik di luar modal untuk tutup
+window.onclick = function(event) {
+    const modal = document.getElementById("detailModal");
+    if (event.target == modal) {
+        closeModal();
+    }
+}
 
 // Start
 loadData();
 </script>
-    <script src="chat.js" defer></script>
+<script src="chat.js" defer></script>
 </body>
 </html>
