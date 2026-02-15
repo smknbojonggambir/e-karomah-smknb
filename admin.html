@@ -44,7 +44,7 @@
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-gold { background: var(--gold); color: #000; }
         
-        main { padding: 30px 30px 60px 30px; /* Padding bawah ditambah agar tidak tertutup footer */ height: 100vh; overflow-y: auto; box-sizing: border-box; position: relative; }
+        main { padding: 30px 30px 60px 30px; height: 100vh; overflow-y: auto; box-sizing: border-box; position: relative; }
         h1 { margin-top: 0; margin-bottom: 20px; font-weight: 600; font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
@@ -73,47 +73,81 @@
 
         /* --- FOOTER FIXED STYLE --- */
         .footer-fixed {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: calc(100% - 260px); /* Sesuai lebar layout grid */
-            background: #020617;
-            border-top: 1px solid var(--border);
-            padding: 12px 0;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 12px;
-            z-index: 50;
+            position: fixed; bottom: 0; right: 0; width: calc(100% - 260px);
+            background: #020617; border-top: 1px solid var(--border); padding: 12px 0;
+            text-align: center; color: var(--text-muted); font-size: 12px; z-index: 50;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
         }
         .footer-fixed a { color: var(--gold); text-decoration: none; font-weight: 600; transition: 0.3s; }
         .footer-fixed a:hover { color: var(--primary); }
 
-        /* Sertifikat Style */
-        #certificate-preview { display: none; width: 800px; height: 600px; padding: 40px; background: #fff; color: #1e293b; text-align: center; border: 20px solid var(--gold); position: relative; margin: 20px auto; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .cert-header { display: flex; justify-content: center; margin-bottom: 20px; }
-        .cert-logo { width: 80px; height: 80px; object-fit: contain; }
-        .cert-title { font-family: 'Playfair Display', serif; font-size: 48px; color: #b45309; margin-bottom: 5px; margin-top: 10px;}
-        .cert-subtitle { font-size: 18px; margin-bottom: 30px; color: #555; }
-        .cert-name { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: bold; border-bottom: 2px solid #ddd; display: inline-block; padding: 0 40px 10px; margin-bottom: 20px; color: #000; }
-        .cert-body { font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #333; }
-        .cert-data-table { margin: 0 auto 30px auto; border-collapse: collapse; width: 70%; }
-        .cert-data-table td { border-bottom: 1px solid #eee; padding: 8px; color: #333; font-size: 15px; }
+        /* --- SERTIFIKAT STYLE (DIPERBARUI) --- */
+        #certificate-preview { 
+            display: none; width: 800px; height: 600px; padding: 40px; 
+            background: #fff; color: #1e293b; text-align: center; 
+            border: 15px solid var(--gold); position: relative; 
+            margin: 20px auto; box-shadow: 0 0 50px rgba(0,0,0,0.5); 
+        }
+        
+        /* Layout Kop Surat */
+        .cert-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 20px; 
+            margin-bottom: 10px; 
+            padding-bottom: 15px;
+            border-bottom: 4px double #b45309; /* Garis Kop Surat */
+        }
+        .cert-logo { 
+            width: 100px; 
+            height: auto; 
+            object-fit: contain; 
+        }
+        .cert-identity {
+            text-align: center;
+            color: #000;
+        }
+        .cert-identity h2 {
+            margin: 0;
+            font-family: 'Times New Roman', serif; /* Font resmi */
+            font-size: 26px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #000;
+        }
+        .cert-identity h3 {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .cert-identity p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .cert-title { font-family: 'Playfair Display', serif; font-size: 42px; color: #b45309; margin-bottom: 5px; margin-top: 20px; font-weight: bold; text-decoration: underline;}
+        .cert-subtitle { font-size: 16px; margin-bottom: 25px; color: #555; }
+        .cert-name { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: bold; border-bottom: 1px solid #ddd; display: inline-block; padding: 0 30px 5px; margin-bottom: 20px; color: #000; }
+        .cert-body { font-size: 15px; line-height: 1.6; margin-bottom: 20px; color: #333; padding: 0 20px; }
+        .cert-data-table { margin: 0 auto 20px auto; border-collapse: collapse; width: 65%; }
+        .cert-data-table td { border-bottom: 1px solid #eee; padding: 6px; color: #333; font-size: 14px; }
         .cert-data-table td:first-child { font-weight: 600; text-align: left; width: 60%; }
         .cert-data-table td:last-child { text-align: center; font-family: 'Courier New', monospace; font-weight: bold; }
-        .cert-footer { display: flex; justify-content: space-around; margin-top: 40px; }
-        .sign-box { text-align: center; }
-        .sign-line { width: 200px; border-top: 1px solid #333; margin: 60px auto 10px; }
+        .cert-footer { display: flex; justify-content: space-around; margin-top: 30px; }
+        .sign-box { text-align: center; font-size: 14px; color: #000; }
+        .sign-line { width: 180px; border-top: 1px solid #333; margin: 60px auto 5px; }
 
         @media print {
             body * { visibility: hidden; }
             .print-area, .print-area * { visibility: visible; }
-            .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; background: white; color: black; border: none; }
-            #certificate-preview { display: block !important; margin: 0; page-break-after: always; width: 100%; height: auto; transform: scale(1); }
-            table th { color: #000; border-bottom: 1px solid #000; }
-            table td { color: #000; border-bottom: 1px solid #ccc; }
-            .card { border: none; box-shadow: none; padding: 0; color: black; }
-            .footer-fixed { display: none; } /* Sembunyikan footer saat print */
+            .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; color: black; border: none; }
+            #certificate-preview { display: block !important; margin: 0; page-break-after: always; width: 100%; height: 100vh; transform: scale(0.95); border: 15px solid #fbbf24 !important; }
+            .footer-fixed { display: none; }
         }
         @media (max-width: 768px) {
             .layout { grid-template-columns: 1fr; }
@@ -172,7 +206,7 @@
 
             <div id="page-nilai" class="page">
                 <h1>Monitoring Penilaian Pembimbing</h1>
-                <p style="color:var(--text-muted); margin-bottom:25px;">Hasil penilaian dari pembimbing. Nilai akan muncul saat pembimbing mengisi form penilaian.</p>
+                <p style="color:var(--text-muted); margin-bottom:25px;">Hasil penilaian dari pembimbing.</p>
                 <div id="container-penilaian"><div style="text-align:center; padding:50px;">Memuat data penilaian...</div></div>
             </div>
 
@@ -195,7 +229,7 @@
             <div id="page-sertifikat" class="page">
                 <h1>Generator Sertifikat</h1>
                 <div class="card">
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
                         <select id="cert-type" style="padding:10px; border-radius:6px; background:#0f172a; color:white; border:1px solid var(--border);">
                             <option value="Siswa">Sertifikat Peserta (Siswa)</option>
                             <option value="Pembimbing">Piagam Penghargaan (Pembimbing)</option>
@@ -204,29 +238,40 @@
                         <button class="btn btn-primary" onclick="generateCertificate()">👁️ Preview</button>
                         <button class="btn btn-gold" onclick="printArea('certificate-preview')">🖨️ Cetak</button>
                     </div>
+                    
                     <div id="certificate-preview" class="print-area">
                         <div class="cert-header">
-                            <img src="https://via.placeholder.com/150x150.png?text=LOGO+SEKOLAH" alt="Logo Sekolah" class="cert-logo">
+                            <img src="https://via.placeholder.com/150x150.png" alt="Logo SMKN Bojonggambir" class="cert-logo">
+                            <div class="cert-identity">
+                                <h3>PEMERINTAH PROVINSI JAWA BARAT</h3>
+                                <h2>SMK NEGERI BOJONGGAMBIR</h2>
+                                <p>Jalan Raya Bojonggambir, Kec. Bojonggambir, Kab. Tasikmalaya</p>
+                            </div>
                         </div>
+                        
                         <div class="cert-title">SERTIFIKAT</div>
                         <div class="cert-subtitle" id="cert-sub">Diberikan Kepada:</div>
                         <div class="cert-name" id="cert-display-name">Nama Peserta</div>
+                        
                         <div class="cert-body">
                             Atas partisipasi aktif dalam kegiatan <strong>E-KAROMAH (Kegiatan Romadhon di Rumah)</strong><br>
                             SMK Negeri Bojonggambir Tahun 1446 H / 2025 M.<br>
                             Berdasarkan laporan kegiatan (Google Sheet Report), diperoleh hasil sebagai berikut:
                         </div>
+                        
                         <table class="cert-data-table">
                             <tr><td>Jumlah Laporan Harian</td><td id="cert-data-jumlah">-</td></tr>
                             <tr><td>Nilai Keaktifan & Ibadah</td><td id="cert-data-nilai">-</td></tr>
                             <tr><td>Predikat / Keterangan</td><td id="cert-data-predikat">-</td></tr>
                         </table>
+                        
                         <div class="cert-footer">
                             <div class="sign-box">Mengetahui,<br>Kepala Sekolah<div class="sign-line"></div><strong>H. NAMA KEPSEK, M.Pd.</strong></div>
                             <div class="sign-box">Tasikmalaya, April 2025<br>Ketua Panitia<div class="sign-line"></div><strong>NAMA KETUA, S.Pd.I</strong></div>
                         </div>
                     </div>
-                    <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:10px;">*Klik Preview untuk melihat hasil, lalu klik Cetak. Data aktivitas belum tersedia.</p>
+                    
+                    <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:10px;">*Klik Preview untuk melihat hasil, lalu klik Cetak. </p>
                 </div>
             </div>
         </main>
@@ -273,6 +318,7 @@
             document.getElementById('cert-data-nilai').innerText = "0";
             document.getElementById('cert-data-predikat').innerText = "Belum Ada Nilai";
 
+            // Logic Ganti Warna & Konten
             if (type === 'Pembimbing') {
                 titleEl.innerText = "PIAGAM PENGHARGAAN";
                 titleEl.style.color = "#10b981"; 
@@ -290,85 +336,57 @@
 
         async function loadData() {
             try {
-                // Fetch data User dari Google Sheet
                 const res = await fetch(API + "?action=getUsers");
-                const data = await res.json();
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                let data = await res.json();
                 
-                // Simpan data
+                if (!data) data = {};
+                if (!Array.isArray(data.siswa)) data.siswa = [];
+                if (!Array.isArray(data.pembimbing)) data.pembimbing = [];
+                
                 globalData = data;
-                
-                // Render Tabel Siswa & Guru
                 renderTable('listSiswa', data.siswa);
                 renderTable('listGuru', data.pembimbing);
-                renderChart(data);
-
-                // Render Laporan & Penilaian (DEFAULT 0 / KOSONG)
-                // Karena data asli belum masuk dari Google Sheet
+                if (document.getElementById('myChart')) renderChart(data);
                 renderLaporan(data);
                 renderPenilaianByGroup(data);
-
             } catch(e) { 
-                console.error("Error:", e);
-                alert("Gagal memuat data dari Google Sheets.");
+                console.error("Detail Error:", e);
+                const containerNilai = document.getElementById('container-penilaian');
+                if (containerNilai) containerNilai.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Gagal memuat data.</div>';
+                alert("Gagal memuat data. Periksa koneksi internet.");
             }
         }
 
         function renderPenilaianByGroup(data) {
             const container = document.getElementById('container-penilaian');
             const grouped = {};
-            
-            // Grouping Siswa per Kelompok
+            if (!data.siswa || data.siswa.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px;">Belum ada data siswa.</div>';
+                return;
+            }
             data.siswa.forEach(s => {
                 const kel = s.Kelompok || 'Tanpa Kelompok';
                 if(!grouped[kel]) grouped[kel] = [];
                 grouped[kel].push(s);
             });
-
             let htmlContent = '';
             const sortedGroups = Object.keys(grouped).sort();
-
-            if(sortedGroups.length === 0) {
-                container.innerHTML = '<div style="text-align:center;">Belum ada data siswa.</div>';
-                return;
-            }
-
             sortedGroups.forEach(kelompokName => {
                 const guru = data.pembimbing.find(g => g.Kelompok == kelompokName);
                 const namaGuru = guru ? guru.Nama : "Belum ada Pembimbing";
-                
-                // PERBAIKAN: NILAI DEFAULT 0
-                const rows = grouped[kelompokName].map((s, idx) => {
-                    // Cek jika siswa punya nilai di data (sementara 0)
-                    const nilaiAktif = s.NilaiAktif || 0;
-                    const nilaiAkhlaq = s.NilaiAkhlaq || 0;
-                    const nilaiLaporan = s.NilaiLaporan || 0;
-
-                    return `
+                const rows = grouped[kelompokName].map((s, idx) => `
                     <tr>
-                        <td>${idx + 1}</td>
-                        <td>${s.Nama}</td>
-                        <td style="text-align:center"><span class="score-badge score-none">${nilaiAktif}</span></td>
-                        <td style="text-align:center"><span class="score-badge score-none">${nilaiAkhlaq}</span></td>
-                        <td style="text-align:center"><span class="score-badge score-none">${nilaiLaporan}</span></td>
-                    </tr>`;
-                }).join('');
-
+                        <td>${idx + 1}</td><td>${s.Nama}</td>
+                        <td style="text-align:center"><span class="score-badge score-none">${s.NilaiAktif || 0}</span></td>
+                        <td style="text-align:center"><span class="score-badge score-none">${s.NilaiAkhlaq || 0}</span></td>
+                        <td style="text-align:center"><span class="score-badge score-none">${s.NilaiLaporan || 0}</span></td>
+                    </tr>`).join('');
                 htmlContent += `
                 <div class="group-card">
-                    <div class="group-header">
-                        <div><div class="group-title">Kelompok: ${kelompokName}</div><div class="group-pembimbing">👔 Pembimbing: ${namaGuru}</div></div>
-                    </div>
-                    <div class="table-responsive" style="border-bottom:1px solid var(--border);">
-                        <table>
-                            <thead><tr><th width="50">No</th><th>Nama Siswa</th><th style="text-align:center">Keaktifan</th><th style="text-align:center">Akhlaq</th><th style="text-align:center">Laporan</th></tr></thead>
-                            <tbody>${rows}</tbody>
-                        </table>
-                    </div>
-                    <div class="group-body">
-                        <label style="font-size:13px; font-weight:600; color:#fbbf24;">📝 Catatan Admin untuk Pembimbing:</label>
-                        <textarea class="admin-note-area" placeholder="Tulis catatan evaluasi atau apresiasi untuk pembimbing kelompok ini..."></textarea>
-                        <div style="text-align:right; margin-top:10px;"><button class="btn btn-primary" onclick="alert('Catatan untuk ${namaGuru} berhasil dikirim!')">📩 Kirim Catatan</button></div>
-                    </div>
+                    <div class="group-header"><div><div class="group-title">Kelompok: ${kelompokName}</div><div class="group-pembimbing">👔 Pembimbing: ${namaGuru}</div></div></div>
+                    <div class="table-responsive"><table><thead><tr><th width="50">No</th><th>Nama Siswa</th><th style="text-align:center">Keaktifan</th><th style="text-align:center">Akhlaq</th><th style="text-align:center">Laporan</th></tr></thead><tbody>${rows}</tbody></table></div>
+                    <div class="group-body"><textarea class="admin-note-area" placeholder="Catatan untuk pembimbing..."></textarea></div>
                 </div>`;
             });
             container.innerHTML = htmlContent;
@@ -376,49 +394,35 @@
 
         function renderLaporan(data) {
             const listLaporan = document.getElementById('listLaporan');
-            if(data.siswa.length > 0) {
-                // PERBAIKAN: DEFAULT TOTAL 0 & STATUS BELUM
+            if(data.siswa && data.siswa.length > 0) {
                 listLaporan.innerHTML = data.siswa.map((u, index) => {
-                    // Jika ada data laporan nanti, ambil dari u.TotalLaporan
                     const totalLap = u.TotalLaporan || 0; 
                     const status = totalLap > 20 ? "TUNTAS" : "BELUM";
                     const statusColor = totalLap > 20 ? "#10b981" : "#ef4444";
-
-                    return `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${u.Nama || u.Username}</td>
-                        <td>${u.Kelompok}</td>
-                        <td style="color:var(--text-muted)">${totalLap} Kegiatan</td>
-                        <td><span style="color:${statusColor}; font-weight:600; font-size:12px;">${status}</span></td>
-                    </tr>`;
+                    return `<tr><td>${index + 1}</td><td>${u.Nama || u.Username}</td><td>${u.Kelompok}</td><td style="color:var(--text-muted)">${totalLap} Kegiatan</td><td><span style="color:${statusColor}; font-weight:600; font-size:12px;">${status}</span></td></tr>`;
                 }).join('');
-            }
+            } else { listLaporan.innerHTML = '<tr><td colspan="5" style="text-align:center">Tidak ada data.</td></tr>'; }
         }
 
         function renderTable(elementId, dataArray) {
             const el = document.getElementById(elementId);
             if (dataArray && dataArray.length > 0) {
                 el.innerHTML = dataArray.map(u => `<tr><td>${u.Username || '-'}</td><td>${u.Nama || '-'}</td><td>${u.Kelompok || '-'}</td></tr>`).join('');
-            } else {
-                el.innerHTML = '<tr><td colspan="3" style="text-align:center">Data kosong</td></tr>';
-            }
+            } else { el.innerHTML = '<tr><td colspan="3" style="text-align:center">Data kosong</td></tr>'; }
         }
 
         let chartInstance = null;
         function renderChart(data) {
             const ctx = document.getElementById('myChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
+            const siswaCount = data.siswa ? data.siswa.length : 0;
+            const guruCount = data.pembimbing ? data.pembimbing.length : 0;
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Siswa', 'Pembimbing'],
-                    datasets: [{ data: [data.siswa.length, data.pembimbing.length], backgroundColor: ['#10b981', '#fbbf24'], borderWidth: 0 }]
-                },
+                data: { labels: ['Siswa', 'Pembimbing'], datasets: [{ data: [siswaCount, guruCount], backgroundColor: ['#10b981', '#fbbf24'], borderWidth: 0 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
             });
         }
-
         loadData();
     </script>
     <script src="chat.js" defer></script>
