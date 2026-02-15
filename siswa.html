@@ -388,13 +388,47 @@ function clearImage(id) {
 }
 
 function initGPS() {
-    if(navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            document.getElementById('inputLat').value = pos.coords.latitude.toFixed(6);
-            document.getElementById('inputLong').value = pos.coords.longitude.toFixed(6);
-            document.getElementById('gpsStatus').classList.add('active');
-            document.getElementById('gpsText').textContent = "Lokasi Terkunci";
-        });
+    const gpsStatus = document.getElementById('gpsStatus');
+    const gpsText = document.getElementById('gpsText');
+
+    if (navigator.geolocation) {
+        // Opsi tambahan untuk akurasi tinggi dan timeout
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                document.getElementById('inputLat').value = pos.coords.latitude.toFixed(6);
+                document.getElementById('inputLong').value = pos.coords.longitude.toFixed(6);
+                
+                gpsStatus.classList.add('active');
+                gpsText.textContent = "Lokasi Terkunci";
+                console.log("GPS Berhasil:", pos.coords.latitude, pos.coords.longitude);
+            },
+            (err) => {
+                gpsStatus.classList.remove('active');
+                switch(err.code) {
+                    case err.PERMISSION_DENIED:
+                        gpsText.textContent = "Izin GPS Ditolak";
+                        break;
+                    case err.POSITION_UNAVAILABLE:
+                        gpsText.textContent = "Sinyal GPS Lemah";
+                        break;
+                    case err.TIMEOUT:
+                        gpsText.textContent = "Waktu GPS Habis";
+                        break;
+                    default:
+                        gpsText.textContent = "GPS Error";
+                }
+                console.warn("GPS Error: " + err.message);
+            },
+            options
+        );
+    } else {
+        gpsText.textContent = "Browser Tidak Support GPS";
     }
 }
 
