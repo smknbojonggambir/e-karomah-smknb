@@ -574,13 +574,15 @@ async function kirimLaporan() {
         const valNama = document.getElementById('inputNama').value || localUser.nama || "-";
         const valKelompok = document.getElementById('inputKelompok').value || localUser.kelompok || "-";
         
-        // FIX: Pastikan Pembimbing tidak kosong. Jika kosong, kirim "-"
+        // --- PERBAIKAN DI SINI ---
+        // Masalah: Jika input pembimbing bernilai "-" (default), sistem sebelumnya tetap mengirim "-" 
+        // Solusi: Jika nilainya "-" atau kosong, paksa ambil ulang dari localStorage (yang mungkin sudah terupdate)
         let valPembimbing = document.getElementById('inputPembimbing').value;
-        if (!valPembimbing || valPembimbing === "undefined") {
+        if (!valPembimbing || valPembimbing === "undefined" || valPembimbing === "-") {
             valPembimbing = localUser.pembimbing || "-";
         }
 
-        // --- 2. AMBIL LAT & LONG (FIX) ---
+        // --- 2. AMBIL LAT & LONG ---
         // Pisahkan Lat dan Long agar masuk ke kolom terpisah
         let lat = document.getElementById('inputLat').value;
         let long = document.getElementById('inputLong').value;
@@ -594,17 +596,17 @@ async function kirimLaporan() {
         const tgl = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
         const jam = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
 
-        // --- KONSTRUKSI PAYLOAD (PERBAIKAN KUNCI) ---
+        // --- KONSTRUKSI PAYLOAD ---
         let payload = {
             action: "simpan",
             Time: jam,
             Tanggal: tgl,
             Nama: valNama,
             Kelompok: valKelompok,
-            Pembimbing: valPembimbing, // Sudah diperbaiki
-            Lat: lat,                  // Dikirim terpisah
-            Long: long,                // Dikirim terpisah
-            LatLong: `${lat}, ${long}`,// Backup gabungan
+            Pembimbing: valPembimbing, // Sekarang akan mengirim nama yang benar
+            Lat: lat,                  
+            Long: long,                
+            LatLong: `${lat}, ${long}`,
             Catatan: document.getElementById('inputCatatan').value
         };
 
