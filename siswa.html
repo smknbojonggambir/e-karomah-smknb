@@ -193,7 +193,7 @@
                 <div class="gps-dot"></div>
                 <span id="gpsText">Mencari Lokasi...</span>
             </div>
-            <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.2 Fix</div>
+            <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.3 Fix</div>
         </div>
     </div>
 
@@ -320,7 +320,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(freshData.status === 'ok') {
             user.nama = freshData.nama;
             user.kelompok = freshData.kelompok;
-            // Jika ada data pembimbing dari server, simpan juga
             if(freshData.pembimbing) user.pembimbing = freshData.pembimbing;
             
             localStorage.setItem("user", JSON.stringify(user));
@@ -338,13 +337,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function updateUserProfileUI(user) {
-    document.getElementById('namaSiswa').textContent = user.nama;
-    document.getElementById('kelompokSiswa').textContent = "Kelompok: " + user.kelompok;
+    document.getElementById('namaSiswa').textContent = user.nama || "Siswa";
+    document.getElementById('kelompokSiswa').textContent = "Kelompok: " + (user.kelompok || "-");
     
     // Set Value Hidden Input
     document.getElementById('inputNama').value = user.nama || "";
     document.getElementById('inputKelompok').value = user.kelompok || "";
-    // Pastikan pembimbing terisi (jika tidak ada di user data, kosongkan)
     document.getElementById('inputPembimbing').value = user.pembimbing || "";
 }
 
@@ -554,7 +552,7 @@ function convertToBase64(file) {
 }
 
 // ==========================================
-// 6. SUBMIT LOGIC (PERBAIKAN UTAMA)
+// 6. SUBMIT LOGIC (FIXED)
 // ==========================================
 async function kirimLaporan() {
     const checkedBoxes = document.querySelectorAll('.chk-hidden:checked');
@@ -569,25 +567,34 @@ async function kirimLaporan() {
     btn.disabled = true;
 
     try {
-        // --- PERBAIKAN DATA UTAMA ---
-        // Menggabungkan Lat & Long menjadi format 'Lat, Long'
+        // --- PERBAIKAN PENGAMBILAN DATA (DATA FETCH FIX) ---
+        // 1. Ambil dari LocalStorage jika Input Tersembunyi Kosong
+        const localUser = JSON.parse(localStorage.getItem("user")) || {};
+        
+        const valNama = document.getElementById('inputNama').value || localUser.nama || "-";
+        const valKelompok = document.getElementById('inputKelompok').value || localUser.kelompok || "-";
+        const valPembimbing = document.getElementById('inputPembimbing').value || localUser.pembimbing || "-";
+
+        // 2. Perbaikan Logika GPS (LatLong)
         const lat = document.getElementById('inputLat').value;
         const long = document.getElementById('inputLong').value;
-        const latLongString = (lat && long) ? `${lat}, ${long}` : "-";
+        // Jika kosong, isi "0,0" agar tidak error di sheet
+        const latLongString = (lat && long) ? `${lat}, ${long}` : "0,0";
         
-        // Membuat Timestamp Sekarang
+        // 3. Waktu & Tanggal
         const now = new Date();
-        const timeString = now.toLocaleTimeString('id-ID', { hour12: false }); // Format HH:MM:SS
+        const tgl = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const jam = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
 
-        // Payload Key disesuaikan persis dengan Header Google Sheet (Case Sensitive)
+        // --- KONSTRUKSI PAYLOAD ---
         let payload = {
             action: "simpan",
-            Time: timeString, // Mengirim Waktu sekarang (Kolom Time)
-            Tanggal: now.toISOString().split('T')[0], // Kolom Tanggal
-            Nama: document.getElementById('inputNama').value, // Kolom Nama (Huruf Besar Awal)
-            Kelompok: document.getElementById('inputKelompok').value, // Kolom Kelompok
-            Pembimbing: document.getElementById('inputPembimbing').value || "-", // Kolom Pembimbing (Baru)
-            LatLong: latLongString, // Kolom LatLong (Digabung)
+            Time: jam,           // Pastikan ini string HH:mm:ss
+            Tanggal: tgl,        // Pastikan ini string YYYY-MM-DD
+            Nama: valNama,       // Data Nama
+            Kelompok: valKelompok, // Data Kelompok
+            Pembimbing: valPembimbing, // Data Pembimbing
+            LatLong: latLongString, // Data Lokasi
             Catatan: document.getElementById('inputCatatan').value
         };
 
@@ -616,7 +623,8 @@ async function kirimLaporan() {
             }
         }
 
-        // --- Kirim Data ---
+        // --- Kirim Data (Menggunakan JSON String) ---
+        // Jika backend Anda menggunakan JSON.parse(e.postData.contents), ini akan berhasil.
         await fetch(WEB_APP_URL, {
             method: "POST",
             body: JSON.stringify(payload)
