@@ -217,6 +217,7 @@
     <form id="formLaporan" onsubmit="return false;">
         <input type="hidden" id="inputNama">
         <input type="hidden" id="inputKelompok">
+        <input type="hidden" id="inputPembimbing">
         <input type="hidden" id="inputLat">
         <input type="hidden" id="inputLong">
 
@@ -253,7 +254,6 @@
 // ==========================================
 // 1. CONFIG & DATA
 // ==========================================
-// Pastikan URL ini sesuai dengan deployment TERBARU
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqvH2sFvjbBcEL-BhvURX9AovXfK4AN0c4mPakdylUlsjwvASotD6krkNSbclylUKpSQ/exec"; 
 
 const activities = [
@@ -273,8 +273,6 @@ const activities = [
     { id: "Tidur", label: "😴 Tidur Malam" }
 ];
 
-// Daftar kegiatan yang TIDAK WAJIB foto (Hanya waktu & ket)
-// Sesuaikan jika Subuh/Tarawih ingin wajib foto
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
 
 const hadithDB = {
@@ -322,6 +320,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(freshData.status === 'ok') {
             user.nama = freshData.nama;
             user.kelompok = freshData.kelompok;
+            // Jika ada data pembimbing dari server, simpan juga
+            if(freshData.pembimbing) user.pembimbing = freshData.pembimbing;
+            
             localStorage.setItem("user", JSON.stringify(user));
             updateUserProfileUI(user);
         }
@@ -339,8 +340,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 function updateUserProfileUI(user) {
     document.getElementById('namaSiswa').textContent = user.nama;
     document.getElementById('kelompokSiswa').textContent = "Kelompok: " + user.kelompok;
-    document.getElementById('inputNama').value = user.nama;
-    document.getElementById('inputKelompok').value = user.kelompok;
+    
+    // Set Value Hidden Input
+    document.getElementById('inputNama').value = user.nama || "";
+    document.getElementById('inputKelompok').value = user.kelompok || "";
+    // Pastikan pembimbing terisi (jika tidak ada di user data, kosongkan)
+    document.getElementById('inputPembimbing').value = user.pembimbing || "";
 }
 
 // ==========================================
@@ -387,7 +392,7 @@ function initGPS() {
             (pos) => {
                 const lat = pos.coords.latitude.toFixed(6);
                 const long = pos.coords.longitude.toFixed(6);
-                // Set ke Hidden Input terpisah
+                
                 document.getElementById('inputLat').value = lat;
                 document.getElementById('inputLong').value = long;
                 
@@ -517,7 +522,7 @@ function clearImage(id) {
 // ==========================================
 function convertToBase64(file) {
     return new Promise((resolve, reject) => {
-        const maxWidth = 800; // Resize agar tidak berat
+        const maxWidth = 800; 
         const quality = 0.7;  
         
         const reader = new FileReader();
@@ -540,7 +545,6 @@ function convertToBase64(file) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Hasil string Base64 yang dikirim ke Sheet
                 const dataUrl = canvas.toDataURL('image/jpeg', quality);
                 resolve(dataUrl);
             };
@@ -553,7 +557,6 @@ function convertToBase64(file) {
 // 6. SUBMIT LOGIC (PERBAIKAN UTAMA)
 // ==========================================
 async function kirimLaporan() {
-    // 1. Validasi Minimal 1 Kegiatan
     const checkedBoxes = document.querySelectorAll('.chk-hidden:checked');
     if(checkedBoxes.length === 0){
         alert("⚠️ Mohon isi minimal satu kegiatan!");
@@ -566,23 +569,33 @@ async function kirimLaporan() {
     btn.disabled = true;
 
     try {
-        // 2. Siapkan Data Dasar
+        // --- PERBAIKAN DATA UTAMA ---
+        // Menggabungkan Lat & Long menjadi format 'Lat, Long'
+        const lat = document.getElementById('inputLat').value;
+        const long = document.getElementById('inputLong').value;
+        const latLongString = (lat && long) ? `${lat}, ${long}` : "-";
+        
+        // Membuat Timestamp Sekarang
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('id-ID', { hour12: false }); // Format HH:MM:SS
+
+        // Payload Key disesuaikan persis dengan Header Google Sheet (Case Sensitive)
         let payload = {
             action: "simpan",
-            nama: document.getElementById('inputNama').value,
-            kelompok: document.getElementById('inputKelompok').value,
-            latitude: document.getElementById('inputLat').value, // Kirim terpisah
-            longitude: document.getElementById('inputLong').value, // Kirim terpisah
-            tanggal: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+            Time: timeString, // Mengirim Waktu sekarang (Kolom Time)
+            Tanggal: now.toISOString().split('T')[0], // Kolom Tanggal
+            Nama: document.getElementById('inputNama').value, // Kolom Nama (Huruf Besar Awal)
+            Kelompok: document.getElementById('inputKelompok').value, // Kolom Kelompok
+            Pembimbing: document.getElementById('inputPembimbing').value || "-", // Kolom Pembimbing (Baru)
+            LatLong: latLongString, // Kolom LatLong (Digabung)
             Catatan: document.getElementById('inputCatatan').value
         };
 
-        // 3. Loop Semua Aktivitas
+        // --- Loop Kegiatan ---
         for (const act of activities) {
             const chk = document.getElementById(`chk_${act.id}`);
             
             if (chk.checked) {
-                // Jika dicentang (Ya)
                 const time = document.getElementById(`time_${act.id}`).value;
                 const ket = document.getElementById(`ket_${act.id}`).value;
                 
@@ -590,23 +603,20 @@ async function kirimLaporan() {
                 payload[`${act.id}_Waktu`] = time || "-";
                 payload[`${act.id}_Ket`] = ket || "-";
 
-                // Cek Foto jika Wajib
                 if (!noPhotoList.includes(act.id)) {
                     const fileInput = document.getElementById(`file_${act.id}`);
                     if (fileInput.files.length > 0) {
-                        // Kompres dan masukkan ke payload
                         payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
                     } else {
                         throw new Error(`⚠️ Foto untuk "${act.label}" wajib diupload!`);
                     }
                 }
             } else {
-                // Jika tidak dicentang (Tidak)
                 payload[`${act.id}_Status`] = "Tidak";
             }
         }
 
-        // 4. Kirim ke Google Apps Script
+        // --- Kirim Data ---
         await fetch(WEB_APP_URL, {
             method: "POST",
             body: JSON.stringify(payload)
