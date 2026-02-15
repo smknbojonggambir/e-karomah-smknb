@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panel Siswa - E-KAROMAH</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --primary: #10b981;
@@ -130,13 +132,14 @@
         .form-label { display: block; font-size: 12px; margin-bottom: 8px; color: #94a3b8; font-weight: 500; }
 
         /* Modern Inputs */
-        input[type="time"], input[type="text"] {
+        input[type="time"], input[type="text"], select {
             width: 100%; padding: 14px;
             background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px; color: white; box-sizing: border-box; 
             font-family:inherit; font-size: 14px; transition: 0.2s;
         }
-        input:focus { outline:none; border-color: var(--primary); background: rgba(0,0,0,0.5); }
+        select option { background: #022c22; color: white; }
+        input:focus, select:focus { outline:none; border-color: var(--primary); background: rgba(0,0,0,0.5); }
 
         /* Custom File Upload with Preview */
         .file-upload-wrapper {
@@ -177,6 +180,30 @@
             background: var(--primary); color: #022c22;
             box-shadow: 0 4px 15px var(--primary-glow);
             transform: translateY(-2px);
+        }
+
+        /* --- HADITH BOX STYLE (BARU) --- */
+        .hadith-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            display: none; /* Hidden by default until selected */
+            animation: fadeIn 0.4s;
+        }
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 22px;
+            line-height: 1.8;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        .translation-text {
+            font-size: 12px;
+            color: #cbd5e1;
+            font-style: italic;
         }
 
         /* --- Floating Submit --- */
@@ -259,6 +286,44 @@
         
         <div id="activitiesContainer"></div>
 
+        <div class="activity-card" id="card_Hafalan" style="border: 1px solid var(--gold);">
+            <div class="activity-header" onclick="toggleAccordion('Hafalan')">
+                <h4 style="color: var(--gold);">📖 Setoran Hafalan Hadis</h4>
+                <div class="toggle-icon" id="icon_Hafalan">▼</div>
+            </div>
+            <div class="activity-body" id="body_Hafalan">
+                
+                <div class="form-group">
+                    <label class="form-label">Pilih Hadis Pendek</label>
+                    <select id="selectHadis" onchange="showHadisText()">
+                        <option value="">-- Pilih Hadis --</option>
+                        <option value="1">1. Hadis Niat</option>
+                        <option value="2">2. Hadis Larangan Marah</option>
+                        <option value="3">3. Hadis Kebersihan</option>
+                        <option value="4">4. Hadis Senyum</option>
+                        <option value="5">5. Hadis Menuntut Ilmu</option>
+                    </select>
+                </div>
+
+                <div id="hadisPreview" class="hadith-box">
+                    <div class="arabic-text" id="txtArab"></div>
+                    <div class="translation-text" id="txtArti"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🎙️ Upload Rekaman (Suara/Video) <span style="color:var(--danger)">*</span></label>
+                    <div class="file-upload-wrapper" style="height: 100px;">
+                        <input type="file" accept="audio/*,video/*" id="file_Hafalan" class="file-upload-input" onchange="handleFileHafalan(this)">
+                        <div class="upload-placeholder" id="labelFileHafalan">
+                            <span class="upload-icon" style="font-size:20px">🎤</span>
+                            Ketuk untuk rekam/upload
+                        </div>
+                    </div>
+                    <small style="font-size:10px; color:#64748b; margin-top:5px; display:block;">*Maksimal 1 Menit (Disarankan Audio/MP3)</small>
+                </div>
+
+            </div>
+        </div>
         <div class="activity-card" style="margin-top:20px; border-style: dashed; background: rgba(255,255,255,0.02);">
             <div class="activity-header" style="cursor:default;">
                 <h4 style="color:#94a3b8;">📝 Catatan Tambahan (Opsional)</h4>
@@ -307,21 +372,34 @@ const activities = [
 
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
 
+// DATA HADIS PENDEK
+const dataHadis = {
+    "1": { arab: "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ", arti: "Sesungguhnya setiap amal itu tergantung pada niatnya. (HR. Bukhari & Muslim)" },
+    "2": { arab: "لاَ تَغْضَبْ وَلَكَ الْجَنَّةُ", arti: "Janganlah engkau marah, maka bagimu surga. (HR. Thabrani)" },
+    "3": { arab: "الطُّهُورُ شَطْرُ الْإِيمَانِ", arti: "Kebersihan itu sebagian dari iman. (HR. Muslim)" },
+    "4": { arab: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ", arti: "Senyummu di hadapan saudaramu adalah sedekah bagimu. (HR. Tirmidzi)" },
+    "5": { arab: "طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ", arti: "Menuntut ilmu itu wajib bagi setiap muslim. (HR. Ibnu Majah)" }
+};
+
 // 1. INIT & AUTH CHECK
 document.addEventListener("DOMContentLoaded", () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if(!user || user.role !== 'siswa'){
-        alert("⛔ Sesi habis. Silakan login kembali.");
-        location.href = 'index.html'; // Pastikan file login ada
-        return;
-    }
+    // Simulasi User Login (Aktifkan baris di bawah jika sudah ada sistem login)
+    // const user = JSON.parse(localStorage.getItem("user"));
+    // if(!user || user.role !== 'siswa'){
+    //     alert("⛔ Sesi habis. Silakan login kembali.");
+    //     location.href = 'index.html'; 
+    //     return;
+    // }
+
+    // DUMMY USER DATA (Hapus jika sudah pakai login asli)
+    const user = { nama: "Siswa Contoh", kelompok: "Kelompok A", pembimbing: "Ust. Budi" };
 
     // Set Data User
     document.getElementById('namaSiswa').textContent = user.nama;
     document.getElementById('kelompokSiswa').textContent = "Kelompok: " + user.kelompok;
     document.getElementById('inputNama').value = user.nama;
     document.getElementById('inputKelompok').value = user.kelompok;
-    // document.getElementById('inputPembimbing').value = user.pembimbing || "";
+    document.getElementById('inputPembimbing').value = user.pembimbing || "";
 
     initGPS();
     renderActivities();
@@ -412,18 +490,21 @@ function renderActivities() {
 // --- INTERACTION FUNCTIONS ---
 function toggleAccordion(id) {
     const body = document.getElementById(`body_${id}`);
-    const card = document.getElementById(`card_${id}`);
+    const icon = document.getElementById(`icon_${id}`);
     const isOpen = body.classList.contains('open');
 
     // Close all others
     document.querySelectorAll('.activity-body').forEach(el => el.classList.remove('open'));
-    document.querySelectorAll('.activity-card').forEach(el => {
-        if(!el.classList.contains('filled')) el.classList.remove('active');
-    });
+    document.querySelectorAll('.toggle-icon').forEach(el => el.style.transform = 'rotate(0deg)');
 
     if(!isOpen) {
         body.classList.add('open');
-        card.classList.add('active');
+        icon.style.transform = 'rotate(180deg)';
+        
+        // Auto scroll dikit biar enak
+        setTimeout(() => {
+            body.scrollIntoView({behavior: "smooth", block: "nearest"});
+        }, 300);
     }
 }
 
@@ -449,6 +530,31 @@ function updateProgress() {
     
     document.getElementById('progressBar').style.width = `${percent}%`;
     document.getElementById('progressText').textContent = `${percent}% Selesai`;
+}
+
+// --- HADITH FUNCTIONS (BARU) ---
+function showHadisText() {
+    const val = document.getElementById("selectHadis").value;
+    const box = document.getElementById("hadisPreview");
+    
+    if(val && dataHadis[val]) {
+        box.style.display = "block";
+        document.getElementById("txtArab").textContent = dataHadis[val].arab;
+        document.getElementById("txtArti").textContent = dataHadis[val].arti;
+    } else {
+        box.style.display = "none";
+    }
+}
+
+function handleFileHafalan(input) {
+    const label = document.getElementById("labelFileHafalan");
+    if(input.files && input.files[0]) {
+        label.innerHTML = "✅ File Siap: <br>" + input.files[0].name;
+        label.style.color = "var(--primary)";
+    } else {
+        label.innerHTML = `<span class="upload-icon" style="font-size:20px">🎤</span> Ketuk untuk rekam/upload`;
+        label.style.color = "#94a3b8";
+    }
 }
 
 // --- IMAGE HANDLING ---
@@ -483,8 +589,12 @@ function convertToBase64(file) {
 // 4. SUBMIT LOGIC
 async function kirimLaporan() {
     const checkedBoxes = document.querySelectorAll('.chk-hidden:checked');
-    if(checkedBoxes.length === 0){
-        alert("⚠️ Belum ada kegiatan yang diceklis!");
+    const hadisFile = document.getElementById("file_Hafalan").files[0];
+    const hadisVal = document.getElementById("selectHadis").value;
+
+    // Validasi sederhana: Minimal 1 kegiatan ATAU ada hafalan
+    if(checkedBoxes.length === 0 && !hadisVal){
+        alert("⚠️ Mohon isi minimal satu kegiatan atau setoran hafalan!");
         return;
     }
 
@@ -504,6 +614,7 @@ async function kirimLaporan() {
             Catatan: document.getElementById('inputCatatan').value
         };
 
+        // --- Loop Kegiatan Harian ---
         for (let act of activities) {
             const chk = document.getElementById(`chk_${act.id}`);
             if (chk.checked) {
@@ -518,8 +629,6 @@ async function kirimLaporan() {
                 if (!noPhotoList.includes(act.id)) {
                     const fileInput = document.getElementById(`file_${act.id}`);
                     if (fileInput.files.length > 0) {
-                        // Kompresi atau Resize sebaiknya dilakukan di sini jika file besar
-                        // Untuk sekarang kita kirim raw base64
                         payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
                     } else {
                         throw new Error(`⚠️ Foto untuk "${act.label}" wajib diupload!`);
@@ -528,6 +637,27 @@ async function kirimLaporan() {
             } else {
                 payload[`${act.id}_Status`] = "Tidak";
             }
+        }
+
+        // --- Handle Hafalan ---
+        if(hadisVal) {
+            payload["Hafalan_Judul"] = document.getElementById("selectHadis").options[document.getElementById("selectHadis").selectedIndex].text;
+            
+            if(hadisFile) {
+                // Convert Audio/Video to Base64 (Hati-hati limit file Google Script biasanya < 50MB)
+                // Jika file terlalu besar, ini bisa gagal.
+                if(hadisFile.size > 10 * 1024 * 1024) { // Limit 10MB client side check
+                     throw new Error("⚠️ Ukuran file hafalan terlalu besar (Max 10MB). Gunakan Audio MP3.");
+                }
+                payload["Hafalan_File"] = await convertToBase64(hadisFile);
+            } else {
+                // Opsional: Boleh kirim tanpa file jika setoran langsung
+                // payload["Hafalan_File"] = "-";
+                // Atau Wajib:
+                 throw new Error("⚠️ Bukti rekaman hafalan wajib diupload!");
+            }
+        } else {
+            payload["Hafalan_Judul"] = "-";
         }
 
         console.log("Sending payload...", payload);
