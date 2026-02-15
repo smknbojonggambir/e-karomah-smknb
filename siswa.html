@@ -1,15 +1,3 @@
-Berikut adalah perbaikan lengkap untuk file HTML Anda.
-
-**Perubahan & Perbaikan Penting yang Dilakukan:**
-
-1. **Logika Pengiriman Data (`kirimLaporan`)**: Saya menulis ulang fungsi ini agar sinkron dengan backend yang baru saja kita perbaiki. Sekarang ia menangani konversi foto (Base64) dengan lebih rapi dan memastikan data dikirim dalam format JSON yang benar.
-2. **Pemisahan Lat/Long**: Saya memecah data GPS menjadi `latitude` dan `longitude` secara terpisah agar backend lebih mudah membacanya.
-3. **Kompresi Foto**: Fungsi `convertToBase64` dioptimalkan agar foto tidak terlalu besar (maksimal 800px), sehingga pengiriman data lebih cepat dan tidak membebani Google Sheet.
-4. **Pengecekan Foto Wajib**: Jika kegiatan dipilih tapi foto belum diupload (untuk kegiatan yang wajib foto), sistem akan menolak pengiriman dan memberitahu siswa.
-
-Silakan ganti **seluruh kode** file HTML Anda dengan yang ini:
-
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -644,5 +632,3 @@ function logout(){
 <script src="chat.js" defer></script>
 </body>
 </html>
-
-```
