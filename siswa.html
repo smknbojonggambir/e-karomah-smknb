@@ -27,7 +27,7 @@
             background: radial-gradient(circle at top right, #064e3b, #020617);
             background-attachment: fixed;
             color: var(--text);
-            padding-bottom: 0; /* Adjusted for new footer handling */
+            padding-bottom: 0;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -174,10 +174,10 @@
         }
         @keyframes spin { to {transform: rotate(360deg);} }
 
-        /* FOOTER BARU */
+        /* FOOTER */
         .footer-info {
             text-align: center;
-            padding: 30px 20px 100px; /* Padding bawah besar agar tidak tertutup tombol Kirim */
+            padding: 30px 20px 100px;
             color: var(--text-muted);
             font-size: 11px;
             margin-top: 40px;
@@ -280,6 +280,7 @@
 // ==========================================
 // 1. CONFIG & DATA
 // ==========================================
+// GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqvH2sFvjbBcEL-BhvURX9AovXfK4AN0c4mPakdylUlsjwvASotD6krkNSbclylUKpSQ/exec"; 
 
 const activities = [
@@ -346,7 +347,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(freshData.status === 'ok') {
             user.nama = freshData.nama;
             user.kelompok = freshData.kelompok;
-            if(freshData.pembimbing) user.pembimbing = freshData.pembimbing;
+            
+            // Prioritas Update Pembimbing
+            if(freshData.pembimbing && freshData.pembimbing !== "") {
+                user.pembimbing = freshData.pembimbing;
+            } else if (freshData.guru && freshData.guru !== "") {
+                user.pembimbing = freshData.guru;
+            }
             
             localStorage.setItem("user", JSON.stringify(user));
             updateUserProfileUI(user);
@@ -368,7 +375,11 @@ function updateUserProfileUI(user) {
     
     document.getElementById('inputNama').value = user.nama || "";
     document.getElementById('inputKelompok').value = user.kelompok || "";
-    document.getElementById('inputPembimbing').value = user.pembimbing || "-";
+    
+    // Fallback Pembimbing di UI
+    let pembimbing = user.pembimbing;
+    if (!pembimbing || pembimbing === "undefined") pembimbing = user.guru || "-";
+    document.getElementById('inputPembimbing').value = pembimbing;
 }
 
 // ==========================================
@@ -569,8 +580,6 @@ function convertToBase64(file) {
                 ctx.drawImage(img, 0, 0, width, height);
 
                 const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                // Kita ambil base64 murni tanpa prefix "data:image/..." jika backend meminta demikian,
-                // tapi biasanya GAS menerima full string. Disini saya kirim full string.
                 resolve(dataUrl); 
             };
         };
@@ -579,7 +588,7 @@ function convertToBase64(file) {
 }
 
 // ==========================================
-// 6. SUBMIT LOGIC (FIXED & IMPROVED)
+// 6. SUBMIT LOGIC (PERBAIKAN PEMBIMBING)
 // ==========================================
 async function kirimLaporan() {
     // 1. Validasi Minimal 1 Kegiatan
@@ -596,42 +605,53 @@ async function kirimLaporan() {
     btn.disabled = true;
 
     try {
-        // 3. Ambil Data Identitas
+        // A. Ambil Data User dari LocalStorage
         const localUser = JSON.parse(localStorage.getItem("user")) || {};
-        const valNama = document.getElementById('inputNama').value || localUser.nama || "-";
-        const valKelompok = document.getElementById('inputKelompok').value || localUser.kelompok || "-";
         
+        // B. Ambil Data Identitas
+        let valNama = document.getElementById('inputNama').value;
+        let valKelompok = document.getElementById('inputKelompok').value;
         let valPembimbing = document.getElementById('inputPembimbing').value;
-        if (!valPembimbing || valPembimbing === "undefined" || valPembimbing === "-") {
-            valPembimbing = localUser.pembimbing || "-";
+
+        // C. Fallback Nama/Kelompok jika kosong
+        if(!valNama || valNama === "") valNama = localUser.nama || "Siswa Tanpa Nama";
+        if(!valKelompok || valKelompok === "") valKelompok = localUser.kelompok || "-";
+
+        // D. FALLBACK AGRESIF UNTUK PEMBIMBING
+        // Jika hidden input kosong/undefined/strip, paksa cari di localStorage
+        if (!valPembimbing || valPembimbing === "undefined" || valPembimbing === "-" || valPembimbing.trim() === "") {
+            if (localUser.pembimbing && localUser.pembimbing !== "undefined") {
+                valPembimbing = localUser.pembimbing;
+            } else if (localUser.guru && localUser.guru !== "undefined") {
+                valPembimbing = localUser.guru;
+            } else {
+                valPembimbing = "-";
+            }
         }
 
-        // 4. Ambil Lokasi
-        let lat = document.getElementById('inputLat').value;
-        let long = document.getElementById('inputLong').value;
-        if (!lat) lat = "0";
-        if (!long) long = "0";
+        // E. Lokasi & Waktu
+        let lat = document.getElementById('inputLat').value || "0";
+        let long = document.getElementById('inputLong').value || "0";
         
-        // 5. Waktu Saat Ini
         const now = new Date();
         const tgl = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
         const jam = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
 
-        // 6. Buat Payload Utama
+        // F. Buat Payload Utama
         let payload = {
             action: "simpan",
             Time: jam,
             Tanggal: tgl,
             Nama: valNama,
             Kelompok: valKelompok,
-            Pembimbing: valPembimbing,
+            Pembimbing: valPembimbing, // Kunci sukses: Data ini sudah dipastikan terisi
             Lat: lat,                  
             Long: long,                 
             LatLong: `${lat}, ${long}`,
             Catatan: document.getElementById('inputCatatan').value
         };
 
-        // 7. Loop Setiap Kegiatan (PERBAIKAN SINTAKS DISINI)
+        // G. Loop Setiap Kegiatan
         for (const act of activities) {
             const chk = document.getElementById(`chk_${act.id}`);
             
@@ -639,7 +659,6 @@ async function kirimLaporan() {
                 const time = document.getElementById(`time_${act.id}`).value;
                 const ket = document.getElementById(`ket_${act.id}`).value;
                 
-                // Gunakan kurung siku [] untuk key dinamis
                 payload[`${act.id}_Status`] = "Ya";
                 payload[`${act.id}_Waktu`] = time || "-";
                 payload[`${act.id}_Ket`] = ket || "-";
@@ -648,16 +667,16 @@ async function kirimLaporan() {
                 if (!noPhotoList.includes(act.id)) {
                     const fileInput = document.getElementById(`file_${act.id}`);
                     if (fileInput.files.length > 0) {
-                        // Await hanya bisa dalam async function (sudah benar)
                         payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
                     } else {
-                        throw new Error(`⚠️ Foto untuk "${act.label}" wajib diupload!`);
+                        // Jika dicentang tapi tidak ada foto, lempar error
+                        throw new Error(`⚠️ Foto untuk "${act.label}" wajib diupload jika kegiatan dicentang!`);
                     }
                 } else {
-                     // Jika kegiatan tidak butuh foto, kirim string kosong/dash
                      payload[`${act.id}_Foto`] = "-";
                 }
             } else {
+                // Kegiatan tidak dicentang
                 payload[`${act.id}_Status`] = "Tidak";
                 payload[`${act.id}_Waktu`] = "";
                 payload[`${act.id}_Ket`] = "";
@@ -665,17 +684,21 @@ async function kirimLaporan() {
             }
         }
 
-        // 8. Kirim ke Google Script
-        // Menggunakan 'text/plain' agar tidak terkena CORS Preflight Check di Google Apps Script
+        // H. Kirim ke Google Script
+        console.log("Mengirim Payload:", payload); // Debugging di console
+
         await fetch(WEB_APP_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
             body: JSON.stringify(payload)
         });
 
-        // 9. Sukses & Reload
-        alert("✅ Laporan Berhasil Dikirim! Terima kasih.");
-        window.location.reload(); // Ini akan mengembalikan ke halaman siswa yang bersih
+        // I. Sukses
+        alert(`✅ Laporan Berhasil Dikirim!\nPembimbing: ${valPembimbing}`);
+        
+        overlay.style.display = 'none';
+        btn.disabled = false;
+        resetFormUI(); 
 
     } catch (err) {
         console.error(err);
@@ -685,6 +708,38 @@ async function kirimLaporan() {
     }
 }
 
+// ==========================================
+// 7. HELPER: RESET FORM UI
+// ==========================================
+function resetFormUI() {
+    // 1. Uncheck & Reset Style
+    document.querySelectorAll('.chk-hidden').forEach(chk => {
+        chk.checked = false;
+        updateCardStyle(chk.id.replace('chk_', ''));
+    });
+
+    // 2. Kosongkan Input
+    document.querySelectorAll('input[type="time"]').forEach(input => input.value = "");
+    document.querySelectorAll('.activity-body input[type="text"]').forEach(input => input.value = "");
+    document.getElementById('inputCatatan').value = "";
+
+    // 3. Bersihkan Foto
+    document.querySelectorAll('.file-upload-input').forEach(input => input.value = "");
+    document.querySelectorAll('.img-preview').forEach(img => {
+        img.style.display = 'none';
+        img.src = "";
+    });
+    document.querySelectorAll('.btn-remove-img').forEach(btn => btn.style.display = 'none');
+
+    // 4. Tutup Accordion
+    document.querySelectorAll('.activity-body').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.toggle-icon').forEach(el => el.style.transform = 'rotate(0deg)');
+
+    // 5. Reset Progress & Scroll
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function logout(){
     if(confirm("Keluar dari aplikasi?")){
         localStorage.removeItem("user");
@@ -692,7 +747,6 @@ function logout(){
     }
 }
 </script>
-<script src="chat.js" defer></script>
 <script src="chat.js" defer></script>
 </body>
 </html>
