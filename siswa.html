@@ -31,43 +31,34 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- Animations --- */
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--primary-glow); } 70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--primary-glow); } 70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); } }
 
-        /* --- Header & Nav --- */
+        /* HEADER */
         .header-container {
             background: rgba(2, 6, 23, 0.8);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             position: sticky; top: 0; z-index: 100;
             padding: 15px 20px;
             border-bottom: 1px solid var(--card-border);
             display: flex; justify-content: space-between; align-items: center;
         }
-        .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px; }
+        .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--gold); }
         .btn-logout { 
             background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); 
             color: var(--danger); padding: 6px 14px; border-radius: 50px; 
             font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.3s;
         }
-        .btn-logout:active { transform: scale(0.95); background: var(--danger); color: white; }
 
         .container { max-width: 600px; margin: auto; padding: 20px; }
 
-        /* --- User Profile Card --- */
+        /* USER CARD */
         .user-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-            backdrop-filter: blur(10px);
             border: 1px solid var(--card-border);
             padding: 24px; border-radius: 20px; margin-bottom: 25px;
             position: relative; overflow: hidden;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        .user-card::before {
-            content: ""; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px;
-            background: radial-gradient(circle, var(--primary-glow), transparent 70%);
-            border-radius: 50%; opacity: 0.6;
         }
         .user-info h1 { margin: 0; font-size: 20px; font-weight: 600; color: white; }
         .user-info p { margin: 4px 0 15px; font-size: 13px; color: #a7f3d0; opacity: 0.9; }
@@ -77,171 +68,101 @@
             display: inline-flex; align-items: center; gap: 6px;
             background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 30px;
             font-size: 11px; color: var(--text-muted); border: 1px solid var(--card-border);
-            transition: 0.3s;
         }
         .gps-pill.active { border-color: var(--primary); color: var(--primary); background: rgba(16, 185, 129, 0.1); }
         .gps-dot { width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
         .gps-pill.active .gps-dot { animation: pulse 2s infinite; }
 
-        /* --- Progress Bar --- */
+        /* PROGRESS */
         .progress-container { margin-bottom: 20px; }
         .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: #cbd5e1; }
         .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f59e0b); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f59e0b); width: 0%; transition: width 0.5s ease; }
 
-        /* --- HADIS REMINDER CARD (BARU) --- */
+        /* HADIS CARD */
         .reminder-card {
             background: linear-gradient(180deg, rgba(251, 191, 36, 0.1), rgba(2, 44, 34, 0.6));
             border: 1px solid rgba(251, 191, 36, 0.4);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: center;
-            position: relative;
-            animation: fadeIn 0.6s ease;
+            border-radius: 16px; padding: 20px; margin-bottom: 25px;
+            text-align: center; position: relative; animation: fadeIn 0.6s ease;
         }
         .reminder-badge {
             position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
             background: var(--gold); color: #022c22;
             padding: 4px 12px; border-radius: 20px;
             font-size: 10px; font-weight: 700; letter-spacing: 1px;
-            box-shadow: 0 4px 10px var(--gold-glow);
         }
         .reminder-arabic {
-            font-family: 'Amiri', serif;
-            font-size: 24px;
-            line-height: 2;
-            color: var(--gold);
-            margin: 15px 0 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-family: 'Amiri', serif; font-size: 24px; line-height: 2;
+            color: var(--gold); margin: 15px 0 10px;
         }
-        .reminder-arti {
-            font-size: 12px;
-            color: #cbd5e1;
-            font-style: italic;
-            line-height: 1.6;
-        }
+        .reminder-arti { font-size: 12px; color: #cbd5e1; font-style: italic; line-height: 1.6; }
         .btn-refresh-hadis {
-            margin-top: 15px;
-            background: rgba(255,255,255,0.1);
-            border: none; color: #94a3b8;
-            font-size: 11px; padding: 5px 10px; border-radius: 10px;
-            cursor: pointer; transition: 0.2s;
+            margin-top: 15px; background: rgba(255,255,255,0.1);
+            border: none; color: #94a3b8; font-size: 11px; padding: 5px 10px;
+            border-radius: 10px; cursor: pointer;
         }
-        .btn-refresh-hadis:hover { background: rgba(255,255,255,0.2); color: white; }
 
-        /* --- Activity List --- */
+        /* ACTIVITY LIST */
         .activity-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px; margin-bottom: 12px;
-            overflow: hidden; transition: all 0.3s ease;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; margin-bottom: 12px; overflow: hidden; transition: 0.3s;
             animation: fadeIn 0.5s ease backwards;
         }
-        .activity-card:nth-child(even) { animation-delay: 0.1s; }
-        
-        .activity-card.active { 
-            background: rgba(16, 185, 129, 0.05); 
-            border-color: var(--primary); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        /* Completed State */
+        .activity-card.active { background: rgba(16, 185, 129, 0.05); border-color: var(--primary); }
         .activity-card.filled { border-left: 4px solid var(--primary); }
-        .activity-card.filled .activity-header h4 { color: var(--primary); text-decoration: line-through; opacity: 0.8; }
-
-        .activity-header {
-            padding: 16px 20px; cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .activity-header h4 { margin:0; font-size:14px; color:#e2e8f0; font-weight:500; display:flex; align-items:center; gap:10px;}
         
-        .toggle-icon { 
-            width: 28px; height: 28px; background: rgba(255,255,255,0.05); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: var(--text-muted); transition: 0.3s; 
-        }
+        .activity-header { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .activity-header h4 { margin:0; font-size:14px; color:#e2e8f0; font-weight:500; }
+        .toggle-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); }
         .activity-card.active .toggle-icon { transform: rotate(180deg); background: var(--primary); color: white; }
 
-        /* --- Form Body --- */
-        .activity-body {
-            display: none; padding: 0 20px 24px;
-            border-top: 1px dashed rgba(255,255,255,0.1);
-        }
-        .activity-body.open { display: block; animation: fadeIn 0.3s; }
+        .activity-body { display: none; padding: 0 20px 24px; border-top: 1px dashed rgba(255,255,255,0.1); }
+        .activity-body.open { display: block; }
 
         .form-group { margin-top: 18px; }
-        .form-label { display: block; font-size: 12px; margin-bottom: 8px; color: #94a3b8; font-weight: 500; }
-
-        /* Modern Inputs */
+        .form-label { display: block; font-size: 12px; margin-bottom: 8px; color: #94a3b8; }
+        
         input[type="time"], input[type="text"] {
-            width: 100%; padding: 14px;
-            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; color: white; box-sizing: border-box; 
-            font-family:inherit; font-size: 14px; transition: 0.2s;
+            width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; color: white; box-sizing: border-box; font-size: 14px;
         }
-        input:focus { outline:none; border-color: var(--primary); background: rgba(0,0,0,0.5); }
 
-        /* Custom File Upload with Preview */
+        /* FILE UPLOAD */
         .file-upload-wrapper {
-            position: relative;
-            width: 100%; height: 120px;
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 12px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.2); transition: 0.2s;
-            overflow: hidden;
+            position: relative; width: 100%; height: 120px;
+            border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.2); overflow: hidden;
         }
-        .file-upload-wrapper:hover { border-color: var(--primary); background: rgba(16,185,129,0.05); }
-        .file-upload-input {
-            position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;
-        }
-        .upload-placeholder { text-align: center; color: #94a3b8; font-size: 12px; pointer-events: none; }
-        .upload-icon { font-size: 24px; margin-bottom: 5px; color: var(--gold); display: block; }
-        .img-preview {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            object-fit: cover; border-radius: 10px; z-index: 1; display: none;
-        }
-        .btn-remove-img {
-            position: absolute; top: 5px; right: 5px; z-index: 3;
-            background: rgba(0,0,0,0.6); color: white; border: none;
-            border-radius: 50%; width: 24px; height: 24px; cursor: pointer;
-            display: none; align-items: center; justify-content: center; font-size: 14px;
-        }
+        .file-upload-input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
+        .upload-placeholder { text-align: center; color: #94a3b8; font-size: 12px; }
+        .img-preview { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; display: none; }
+        .btn-remove-img { position: absolute; top: 5px; right: 5px; z-index: 3; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: none; align-items: center; justify-content: center; cursor: pointer; }
 
-        /* Checkbox Button Big */
+        /* CHECKBOX */
         .chk-label {
             display: flex; align-items: center; justify-content: center; gap: 10px;
             background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px;
-            color: #cbd5e1; font-weight: 600; font-size: 14px; cursor: pointer;
-            transition: 0.3s; border: 1px solid transparent; margin-top: 15px;
+            color: #cbd5e1; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 15px;
         }
         .chk-hidden { display: none; }
-        .chk-hidden:checked ~ .chk-label {
-            background: var(--primary); color: #022c22;
-            box-shadow: 0 4px 15px var(--primary-glow);
-            transform: translateY(-2px);
-        }
+        .chk-hidden:checked ~ .chk-label { background: var(--primary); color: #022c22; box-shadow: 0 4px 15px var(--primary-glow); }
 
-        /* --- Floating Submit --- */
+        /* FAB SUBMIT */
         .fab-container {
-            position: fixed; bottom: 0; left:0; right:0; 
-            padding: 20px;
+            position: fixed; bottom: 0; left:0; right:0; padding: 20px;
             background: linear-gradient(to top, #020617 70%, transparent 100%);
             max-width: 600px; margin: auto; z-index: 90;
-            display: flex; flex-direction: column; gap: 10px;
         }
         .submit-btn {
-            width: 100%; padding: 16px;
-            background: linear-gradient(90deg, var(--gold), #f59e0b);
-            color: #022c22; border: none; border-radius: 16px;
-            font-weight: 700; font-size: 16px; letter-spacing: 0.5px;
-            box-shadow: 0 4px 20px var(--gold-glow);
-            cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;
+            width: 100%; padding: 16px; background: linear-gradient(90deg, var(--gold), #f59e0b);
+            color: #022c22; border: none; border-radius: 16px; font-weight: 700; font-size: 16px;
+            box-shadow: 0 4px 20px var(--gold-glow); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
-        .submit-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+        .submit-btn:disabled { filter: grayscale(1); opacity: 0.5; }
 
-        /* --- Loader --- */
+        /* LOADER */
         #loaderOverlay {
             display: none; position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(5px); z-index: 200;
@@ -249,34 +170,30 @@
         }
         .spinner {
             width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1);
-            border-top-color: var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to {transform: rotate(360deg);} }
-
     </style>
 </head>
 <body>
 
 <div class="header-container">
-    <div class="brand">
-        <span style="font-size:20px;">🌙</span> E-KAROMAH
-    </div>
+    <div class="brand"><span style="font-size:20px;">🌙</span> E-KAROMAH</div>
     <button class="btn-logout" onclick="logout()">Keluar</button>
 </div>
 
 <div class="container">
     <div class="user-card">
         <div class="user-info">
-            <h1 id="namaSiswa">Memuat...</h1>
-            <p id="kelompokSiswa">Kelompok...</p>
+            <h1 id="namaSiswa">Memuat Data...</h1>
+            <p id="kelompokSiswa">Sinkronisasi data...</p>
         </div>
         <div class="status-row">
             <div class="gps-pill" id="gpsStatus">
                 <div class="gps-dot"></div>
                 <span id="gpsText">Mencari Lokasi...</span>
             </div>
-            <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.0</div>
+            <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.1</div>
         </div>
     </div>
 
@@ -292,14 +209,11 @@
 
     <div class="reminder-card" id="dailyHadisSection">
         <div class="reminder-badge" id="hadisTimeLabel">MUTIARA PAGI</div>
-        <div class="reminder-arabic" id="hadisArab">
-            ...
-        </div>
-        <div class="reminder-arti" id="hadisArti">
-            Memuat Hadis Pilihan...
-        </div>
+        <div class="reminder-arabic" id="hadisArab">...</div>
+        <div class="reminder-arti" id="hadisArti">Memuat Hadis Pilihan...</div>
         <button class="btn-refresh-hadis" onclick="loadRandomHadis(true)">🔄 Lihat Hadis Lain</button>
     </div>
+
     <form id="formLaporan" onsubmit="return false;">
         <input type="hidden" id="inputNama">
         <input type="hidden" id="inputKelompok">
@@ -337,7 +251,7 @@
 
 <script>
 // ==========================================
-// CONFIGURATION
+// 1. CONFIG & DATA
 // ==========================================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyy9rKG7G7zE7jcydfAgnZmdXAzKdPt-uRMjIxGl788OaNHkWW14XuUHaq8XllLCfmDaw/exec"; 
 
@@ -360,51 +274,83 @@ const activities = [
 
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
 
-// === DATABASE HADIS ===
 const hadithDB = {
     pagi: [
         { arab: "اللَّهُمَّ بَارِكْ لِأُمَّتِي فِي بُكُورِهَا", arti: "Ya Allah, berkahilah umatku di waktu paginya. (HR. Abu Daud)" },
-        { arab: "رَكْعَتَا الْفَجْرِ خَيْرٌ مِنَ الدُّنْيَا وَمَا فِيهَا", arti: "Dua rakaat fajar (shalat sunnah qobliyah shubuh) lebih baik daripada dunia dan seisinya. (HR. Muslim)" },
-        { arab: "يُصْبِحُ عَلَى كُلِّ سُلاَمَى مِنْ أَحَدِكُمْ صَدَقَةٌ", arti: "Setiap pagi, setiap ruas anggota badan kalian wajib dikeluarkan sedekahnya. (HR. Muslim - Anjuran Dhuha)" }
+        { arab: "رَكْعَتَا الْفَجْرِ خَيْرٌ مِنَ الدُّنْيَا وَمَا فِيهَا", arti: "Dua rakaat fajar (qobliyah shubuh) lebih baik daripada dunia dan seisinya. (HR. Muslim)" }
     ],
     siang: [
-        { arab: "قِيلُوا فَإِنَّ الشَّيَاطِينَ لَا تَقِيلُ", arti: "Tidurlah qailulah (tidur siang sejenak), karena sesungguhnya setan itu tidak tidur siang. (HR. Abu Nu'aim)" },
-        { arab: "مَنْ يُرِدِ اللَّهُ بِهِ خَيْرًا يُفَقِّهْهُ فِي الدِّينِ", arti: "Barangsiapa yang Allah kehendaki kebaikan baginya, maka Allah pahamkan ia dalam agama. (HR. Bukhari)" }
+        { arab: "قِيلُوا فَإِنَّ الشَّيَاطِينَ لَا تَقِيلُ", arti: "Tidurlah sejenak (siang), karena setan tidak tidur siang. (HR. Abu Nu'aim)" }
     ],
     sore: [
-        { arab: "مَنْ صَلَّى الْبَرْدَيْنِ دَخَلَ الْجَنَّةَ", arti: "Barangsiapa yang mengerjakan shalat bardain (yaitu shalat shubuh dan ashar) maka dia akan masuk surga. (HR. Bukhari)" },
-        { arab: "أَفْضَلُ الذِّكْرِ لَا إِلَهَ إِلَّا اللَّهُ", arti: "Dzikir yang paling utama adalah Laa ilaaha illallah. (HR. Tirmidzi)" }
+        { arab: "مَنْ صَلَّى الْبَرْدَيْنِ دَخَلَ الْجَنَّةَ", arti: "Barangsiapa shalat dua waktu dingin (Subuh & Ashar) maka masuk surga. (HR. Bukhari)" }
     ],
     malam: [
-        { arab: "أَقْرَبُ مَا يَكُونُ الرَّبُّ مِنَ الْعَبْدِ فِي جَوْفِ اللَّيْلِ الْآخِرِ", arti: "Keadaan paling dekat antara Rabb dan hamba-Nya adalah di tengah malam terakhir. (HR. Tirmidzi)" },
-        { arab: "إِذَا أَوَى أَحَدُكُمْ إِلَى فِرَاشِهِ فَلْيَنْفُضْ فِرَاشَهُ", arti: "Apabila salah seorang di antara kalian hendak tidur, maka kibaslah tempat tidurnya. (HR. Bukhari)" }
+        { arab: "إِذَا أَوَى أَحَدُكُمْ إِلَى فِرَاشِهِ فَلْيَنْفُضْ فِرَاشَهُ", arti: "Apabila kalian hendak tidur, kibaslah tempat tidurnya. (HR. Bukhari)" }
     ],
     umum: [
         { arab: "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ", arti: "Sesungguhnya setiap amal itu tergantung pada niatnya. (HR. Bukhari)" },
-        { arab: "لاَ تَغْضَبْ وَلَكَ الْجَنَّةُ", arti: "Janganlah engkau marah, maka bagimu surga. (HR. Thabrani)" },
-        { arab: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ", arti: "Senyummu di hadapan saudaramu adalah sedekah. (HR. Tirmidzi)" }
+        { arab: "لاَ تَغْضَبْ وَلَكَ الْجَنَّةُ", arti: "Janganlah engkau marah, maka bagimu surga. (HR. Thabrani)" }
     ]
 };
 
-// 1. INIT & AUTH CHECK
-document.addEventListener("DOMContentLoaded", () => {
-    // DUMMY USER DATA (Hapus jika sudah pakai login asli)
-    const user = { nama: "Siswa Contoh", kelompok: "Kelompok A", pembimbing: "Ust. Budi" };
+// ==========================================
+// 2. MAIN INITIALIZATION
+// ==========================================
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Cek Sesi Lokal (Username/ID harus ada dari proses Login sebelumnya)
+    let user = JSON.parse(localStorage.getItem("user"));
+    
+    // Jika user kosong, anggap belum login
+    if(!user || user.role !== 'siswa'){
+        alert("⛔ Anda belum login. Mengarahkan ke halaman login...");
+        location.href = 'index.html'; // Ganti dengan halaman login Anda
+        return;
+    }
 
-    // Set Data User
+    // 2. Tampilkan Data Cache (Supaya cepat)
+    updateUserProfileUI(user);
+
+    // 3. SINKRONISASI DATA (FETCH FROM SHEET)
+    // Ini mengambil nama & kelompok terbaru dari Google Sheet berdasarkan username
+    try {
+        const username = user.username || user.id; // Sesuaikan dengan key login Anda
+        // Pastikan action 'getProfile' ada di Google Apps Script
+        const res = await fetch(`${WEB_APP_URL}?action=getProfile&id=${username}`);
+        const freshData = await res.json();
+
+        if(freshData.status === 'ok') {
+            // Update data user di lokal & UI
+            user.nama = freshData.nama;
+            user.kelompok = freshData.kelompok;
+            // Simpan pembaruan ke localStorage
+            localStorage.setItem("user", JSON.stringify(user));
+            // Update UI dengan data baru
+            updateUserProfileUI(user);
+        }
+    } catch (e) {
+        console.warn("Gagal sinkronisasi data (Offline/Error):", e);
+    }
+
+    // 4. Init Fitur Lain
+    initGPS();
+    renderActivities();
+    updateProgress();
+    loadRandomHadis();
+});
+
+// Helper: Update Tampilan Profil
+function updateUserProfileUI(user) {
     document.getElementById('namaSiswa').textContent = user.nama;
     document.getElementById('kelompokSiswa').textContent = "Kelompok: " + user.kelompok;
     document.getElementById('inputNama').value = user.nama;
     document.getElementById('inputKelompok').value = user.kelompok;
-    document.getElementById('inputPembimbing').value = user.pembimbing || "";
+    // document.getElementById('inputPembimbing').value = user.pembimbing || "";
+}
 
-    initGPS();
-    renderActivities();
-    updateProgress();
-    loadRandomHadis(); // Load Hadis Saat Masuk
-});
-
-// 2. HADIS LOGIC
+// ==========================================
+// 3. HADIS ENGINE
+// ==========================================
 function loadRandomHadis(forceRandom = false) {
     const hour = new Date().getHours();
     let category = "umum";
@@ -416,7 +362,6 @@ function loadRandomHadis(forceRandom = false) {
         else if (hour >= 15 && hour < 18) { category = "sore"; label = "RENUNGAN SORE"; }
         else { category = "malam"; label = "NASIHAT MALAM"; }
     } else {
-        // Jika tombol refresh ditekan, ambil acak dari semua kategori
         const keys = Object.keys(hadithDB);
         category = keys[Math.floor(Math.random() * keys.length)];
         label = "MUTIARA PILIHAN";
@@ -425,10 +370,8 @@ function loadRandomHadis(forceRandom = false) {
     const list = hadithDB[category];
     const selected = list[Math.floor(Math.random() * list.length)];
 
-    // Animasi Update
     const card = document.getElementById('dailyHadisSection');
     card.style.opacity = 0;
-    
     setTimeout(() => {
         document.getElementById('hadisTimeLabel').textContent = label;
         document.getElementById('hadisArab').textContent = selected.arab;
@@ -437,7 +380,9 @@ function loadRandomHadis(forceRandom = false) {
     }, 200);
 }
 
-// 3. GPS HANDLER
+// ==========================================
+// 4. CORE FUNCTIONS
+// ==========================================
 function initGPS() {
     const gpsStatus = document.getElementById('gpsStatus');
     const gpsText = document.getElementById('gpsText');
@@ -448,7 +393,6 @@ function initGPS() {
                 const lat = pos.coords.latitude.toFixed(5);
                 const long = pos.coords.longitude.toFixed(5);
                 document.getElementById('inputLatLong').value = `${lat},${long}`;
-                
                 gpsStatus.classList.add('active');
                 gpsText.textContent = "Lokasi Terkunci";
             },
@@ -463,13 +407,12 @@ function initGPS() {
     }
 }
 
-// 4. RENDER UI
 function renderActivities() {
     const container = document.getElementById("activitiesContainer");
     
     activities.forEach((act, index) => {
         const needPhoto = !noPhotoList.includes(act.id);
-        const delay = index * 0.05; // Staggered animation
+        const delay = index * 0.05;
 
         let photoHtml = '';
         if(needPhoto) {
@@ -495,19 +438,15 @@ function renderActivities() {
                 <div class="toggle-icon" id="icon_${act.id}">▼</div>
             </div>
             <div class="activity-body" id="body_${act.id}">
-                
                 <input type="checkbox" id="chk_${act.id}" class="chk-hidden" onchange="updateCardStyle('${act.id}')">
                 <label for="chk_${act.id}" class="chk-label">
                     <span id="lbl_icon_${act.id}">⬜</span> KONFIRMASI PELAKSANAAN
                 </label>
-
                 <div class="form-group">
                     <label class="form-label">⏰ Waktu Pelaksanaan</label>
                     <input type="time" id="time_${act.id}">
                 </div>
-
                 ${photoHtml}
-                
                 <div class="form-group">
                     <label class="form-label">📝 Keterangan Singkat</label>
                     <input type="text" id="ket_${act.id}" placeholder="Contoh: Di Masjid Al-Huda...">
@@ -518,24 +457,18 @@ function renderActivities() {
     });
 }
 
-// --- INTERACTION FUNCTIONS ---
 function toggleAccordion(id) {
     const body = document.getElementById(`body_${id}`);
     const icon = document.getElementById(`icon_${id}`);
     const isOpen = body.classList.contains('open');
 
-    // Close all others
     document.querySelectorAll('.activity-body').forEach(el => el.classList.remove('open'));
     document.querySelectorAll('.toggle-icon').forEach(el => el.style.transform = 'rotate(0deg)');
 
     if(!isOpen) {
         body.classList.add('open');
         icon.style.transform = 'rotate(180deg)';
-        
-        // Auto scroll dikit biar enak
-        setTimeout(() => {
-            body.scrollIntoView({behavior: "smooth", block: "nearest"});
-        }, 300);
+        setTimeout(() => { body.scrollIntoView({behavior: "smooth", block: "nearest"}); }, 300);
     }
 }
 
@@ -558,12 +491,10 @@ function updateProgress() {
     const total = activities.length;
     const checked = document.querySelectorAll('.chk-hidden:checked').length;
     const percent = Math.round((checked / total) * 100);
-    
     document.getElementById('progressBar').style.width = `${percent}%`;
     document.getElementById('progressText').textContent = `${percent}% Selesai`;
 }
 
-// --- IMAGE HANDLING ---
 function previewImage(input, id) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -592,10 +523,9 @@ function convertToBase64(file) {
     });
 }
 
-// 5. SUBMIT LOGIC
+// 5. SUBMIT HANDLER
 async function kirimLaporan() {
     const checkedBoxes = document.querySelectorAll('.chk-hidden:checked');
-
     if(checkedBoxes.length === 0){
         alert("⚠️ Mohon isi minimal satu kegiatan!");
         return;
@@ -603,7 +533,6 @@ async function kirimLaporan() {
 
     const btn = document.getElementById('btnSubmit');
     const overlay = document.getElementById('loaderOverlay');
-    
     overlay.style.display = 'flex';
     btn.disabled = true;
 
@@ -617,18 +546,15 @@ async function kirimLaporan() {
             Catatan: document.getElementById('inputCatatan').value
         };
 
-        // --- Loop Kegiatan Harian ---
         for (let act of activities) {
             const chk = document.getElementById(`chk_${act.id}`);
             if (chk.checked) {
                 const time = document.getElementById(`time_${act.id}`).value;
                 const ket = document.getElementById(`ket_${act.id}`).value;
-                
                 payload[`${act.id}_Status`] = "Ya";
                 payload[`${act.id}_Waktu`] = time || "-";
                 payload[`${act.id}_Ket`] = ket || "-";
 
-                // Foto handling
                 if (!noPhotoList.includes(act.id)) {
                     const fileInput = document.getElementById(`file_${act.id}`);
                     if (fileInput.files.length > 0) {
@@ -642,26 +568,11 @@ async function kirimLaporan() {
             }
         }
 
-        console.log("Sending payload...", payload);
-
-        // Fetch ke Google Script
-        const response = await fetch(WEB_APP_URL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-
-        // Parse Response
-        const result = await response.json();
-
-        if(result.status === "ok"){
-             alert("✅ Laporan Berhasil Dikirim!");
-             window.location.reload(); 
-        } else {
-             throw new Error("Server merespon gagal.");
-        }
+        await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+        alert("✅ Laporan Berhasil Dikirim!");
+        window.location.reload(); 
 
     } catch (err) {
-        console.error(err);
         alert("Gagal Mengirim: " + err.message);
         overlay.style.display = 'none';
         btn.disabled = false;
@@ -675,6 +586,5 @@ function logout(){
     }
 }
 </script>
-    <script src="chat.js" defer></script>
 </body>
 </html>
