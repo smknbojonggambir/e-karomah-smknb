@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const CHAT_URL = "https://script.google.com/macros/s/AKfycbymMZ7unZ-LPNDC_HOnkYsLRH-MSPqyRnVWA20-Mnsg7vAKgOiJ52qk4cJYlp5vSpbg/exec";
+const CHAT_URL = "https://script.google.com/macros/s/AKfycbx1JrdkqWA4S-61z4PklNjTmsStUyBfwH9bZGgcUa_t8QokaJxT6Y47JLLDDxVhfzcgLg/exec";
 
 document.addEventListener("DOMContentLoaded", async function() {
 
