@@ -514,11 +514,42 @@ function clearImage(id) {
     document.getElementById(`remove_${id}`).style.display = 'none';
 }
 
+// ==========================================
+// FUNGSI BARU: KOMPRES FOTO SEBELUM UPLOAD
+// ==========================================
 function convertToBase64(file) {
     return new Promise((resolve, reject) => {
+        const maxWidth = 800; // Kecilkan lebar foto jadi 800px (Cukup untuk laporan)
+        const quality = 0.6;  // Kualitas 60% (Agar ukuran file < 200KB)
+        
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                // Buat Canvas untuk resize
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Hitung rasio aspek baru
+                if (width > maxWidth) {
+                    height = Math.round(height * (maxWidth / width));
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Konversi ke Base64 dengan kompresi JPEG
+                // Hasil string ini jauh lebih pendek dan ringan
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(dataUrl);
+            };
+        };
         reader.onerror = error => reject(error);
     });
 }
