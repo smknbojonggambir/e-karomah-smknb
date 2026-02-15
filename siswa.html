@@ -366,7 +366,6 @@ function updateUserProfileUI(user) {
     document.getElementById('namaSiswa').textContent = user.nama || "Siswa";
     document.getElementById('kelompokSiswa').textContent = "Kelompok: " + (user.kelompok || "-");
     
-    // Set Value Hidden Input (FIX: Pastikan pembimbing tidak undefined)
     document.getElementById('inputNama').value = user.nama || "";
     document.getElementById('inputKelompok').value = user.kelompok || "";
     document.getElementById('inputPembimbing').value = user.pembimbing || "-";
@@ -542,7 +541,7 @@ function clearImage(id) {
 }
 
 // ==========================================
-// 5. IMAGE COMPRESSION (CRITICAL)
+// 5. IMAGE COMPRESSION
 // ==========================================
 function convertToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -570,7 +569,9 @@ function convertToBase64(file) {
                 ctx.drawImage(img, 0, 0, width, height);
 
                 const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                resolve(dataUrl);
+                // Kita ambil base64 murni tanpa prefix "data:image/..." jika backend meminta demikian,
+                // tapi biasanya GAS menerima full string. Disini saya kirim full string.
+                resolve(dataUrl); 
             };
         };
         reader.onerror = error => reject(error);
@@ -578,65 +579,59 @@ function convertToBase64(file) {
 }
 
 // ==========================================
-// 6. SUBMIT LOGIC (FIXED)
+// 6. SUBMIT LOGIC (FIXED & IMPROVED)
 // ==========================================
 async function kirimLaporan() {
+    // 1. Validasi Minimal 1 Kegiatan
     const checkedBoxes = document.querySelectorAll('.chk-hidden:checked');
     if(checkedBoxes.length === 0){
-        alert("⚠️ Mohon isi minimal satu kegiatan!");
+        alert("⚠️ Mohon centang minimal satu kegiatan yang sudah dikerjakan!");
         return;
     }
 
+    // 2. Persiapan UI Loading
     const btn = document.getElementById('btnSubmit');
     const overlay = document.getElementById('loaderOverlay');
     overlay.style.display = 'flex';
     btn.disabled = true;
 
     try {
-        // --- 1. AMBIL DATA IDENTITAS ---
-        // Prioritas: Input Hidden -> LocalStorage -> Default
+        // 3. Ambil Data Identitas
         const localUser = JSON.parse(localStorage.getItem("user")) || {};
-        
         const valNama = document.getElementById('inputNama').value || localUser.nama || "-";
         const valKelompok = document.getElementById('inputKelompok').value || localUser.kelompok || "-";
         
-        // --- PERBAIKAN DI SINI ---
-        // Masalah: Jika input pembimbing bernilai "-" (default), sistem sebelumnya tetap mengirim "-" 
-        // Solusi: Jika nilainya "-" atau kosong, paksa ambil ulang dari localStorage (yang mungkin sudah terupdate)
         let valPembimbing = document.getElementById('inputPembimbing').value;
         if (!valPembimbing || valPembimbing === "undefined" || valPembimbing === "-") {
             valPembimbing = localUser.pembimbing || "-";
         }
 
-        // --- 2. AMBIL LAT & LONG ---
-        // Pisahkan Lat dan Long agar masuk ke kolom terpisah
+        // 4. Ambil Lokasi
         let lat = document.getElementById('inputLat').value;
         let long = document.getElementById('inputLong').value;
-        
-        // Default ke 0 jika GPS mati/belum dapat
         if (!lat) lat = "0";
         if (!long) long = "0";
         
-        // Waktu & Tanggal
+        // 5. Waktu Saat Ini
         const now = new Date();
         const tgl = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
         const jam = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
 
-        // --- KONSTRUKSI PAYLOAD ---
+        // 6. Buat Payload Utama
         let payload = {
             action: "simpan",
             Time: jam,
             Tanggal: tgl,
             Nama: valNama,
             Kelompok: valKelompok,
-            Pembimbing: valPembimbing, // Sekarang akan mengirim nama yang benar
+            Pembimbing: valPembimbing,
             Lat: lat,                  
             Long: long,                 
             LatLong: `${lat}, ${long}`,
             Catatan: document.getElementById('inputCatatan').value
         };
 
-        // --- Loop Kegiatan ---
+        // 7. Loop Setiap Kegiatan (PERBAIKAN SINTAKS DISINI)
         for (const act of activities) {
             const chk = document.getElementById(`chk_${act.id}`);
             
@@ -644,33 +639,46 @@ async function kirimLaporan() {
                 const time = document.getElementById(`time_${act.id}`).value;
                 const ket = document.getElementById(`ket_${act.id}`).value;
                 
+                // Gunakan kurung siku [] untuk key dinamis
                 payload[`${act.id}_Status`] = "Ya";
                 payload[`${act.id}_Waktu`] = time || "-";
                 payload[`${act.id}_Ket`] = ket || "-";
 
+                // Proses Foto
                 if (!noPhotoList.includes(act.id)) {
                     const fileInput = document.getElementById(`file_${act.id}`);
                     if (fileInput.files.length > 0) {
+                        // Await hanya bisa dalam async function (sudah benar)
                         payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
                     } else {
                         throw new Error(`⚠️ Foto untuk "${act.label}" wajib diupload!`);
                     }
+                } else {
+                     // Jika kegiatan tidak butuh foto, kirim string kosong/dash
+                     payload[`${act.id}_Foto`] = "-";
                 }
             } else {
                 payload[`${act.id}_Status`] = "Tidak";
+                payload[`${act.id}_Waktu`] = "";
+                payload[`${act.id}_Ket`] = "";
+                payload[`${act.id}_Foto`] = "";
             }
         }
 
-        // --- Kirim Data ---
+        // 8. Kirim ke Google Script
+        // Menggunakan 'text/plain' agar tidak terkena CORS Preflight Check di Google Apps Script
         await fetch(WEB_APP_URL, {
             method: "POST",
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify(payload)
         });
 
-        alert("✅ Laporan Berhasil Dikirim!");
-        window.location.reload(); 
+        // 9. Sukses & Reload
+        alert("✅ Laporan Berhasil Dikirim! Terima kasih.");
+        window.location.reload(); // Ini akan mengembalikan ke halaman siswa yang bersih
 
     } catch (err) {
+        console.error(err);
         alert("Gagal Mengirim: " + err.message);
         overlay.style.display = 'none';
         btn.disabled = false;
@@ -684,6 +692,7 @@ function logout(){
     }
 }
 </script>
+<script src="chat.js" defer></script>
 <script src="chat.js" defer></script>
 </body>
 </html>
