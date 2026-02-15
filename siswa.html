@@ -196,85 +196,83 @@
     </style>
 </head>
 <body>
+    <div class="header-container">
+        <div class="brand"><span style="font-size:20px;">🌙</span> E-KAROMAH</div>
+        <button class="btn-logout" onclick="logout()">Keluar</button>
+    </div>
 
-<div class="header-container">
-    <div class="brand"><span style="font-size:20px;">🌙</span> E-KAROMAH</div>
-    <button class="btn-logout" onclick="logout()">Keluar</button>
-</div>
-
-<div class="container">
-    <div class="user-card">
-        <div class="user-info">
-            <h1 id="namaSiswa">Memuat Data...</h1>
-            <p id="kelompokSiswa">Sinkronisasi data...</p>
-        </div>
-        <div class="status-row">
-            <div class="gps-pill" id="gpsStatus">
-                <div class="gps-dot"></div>
-                <span id="gpsText">Mencari Lokasi...</span>
+    <div class="container">
+        <div class="user-card">
+            <div class="user-info">
+                <h1 id="namaSiswa">Memuat Data...</h1>
+                <p id="kelompokSiswa">Sinkronisasi data...</p>
             </div>
-            <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.4</div>
+            <div class="status-row">
+                <div class="gps-pill" id="gpsStatus">
+                    <div class="gps-dot"></div>
+                    <span id="gpsText">Mencari Lokasi...</span>
+                </div>
+                <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.4</div>
+            </div>
         </div>
-    </div>
 
-    <div class="progress-container">
-        <div class="progress-label">
-            <span>Progress Hari Ini</span>
-            <span id="progressText">0%</span>
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Progress Hari Ini</span>
+                <span id="progressText">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
         </div>
-        <div class="progress-track">
-            <div class="progress-fill" id="progressBar"></div>
+
+        <div class="reminder-card" id="dailyHadisSection">
+            <div class="reminder-badge" id="hadisTimeLabel">MUTIARA PAGI</div>
+            <div class="reminder-arabic" id="hadisArab">...</div>
+            <div class="reminder-arti" id="hadisArti">Memuat Hadis Pilihan...</div>
+            <button class="btn-refresh-hadis" onclick="loadRandomHadis(true)">🔄 Lihat Hadis Lain</button>
         </div>
-    </div>
 
-    <div class="reminder-card" id="dailyHadisSection">
-        <div class="reminder-badge" id="hadisTimeLabel">MUTIARA PAGI</div>
-        <div class="reminder-arabic" id="hadisArab">...</div>
-        <div class="reminder-arti" id="hadisArti">Memuat Hadis Pilihan...</div>
-        <button class="btn-refresh-hadis" onclick="loadRandomHadis(true)">🔄 Lihat Hadis Lain</button>
-    </div>
+        <form id="formLaporan" onsubmit="return false;">
+            <input type="hidden" id="inputNama">
+            <input type="hidden" id="inputKelompok">
+            <input type="hidden" id="inputPembimbing">
+            <input type="hidden" id="inputLat">
+            <input type="hidden" id="inputLong">
 
-    <form id="formLaporan" onsubmit="return false;">
-        <input type="hidden" id="inputNama">
-        <input type="hidden" id="inputKelompok">
-        <input type="hidden" id="inputPembimbing">
-        <input type="hidden" id="inputLat">
-        <input type="hidden" id="inputLong">
+            <h3 style="color:var(--text); font-size:14px; margin-bottom:15px; font-weight: 600; padding-left:5px; border-left: 3px solid var(--gold);">
+                📋 DAFTAR KEGIATAN
+            </h3>
+            
+            <div id="activitiesContainer"></div>
 
-        <h3 style="color:var(--text); font-size:14px; margin-bottom:15px; font-weight: 600; padding-left:5px; border-left: 3px solid var(--gold);">
-            📋 DAFTAR KEGIATAN
-        </h3>
+            <div class="activity-card" style="margin-top:20px; border-style: dashed; background: rgba(255,255,255,0.02);">
+                <div class="activity-header" style="cursor:default;">
+                    <h4 style="color:#94a3b8;">📝 Catatan Tambahan (Opsional)</h4>
+                </div>
+                <div class="activity-body open" style="padding-top:0; border:none;">
+                    <input type="text" id="inputCatatan" placeholder="Ada kejadian menarik hari ini? Tulis disini..." style="background: rgba(0,0,0,0.2);">
+                </div>
+            </div>
+
+            <div class="fab-container">
+                <button type="button" class="submit-btn" id="btnSubmit" onclick="kirimLaporan()">
+                    <span>🚀 KIRIM LAPORAN</span>
+                </button>
+            </div>
+        </form>
         
-        <div id="activitiesContainer"></div>
-
-        <div class="activity-card" style="margin-top:20px; border-style: dashed; background: rgba(255,255,255,0.02);">
-            <div class="activity-header" style="cursor:default;">
-                <h4 style="color:#94a3b8;">📝 Catatan Tambahan (Opsional)</h4>
-            </div>
-            <div class="activity-body open" style="padding-top:0; border:none;">
-                <input type="text" id="inputCatatan" placeholder="Ada kejadian menarik hari ini? Tulis disini..." style="background: rgba(0,0,0,0.2);">
-            </div>
+        <div class="footer-info">
+            &copy; 2026 E-KAROMAH App.<br>
+            Created with <span style="color:#ef4444">♥</span> by <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
         </div>
-
-        <div class="fab-container">
-            <button type="button" class="submit-btn" id="btnSubmit" onclick="kirimLaporan()">
-                <span>🚀 KIRIM LAPORAN</span>
-            </button>
-        </div>
-    </form>
-    
-    <div class="footer-info">
-        &copy; 2026 E-KAROMAH App.<br>
-        Created with <span style="color:#ef4444">♥</span> by <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
     </div>
 
-</div>
-
-<div id="loaderOverlay">
-    <div class="spinner"></div>
-    <h3 style="color:white; font-size:18px; font-weight:600;">Mengirim Data...</h3>
-    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Mohon jangan tutup halaman ini <br>sampai muncul notifikasi sukses.</p>
-</div>
+    <div id="loaderOverlay">
+        <div class="spinner"></div>
+        <h3 style="color:white; font-size:18px; font-weight:600;">Mengirim Data...</h3>
+        <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Mohon jangan tutup halaman ini <br>sampai muncul notifikasi sukses.</p>
+    </div>
 
 <script>
 // ==========================================
@@ -335,10 +333,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // 2. Tampilkan Data Cache
+    // 2. Tampilkan Data Cache (Agar cepat)
     updateUserProfileUI(user);
 
     // 3. SINKRONISASI DATA (FETCH FROM SHEET)
+    // Ini penting untuk memperbarui data pembimbing terbaru dari database
     try {
         const username = user.username || user.id; 
         const res = await fetch(`${WEB_APP_URL}?action=getProfile&id=${username}`);
@@ -349,12 +348,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             user.kelompok = freshData.kelompok;
             
             // Prioritas Update Pembimbing
+            // Cek berbagai kemungkinan nama field dari Google Script
             if(freshData.pembimbing && freshData.pembimbing !== "") {
                 user.pembimbing = freshData.pembimbing;
             } else if (freshData.guru && freshData.guru !== "") {
                 user.pembimbing = freshData.guru;
             }
             
+            // Simpan update ke LocalStorage agar login berikutnya tidak perlu fetch ulang
             localStorage.setItem("user", JSON.stringify(user));
             updateUserProfileUI(user);
         }
@@ -415,8 +416,13 @@ function loadRandomHadis(forceRandom = false) {
 }
 
 // ==========================================
-// 4. CORE FUNCTIONS
+// 4. CORE FUNCTIONS (UI & GPS)
 // ==========================================
+function logout() {
+    localStorage.removeItem("user");
+    location.href = "index.html";
+}
+
 function initGPS() {
     const gpsStatus = document.getElementById('gpsStatus');
     const gpsText = document.getElementById('gpsText');
@@ -588,7 +594,7 @@ function convertToBase64(file) {
 }
 
 // ==========================================
-// 6. SUBMIT LOGIC (PERBAIKAN PEMBIMBING)
+// 6. SUBMIT LOGIC (PERBAIKAN UTAMA: PEMBIMBING)
 // ==========================================
 async function kirimLaporan() {
     // 1. Validasi Minimal 1 Kegiatan
@@ -605,10 +611,11 @@ async function kirimLaporan() {
     btn.disabled = true;
 
     try {
-        // A. Ambil Data User dari LocalStorage
+        // A. Ambil Data User dari LocalStorage (Data Mentah Login)
+        // Ini adalah sumber kebenaran (Source of Truth) jika input HTML gagal
         const localUser = JSON.parse(localStorage.getItem("user")) || {};
         
-        // B. Ambil Data Identitas
+        // B. Ambil Data Identitas dari Form
         let valNama = document.getElementById('inputNama').value;
         let valKelompok = document.getElementById('inputKelompok').value;
         let valPembimbing = document.getElementById('inputPembimbing').value;
@@ -617,15 +624,17 @@ async function kirimLaporan() {
         if(!valNama || valNama === "") valNama = localUser.nama || "Siswa Tanpa Nama";
         if(!valKelompok || valKelompok === "") valKelompok = localUser.kelompok || "-";
 
-        // D. FALLBACK AGRESIF UNTUK PEMBIMBING
-        // Jika hidden input kosong/undefined/strip, paksa cari di localStorage
+        // D. LOGIC "ANTI-GAGAL" PEMBIMBING
+        // Jika input hidden kosong, undefined, atau "-", paksa ambil dari data login
         if (!valPembimbing || valPembimbing === "undefined" || valPembimbing === "-" || valPembimbing.trim() === "") {
+            console.log("Input Pembimbing kosong, mengambil dari LocalStorage...");
+            
             if (localUser.pembimbing && localUser.pembimbing !== "undefined") {
                 valPembimbing = localUser.pembimbing;
             } else if (localUser.guru && localUser.guru !== "undefined") {
                 valPembimbing = localUser.guru;
             } else {
-                valPembimbing = "-";
+                valPembimbing = "-"; // Benar-benar tidak ada data
             }
         }
 
@@ -644,7 +653,7 @@ async function kirimLaporan() {
             Tanggal: tgl,
             Nama: valNama,
             Kelompok: valKelompok,
-            Pembimbing: valPembimbing, // Kunci sukses: Data ini sudah dipastikan terisi
+            Pembimbing: valPembimbing, // Data ini sekarang dijamin terisi jika ada di data login
             Lat: lat,                  
             Long: long,                 
             LatLong: `${lat}, ${long}`,
@@ -669,7 +678,7 @@ async function kirimLaporan() {
                     if (fileInput.files.length > 0) {
                         payload[`${act.id}_Foto`] = await convertToBase64(fileInput.files[0]);
                     } else {
-                        // Jika dicentang tapi tidak ada foto, lempar error
+                        // Jika dicentang tapi tidak ada foto, lempar error (Validasi Foto Wajib)
                         throw new Error(`⚠️ Foto untuk "${act.label}" wajib diupload jika kegiatan dicentang!`);
                     }
                 } else {
@@ -685,16 +694,17 @@ async function kirimLaporan() {
         }
 
         // H. Kirim ke Google Script
-        console.log("Mengirim Payload:", payload); // Debugging di console
+        // Menggunakan JSON stringify untuk memastikan struktur data utuh
+        console.log("Mengirim Payload:", payload); 
 
         await fetch(WEB_APP_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain" },
+            headers: { "Content-Type": "text/plain" }, // text/plain menghindari CORS error di Apps Script
             body: JSON.stringify(payload)
         });
 
         // I. Sukses
-        alert(`✅ Laporan Berhasil Dikirim!\nPembimbing: ${valPembimbing}`);
+        alert(`✅ Laporan Berhasil Dikirim!\n\nNama: ${valNama}\nPembimbing: ${valPembimbing}`);
         
         overlay.style.display = 'none';
         btn.disabled = false;
@@ -723,30 +733,16 @@ function resetFormUI() {
     document.querySelectorAll('.activity-body input[type="text"]').forEach(input => input.value = "");
     document.getElementById('inputCatatan').value = "";
 
-    // 3. Bersihkan Foto
-    document.querySelectorAll('.file-upload-input').forEach(input => input.value = "");
-    document.querySelectorAll('.img-preview').forEach(img => {
-        img.style.display = 'none';
-        img.src = "";
+    // 3. Reset Gambar Preview
+    activities.forEach(act => {
+        if(!noPhotoList.includes(act.id)) {
+            clearImage(act.id);
+        }
     });
-    document.querySelectorAll('.btn-remove-img').forEach(btn => btn.style.display = 'none');
 
-    // 4. Tutup Accordion
-    document.querySelectorAll('.activity-body').forEach(el => el.classList.remove('open'));
-    document.querySelectorAll('.toggle-icon').forEach(el => el.style.transform = 'rotate(0deg)');
-
-    // 5. Reset Progress & Scroll
-    updateProgress();
+    // 4. Scroll ke atas
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-function logout(){
-    if(confirm("Keluar dari aplikasi?")){
-        localStorage.removeItem("user");
-        location.href = "index.html"; 
-    }
-}
 </script>
-<script src="chat.js" defer></script>
 </body>
 </html>
