@@ -97,39 +97,13 @@
             gap: 20px; 
             margin-bottom: 10px; 
             padding-bottom: 15px;
-            border-bottom: 4px double #b45309; /* Garis Kop Surat */
+            border-bottom: 4px double #b45309; 
         }
-        .cert-logo { 
-            width: 100px; 
-            height: auto; 
-            object-fit: contain; 
-        }
-        .cert-identity {
-            text-align: center;
-            color: #000;
-        }
-        .cert-identity h2 {
-            margin: 0;
-            font-family: 'Times New Roman', serif; /* Font resmi */
-            font-size: 26px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #000;
-        }
-        .cert-identity h3 {
-            margin: 5px 0 0 0;
-            font-size: 14px;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-        .cert-identity p {
-            margin: 5px 0 0 0;
-            font-size: 12px;
-            font-style: italic;
-        }
-
+        .cert-logo { width: 100px; height: auto; object-fit: contain; }
+        .cert-identity { text-align: center; color: #000; }
+        .cert-identity h2 { margin: 0; font-family: 'Times New Roman', serif; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #000; }
+        .cert-identity h3 { margin: 5px 0 0 0; font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; }
+        .cert-identity p { margin: 5px 0 0 0; font-size: 12px; font-style: italic; }
         .cert-title { font-family: 'Playfair Display', serif; font-size: 42px; color: #b45309; margin-bottom: 5px; margin-top: 20px; font-weight: bold; text-decoration: underline;}
         .cert-subtitle { font-size: 16px; margin-bottom: 25px; color: #555; }
         .cert-name { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: bold; border-bottom: 1px solid #ddd; display: inline-block; padding: 0 30px 5px; margin-bottom: 20px; color: #000; }
@@ -282,7 +256,7 @@
     </div>
 
     <script>
-        // CONFIG
+        // CONFIG - Ganti URL API di bawah jika Apps Script Anda di-deploy ulang
         const API = "https://script.google.com/macros/s/AKfycbx1JrdkqWA4S-61z4PklNjTmsStUyBfwH9bZGgcUa_t8QokaJxT6Y47JLLDDxVhfzcgLg/exec";
         
         let globalData = { siswa: [], pembimbing: [] };
@@ -297,7 +271,7 @@
         function logout() {
             if(confirm("Yakin ingin keluar?")) {
                 localStorage.removeItem("user");
-                window.location.href = "index.html";
+                window.location.href = "index.html"; // Sesuaikan dengan halaman login Anda
             }
         }
 
@@ -313,12 +287,15 @@
             document.getElementById('cert-display-name').innerText = name;
             preview.style.display = 'block';
 
-            // Reset data sertifikat
-            document.getElementById('cert-data-jumlah').innerText = "0 Kegiatan";
+            // Coba cari data siswa untuk mengisi total laporan sertifikat
+            let jumlahLaporan = 0;
+            const siswaDitemukan = globalData.siswa.find(s => s.Nama.toLowerCase() === name.toLowerCase());
+            if(siswaDitemukan) jumlahLaporan = siswaDitemukan.TotalLaporan || 0;
+
+            document.getElementById('cert-data-jumlah').innerText = jumlahLaporan + " Kegiatan";
             document.getElementById('cert-data-nilai').innerText = "0";
             document.getElementById('cert-data-predikat').innerText = "Belum Ada Nilai";
 
-            // Logic Ganti Warna & Konten
             if (type === 'Pembimbing') {
                 titleEl.innerText = "PIAGAM PENGHARGAAN";
                 titleEl.style.color = "#10b981"; 
@@ -336,25 +313,72 @@
 
         async function loadData() {
             try {
-                const res = await fetch(API + "?action=getUsers");
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                let data = await res.json();
+                // 1. Ambil data Users dari Kode.gs
+                const resUsers = await fetch(API + "?action=getUsers");
+                if (!resUsers.ok) throw new Error(`HTTP error Users! status: ${resUsers.status}`);
+                const usersRaw = await resUsers.json();
                 
-                if (!data) data = {};
-                if (!Array.isArray(data.siswa)) data.siswa = [];
-                if (!Array.isArray(data.pembimbing)) data.pembimbing = [];
+                // 2. Ambil data Laporan untuk menghitung jumlah kegiatan dari Kode.gs
+                const resLaporan = await fetch(API + "?action=rekapAdmin");
+                let laporanRaw = [];
+                if (resLaporan.ok) {
+                    laporanRaw = await resLaporan.json();
+                }
+
+                let siswaArr = [];
+                let pembimbingArr = [];
+
+                // 3. Pilah Data (Mencocokkan lowercase dari GS ke uppercase awal HTML)
+                usersRaw.forEach(u => {
+                    const role = u.role ? u.role.toLowerCase() : 'siswa';
+                    
+                    const formatUser = {
+                        Username: u.username,
+                        Nama: u.nama,
+                        Kelompok: u.kelompok,
+                        Role: role
+                    };
+
+                    if (role === 'pembimbing') {
+                        pembimbingArr.push(formatUser);
+                    } else if (role !== 'admin') {
+                        // 4. Hitung jumlah laporan spesifik untuk siswa ini
+                        const laporannya = laporanRaw.filter(l => {
+                            const keyNama = Object.keys(l).find(k => k.toLowerCase().includes('nama'));
+                            if (keyNama && l[keyNama]) {
+                                return l[keyNama].toString().toLowerCase().trim() === u.nama.toLowerCase().trim();
+                            }
+                            return false;
+                        });
+                        
+                        formatUser.TotalLaporan = laporannya.length;
+                        formatUser.NilaiAktif = 0; 
+                        formatUser.NilaiAkhlaq = 0;
+                        formatUser.NilaiLaporan = 0;
+                        
+                        siswaArr.push(formatUser);
+                    }
+                });
+
+                // Gabungkan untuk dibaca UI HTML
+                const finalData = {
+                    siswa: siswaArr,
+                    pembimbing: pembimbingArr
+                };
                 
-                globalData = data;
-                renderTable('listSiswa', data.siswa);
-                renderTable('listGuru', data.pembimbing);
-                if (document.getElementById('myChart')) renderChart(data);
-                renderLaporan(data);
-                renderPenilaianByGroup(data);
+                globalData = finalData;
+                
+                // Render semua komponen Dashboard
+                renderTable('listSiswa', finalData.siswa);
+                renderTable('listGuru', finalData.pembimbing);
+                if (document.getElementById('myChart')) renderChart(finalData);
+                renderLaporan(finalData);
+                renderPenilaianByGroup(finalData);
+
             } catch(e) { 
                 console.error("Detail Error:", e);
                 const containerNilai = document.getElementById('container-penilaian');
-                if (containerNilai) containerNilai.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Gagal memuat data.</div>';
-                alert("Gagal memuat data. Periksa koneksi internet.");
+                if (containerNilai) containerNilai.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Gagal memuat data. Periksa koneksi internet.</div>';
             }
         }
 
@@ -423,6 +447,8 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
             });
         }
+        
+        // Load data on page init
         loadData();
     </script>
     <script src="chat.js" defer></script>
