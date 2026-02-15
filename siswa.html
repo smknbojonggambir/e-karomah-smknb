@@ -27,7 +27,7 @@
             background: radial-gradient(circle at top right, #064e3b, #020617);
             background-attachment: fixed;
             color: var(--text);
-            padding-bottom: 120px;
+            padding-bottom: 0; /* Adjusted for new footer handling */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -173,6 +173,26 @@
             border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to {transform: rotate(360deg);} }
+
+        /* FOOTER BARU */
+        .footer-info {
+            text-align: center;
+            padding: 30px 20px 100px; /* Padding bawah besar agar tidak tertutup tombol Kirim */
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 40px;
+            border-top: 1px solid var(--card-border);
+            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+        }
+        .footer-info a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .footer-info a:hover {
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -242,16 +262,18 @@
             </button>
         </div>
     </form>
+    
+    <div class="footer-info">
+        &copy; 2026 E-KAROMAH App.<br>
+        Created with <span style="color:#ef4444">♥</span> by <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
+    </div>
+
 </div>
 
 <div id="loaderOverlay">
     <div class="spinner"></div>
     <h3 style="color:white; font-size:18px; font-weight:600;">Mengirim Data...</h3>
     <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Mohon jangan tutup halaman ini <br>sampai muncul notifikasi sukses.</p>
-</div>
-
-    <div class="footer-fixed">
-    &copy; 2026 E-KAROMAH App. Developer <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
 </div>
 
 <script>
@@ -609,7 +631,7 @@ async function kirimLaporan() {
             Kelompok: valKelompok,
             Pembimbing: valPembimbing, // Sekarang akan mengirim nama yang benar
             Lat: lat,                  
-            Long: long,                
+            Long: long,                 
             LatLong: `${lat}, ${long}`,
             Catatan: document.getElementById('inputCatatan').value
         };
