@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI', sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  min-height:100vh;
+}
+
+.card{
+  background:#ffffff;
+  max-width:500px;
+  width:100%;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.3);
+  text-align:center;
+}
+
+.title{
+  font-size:20px;
+  font-weight:bold;
+  color:#2c5364;
+  margin-bottom:15px;
+}
+
+.hadis{
+  font-size:15px;
+  line-height:1.6;
+  color:#333;
+  margin-bottom:15px;
+}
+
+.source{
+  font-size:13px;
+  color:#777;
+  font-style:italic;
+}
+
+button{
+  margin-top:15px;
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#2c5364;
+  color:white;
+  cursor:pointer;
+  font-size:14px;
+  transition:0.3s;
+}
+
+button:hover{
+  background:#1c3b4a;
+}
+
+@media(max-width:400px){
+  .card{
+    padding:18px;
+  }
+  .hadis{
+    font-size:14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="title">📖 Hadis Harian</div>
+  <div class="hadis" id="hadisText"></div>
+  <div class="source" id="hadisSource"></div>
+  <button onclick="randomHadis()">Hadis Lainnya</button>
+</div>
+
+<script>
+const hadisList = [
+{
+text:"Barang siapa yang berpuasa Ramadhan karena iman dan mengharap pahala, maka diampuni dosa-dosanya yang telah lalu.",
+source:"HR. Bukhari & Muslim"
+},
+{
+text:"Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.",
+source:"HR. Ahmad"
+},
+{
+text:"Barang siapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan baginya jalan menuju surga.",
+source:"HR. Muslim"
+},
+{
+text:"Senyummu kepada saudaramu adalah sedekah.",
+source:"HR. Tirmidzi"
+},
+{
+text:"Tidaklah berkurang harta karena sedekah.",
+source:"HR. Muslim"
+},
+{
+text:"Orang yang kuat bukanlah yang pandai bergulat, tetapi yang mampu menahan marah.",
+source:"HR. Bukhari & Muslim"
+},
+{
+text:"Sesungguhnya amal itu tergantung niatnya.",
+source:"HR. Bukhari & Muslim"
+},
+{
+text:"Barang siapa memberi makan orang yang berpuasa, maka ia mendapat pahala seperti orang yang berpuasa itu.",
+source:"HR. Tirmidzi"
+}
+];
+
+function randomHadis(){
+  const randomIndex = Math.floor(Math.random() * hadisList.length);
+  document.getElementById("hadisText").innerText = hadisList[randomIndex].text;
+  document.getElementById("hadisSource").innerText = hadisList[randomIndex].source;
+}
+
+randomHadis();
+</script>
+
+</body>
+</html>
