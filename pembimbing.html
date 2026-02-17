@@ -337,7 +337,7 @@
 
 <script>
 // ================= CONFIG & SETUP =================
-// ⚠️ GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT ANDA ⚠️
+// ⚠️ GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT GOOGLE SCRIPT ANDA ⚠️
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1JrdkqWA4S-61z4PklNjTmsStUyBfwH9bZGgcUa_t8QokaJxT6Y47JLLDDxVhfzcgLg/exec"; 
 
 const activityConfig = [
@@ -364,12 +364,12 @@ let validationState = {};
 // 1. CEK LOGIN
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'pembimbing'){
-    alert("⛔ Akses Ditolak."); 
-    location.href='index.html';
+    alert("⛔ Akses Ditolak. Silakan login sebagai Pembimbing."); 
+    window.location.href='index.html';
 }
 
-document.getElementById('mName').textContent = user.nama;
-document.getElementById('mGroup').textContent = "Kelompok: " + user.kelompok;
+document.getElementById('mName').textContent = user.nama || "Pembimbing";
+document.getElementById('mGroup').textContent = "Kelompok: " + (user.kelompok || "-");
 document.getElementById('dateFilter').valueAsDate = new Date();
 
 // ==========================================
@@ -384,15 +384,19 @@ async function loadData() {
     loader.style.display = "block";
 
     try {
+        // Asumsi Endpoint: action=rekapPembimbing&kelompok=X
         const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
         let myStudents = data;
+        
+        // Filter Client Side by Date
         if(dateInput) {
             myStudents = data.filter(item => {
                 let itemDate = "";
                 if(item.Tanggal){
+                    // Konversi format tanggal sheet ke YYYY-MM-DD
                     const d = new Date(item.Tanggal);
                     itemDate = d.toISOString().split('T')[0];
                 }
@@ -413,7 +417,7 @@ async function loadData() {
 
     } catch(e) {
         console.error(e);
-        loader.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">Gagal memuat data.</div>`;
+        loader.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">Gagal memuat data. Cek koneksi internet.</div>`;
     }
 }
 
@@ -425,7 +429,10 @@ function updateCountChips(data) {
     document.getElementById("countDone").textContent = done;
 }
 
-function hasGrade(item){ return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2; }
+function hasGrade(item){ 
+    // Cek apakah kolom Nilai_Pembimbing sudah terisi
+    return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2; 
+}
 
 function setFilter(type, el) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -442,6 +449,7 @@ function renderList(data) {
     if(currentFilterType === 'pending') displayData = data.filter(item => !hasGrade(item));
     else if(currentFilterType === 'done') displayData = data.filter(item => hasGrade(item));
 
+    // Sort: Pending di atas, Done di bawah
     displayData.sort((a,b) => {
         const aDone = hasGrade(a);
         const bDone = hasGrade(b);
@@ -456,6 +464,7 @@ function renderList(data) {
 function createCard(item) {
     let doneCount = 0;
     activityConfig.forEach(act => {
+        // Cek kolom Sheet (biasanya nama kegiatan atau nama_Status)
         const val = item[act.key] || item[act.key+'_Status'] || "";
         if(String(val).toLowerCase().includes('ya')) doneCount++;
     });
@@ -505,7 +514,7 @@ function openInspectionMode(item) {
     document.getElementById("modalCatatanSiswa").textContent = item.Catatan ? `"${item.Catatan}"` : "-";
 
     renderValidationList(item);
-    renderPhotoGallery(item); // Ini memanggil fungsi galeri yang SUDAH diperbaiki
+    renderPhotoGallery(item);
     setupGrading(item);
 
     switchTab('check'); 
@@ -521,7 +530,7 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     
-    // Cari elemen berdasarkan text atau index, manual mapping simple:
+    // Manual mapping tab index
     const tabs = document.querySelectorAll('.tab');
     if(tabName === 'check') tabs[0].classList.add('active');
     if(tabName === 'gallery') tabs[1].classList.add('active');
@@ -538,6 +547,7 @@ function renderValidationList(item) {
     container.innerHTML = "";
 
     activityConfig.forEach(act => {
+        // Ambil data dari object sheet
         const status = item[act.key] || item[act.key+'_Status'] || "-";
         const waktu = item[act.key+'_Waktu'] || item['Waktu_'+act.key] || "-";
         const isYa = String(status).toLowerCase().includes("ya");
@@ -545,7 +555,9 @@ function renderValidationList(item) {
         let anomalyHtml = "";
         let timeColor = "#94a3b8";
 
+        // Deteksi Keterlambatan
         if(isYa && act.max) {
+            // Regex sederhana jam HH:MM
             const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
             if(timePattern.test(waktu)) {
                 if(waktu > act.max) {
@@ -555,9 +567,10 @@ function renderValidationList(item) {
             }
         }
 
+        // Logic Checkbox: Hanya muncul jika siswa melakukan ('Ya')
         const needsCheck = isYa; 
         const checkId = `chk_${act.key}`;
-        if(!needsCheck) validationState[act.key] = true;
+        if(!needsCheck) validationState[act.key] = true; // Auto valid jika tidak dilakukan
 
         const checkHtml = needsCheck 
             ? `<div class="check-box-wrapper">
@@ -590,9 +603,11 @@ function toggleValidation(key) {
 function checkValidationCompletion() {
     const btn = document.getElementById("btnSave");
     let allValid = true;
+    
     activityConfig.forEach(act => {
         const status = selectedItem[act.key] || selectedItem[act.key+'_Status'] || "";
         const isYa = String(status).toLowerCase().includes("ya");
+        // Jika dilakukan (Ya), maka harus divalidasi (checkbox checked)
         if(isYa && !validationState[act.key]) {
             allValid = false;
         }
@@ -610,7 +625,7 @@ function checkValidationCompletion() {
 }
 
 // ==========================================
-// 5. GALLERY LOGIC (UPDATED & FIXED)
+// 5. GALLERY LOGIC
 // ==========================================
 function renderPhotoGallery(item) {
     const container = document.getElementById("photoGalleryContainer");
@@ -654,6 +669,7 @@ function renderPhotoGallery(item) {
 
 function convertDriveLink(url) {
     if (!url) return "";
+    // Konversi link view/open menjadi export=view agar bisa tampil di tag IMG
     if (url.includes("drive.google.com")) {
         const idMatch = url.match(/\/d\/(.+?)(\/|$)/);
         if (idMatch && idMatch[1]) {
@@ -667,11 +683,12 @@ function convertDriveLink(url) {
 // 6. GRADING & SAVING
 // ==========================================
 function setupGrading(item) {
+    // Reset nilai default
     updateRubric('R1', 80); updateRubric('R2', 80); updateRubric('R3', 80);
     document.getElementById("inputCatatanPembimbing").value = "";
 
     const val = item.Nilai_Pembimbing || "";
-    // Parsing format sederhana: "[N:85] Komentar"
+    // Parsing jika data sudah ada: "[N:85] Komentar..."
     if(val.includes("[N:")) {
         const matchTotal = val.match(/\[N:(\d+)\]/);
         if(matchTotal) {
@@ -709,12 +726,13 @@ function saveGrade() {
     const score = document.getElementById("finalScoreDisplay").textContent;
     const comment = document.getElementById("inputCatatanPembimbing").value;
     
-    // Format simpan: [N:85] Komentar
+    // Format simpan yang disepakati: [N:85] Komentar
     const dataToSend = `[N:${score}] ${comment}`;
 
     const formData = new FormData();
     formData.append("action", "simpanNilai");
-    formData.append("baris", selectedItem.RowIndex); // Pastikan Google Script kirim RowIndex
+    // ID Unik Baris (RowIndex dikirim dari script backend saat rekap)
+    formData.append("baris", selectedItem.RowIndex || selectedItem.id); 
     formData.append("nilai", dataToSend);
 
     fetch(WEB_APP_URL, {
@@ -726,7 +744,7 @@ function saveGrade() {
         if(res.status === 'success') {
             alert("✅ Nilai berhasil disimpan!");
             closeModal();
-            loadData(); // Refresh data
+            loadData(); // Refresh list agar status berubah
         } else {
             alert("Gagal menyimpan: " + res.message);
             btn.disabled = false;
@@ -741,21 +759,25 @@ function saveGrade() {
     });
 }
 
+// ==========================================
+// 7. UTILITIES
+// ==========================================
+function formatTglIndo(dateStr) {
+    if(!dateStr) return "-";
+    const d = new Date(dateStr);
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return d.toLocaleDateString('id-ID', options);
+}
+
 function logout() {
-    localStorage.removeItem("user");
-    location.href = "index.html";
+    if(confirm("Apakah Anda yakin ingin keluar?")) {
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
 }
 
-function formatTglIndo(isoStr) {
-    if(!isoStr) return "-";
-    const d = new Date(isoStr);
-    return d.toLocaleDateString("id-ID", { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-}
-
-// Auto Load
-loadData();
-
+// Init Load
+window.onload = loadData;
 </script>
-       <script src="chat.js" defer></script>
 </body>
 </html>
