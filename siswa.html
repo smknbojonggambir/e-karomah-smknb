@@ -77,24 +77,6 @@
         .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f59e0b); width: 0%; transition: width 0.5s ease; }
 
-        .reminder-card {
-            background: linear-gradient(180deg, rgba(251, 191, 36, 0.1), rgba(2, 44, 34, 0.6));
-            border: 1px solid rgba(251, 191, 36, 0.4);
-            border-radius: 16px; padding: 20px; margin-bottom: 25px;
-            text-align: center; position: relative; animation: fadeIn 0.6s ease;
-        }
-        .reminder-badge {
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-            background: var(--gold); color: #022c22;
-            padding: 4px 12px; border-radius: 20px;
-            font-size: 10px; font-weight: 700; letter-spacing: 1px;
-        }
-        .reminder-arabic {
-            font-family: 'Amiri', serif; font-size: 24px; line-height: 2;
-            color: var(--gold); margin: 15px 0 10px;
-        }
-        .reminder-arti { font-size: 12px; color: #cbd5e1; font-style: italic; line-height: 1.6; }
-
         .activity-card {
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-radius: 16px; margin-bottom: 12px; overflow: hidden; transition: 0.3s;
@@ -156,6 +138,7 @@
             border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to {transform: rotate(360deg);} }
+        #loaderStatus { margin-top: 15px; font-size: 14px; color: #cbd5e1; }
 
         .footer-info { text-align: center; padding: 30px 20px 100px; color: var(--text-muted); font-size: 11px; margin-top: 40px; border-top: 1px solid var(--card-border); }
     </style>
@@ -178,7 +161,7 @@
                     <div class="gps-dot"></div>
                     <span id="gpsText">Mencari Lokasi...</span>
                 </div>
-                <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.5</div>
+                <div style="font-size: 11px; opacity: 0.6; color:var(--gold);">Panel Siswa v2.6 (Fast)</div>
             </div>
         </div>
 
@@ -230,6 +213,7 @@
     <div id="loaderOverlay">
         <div class="spinner"></div>
         <h3 style="color:white; margin-top:15px;">Mengirim Laporan...</h3>
+        <div id="loaderStatus">Mohon tunggu...</div>
     </div>
 
 <script>
@@ -266,10 +250,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // Tampilkan data awal
     updateUserProfileUI(user);
 
-    // Sinkronisasi data terbaru (untuk ambil nama pembimbing)
     try {
         const username = user.username || user.id; 
         const res = await fetch(`${WEB_APP_URL}?action=getProfile&id=${username}`);
@@ -278,7 +260,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(freshData.status === 'ok') {
             user.nama = freshData.nama;
             user.kelompok = freshData.kelompok;
-            // Ambil field pembimbing atau guru
             user.pembimbing = freshData.pembimbing || freshData.guru || "-";
             
             localStorage.setItem("user", JSON.stringify(user));
@@ -294,11 +275,9 @@ function updateUserProfileUI(user) {
     document.getElementById('namaSiswa').textContent = user.nama || "Siswa";
     document.getElementById('kelompokSiswa').textContent = "Kelompok: " + (user.kelompok || "-");
     
-    // TAMPILKAN PEMBIMBING DI UI
     const pembimbingName = user.pembimbing || user.guru || "-";
     document.getElementById('pembimbingSiswa').textContent = "Pembimbing: " + pembimbingName;
     
-    // Isi Hidden Input untuk pengiriman
     document.getElementById('inputNama').value = user.nama || "";
     document.getElementById('inputKelompok').value = user.kelompok || "";
     document.getElementById('inputPembimbing').value = pembimbingName;
@@ -392,97 +371,107 @@ function initGPS() {
     const gpsText = document.getElementById('gpsText');
 
     if (navigator.geolocation) {
-        // Opsi tambahan untuk akurasi tinggi dan timeout
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        };
+        const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 document.getElementById('inputLat').value = pos.coords.latitude.toFixed(6);
                 document.getElementById('inputLong').value = pos.coords.longitude.toFixed(6);
-                
                 gpsStatus.classList.add('active');
                 gpsText.textContent = "Lokasi Terkunci";
-                console.log("GPS Berhasil:", pos.coords.latitude, pos.coords.longitude);
             },
             (err) => {
                 gpsStatus.classList.remove('active');
-                switch(err.code) {
-                    case err.PERMISSION_DENIED:
-                        gpsText.textContent = "Izin GPS Ditolak";
-                        break;
-                    case err.POSITION_UNAVAILABLE:
-                        gpsText.textContent = "Sinyal GPS Lemah";
-                        break;
-                    case err.TIMEOUT:
-                        gpsText.textContent = "Waktu GPS Habis";
-                        break;
-                    default:
-                        gpsText.textContent = "GPS Error";
-                }
-                console.warn("GPS Error: " + err.message);
+                gpsText.textContent = "GPS Mati/Error";
             },
             options
         );
     } else {
-        gpsText.textContent = "Browser Tidak Support GPS";
+        gpsText.textContent = "No GPS Support";
     }
 }
 
-async function convertToBase64(file) {
-    return new Promise((resolve) => {
+// === FUNGSI BARU: KOMPRESI GAMBAR ===
+// Mencegah Out of Memory dan Mempercepat Upload
+async function compressImage(file) {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
         reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                // Resize gambar
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1000; // Maksimal lebar 1000px (cukup HD untuk laporan)
+                const scaleSize = MAX_WIDTH / img.width;
+                const width = (scaleSize < 1) ? MAX_WIDTH : img.width;
+                const height = (scaleSize < 1) ? (img.height * scaleSize) : img.height;
+
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Kompres jadi JPEG kualitas 60% (Ukuran file turun drastis)
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                resolve(dataUrl);
+            };
+            img.onerror = (e) => reject(e);
+        };
+        reader.onerror = (e) => reject(e);
     });
 }
 
 async function kirimLaporan() {
-    const checked = document.querySelectorAll('.chk-hidden:checked');
-    if(checked.length === 0) return alert("Pilih minimal 1 kegiatan!");
+    const checked = document.querySelectorAll('.chk-hidden:checked');
+    if(checked.length === 0) return alert("Pilih minimal 1 kegiatan!");
 
-    const btn = document.getElementById('btnSubmit');
-    const overlay = document.getElementById('loaderOverlay');
-    overlay.style.display = 'flex';
-    btn.disabled = true;
+    const btn = document.getElementById('btnSubmit');
+    const overlay = document.getElementById('loaderOverlay');
+    const loaderStatus = document.getElementById('loaderStatus');
+    
+    overlay.style.display = 'flex';
+    btn.disabled = true;
 
-    try {
-        const now = new Date();
-        let payload = {
-            action: "simpan",
-            Nama: document.getElementById('inputNama').value,
-            Kelompok: document.getElementById('inputKelompok').value,
-            Pembimbing: document.getElementById('inputPembimbing').value,
-            Tanggal: now.toISOString().split('T')[0],
-            Time: now.toLocaleTimeString(),
-            
-            // -- PERBAIKAN DIMULAI DI SINI --
-            // Mengirim data secara terpisah maupun digabung agar terbaca oleh G-Sheet
-            Lat: document.getElementById('inputLat').value,
-            Long: document.getElementById('inputLong').value,
-            LatLong: document.getElementById('inputLat').value + ", " + document.getElementById('inputLong').value,
-            // -- PERBAIKAN SELESAI --
+    try {
+        const now = new Date();
+        let payload = {
+            action: "simpan",
+            Nama: document.getElementById('inputNama').value,
+            Kelompok: document.getElementById('inputKelompok').value,
+            Pembimbing: document.getElementById('inputPembimbing').value,
+            Tanggal: now.toISOString().split('T')[0],
+            Time: now.toLocaleTimeString(),
+            Lat: document.getElementById('inputLat').value,
+            Long: document.getElementById('inputLong').value,
+            LatLong: document.getElementById('inputLat').value + ", " + document.getElementById('inputLong').value,
+            Catatan: document.getElementById('inputCatatan').value
+        };
 
-            Catatan: document.getElementById('inputCatatan').value
-        };
-
-        for (const act of activities) {
+        // Loop untuk memproses data dan foto
+        for (const act of activities) {
             const isChecked = document.getElementById(`chk_${act.id}`).checked;
             payload[`${act.id}_Status`] = isChecked ? "Ya" : "Tidak";
             payload[`${act.id}_Waktu`] = isChecked ? document.getElementById(`time_${act.id}`).value : "-";
             payload[`${act.id}_Ket`] = isChecked ? document.getElementById(`ket_${act.id}`).value : "-";
             
             if (isChecked && !noPhotoList.includes(act.id)) {
-                const f = document.getElementById(`file_${act.id}`).files[0];
-                if(!f) throw new Error("Foto " + act.label + " wajib diisi!");
-                payload[`${act.id}_Foto`] = await convertToBase64(f);
+                const fileInput = document.getElementById(`file_${act.id}`);
+                if (fileInput.files.length > 0) {
+                    loaderStatus.textContent = `Mengompres Foto ${act.label}...`;
+                    // GUNAKAN FUNGSI KOMPRESI DI SINI
+                    payload[`${act.id}_Foto`] = await compressImage(fileInput.files[0]);
+                } else {
+                     throw new Error("Foto " + act.label + " wajib diisi!");
+                }
             } else {
                 payload[`${act.id}_Foto`] = "-";
             }
         }
+
+        loaderStatus.textContent = "Mengirim data ke server...";
 
         await fetch(WEB_APP_URL, {
             method: "POST",
