@@ -337,6 +337,7 @@
 
 <script>
 // ================= CONFIG & SETUP =================
+// ✅ PASTIKAN URL INI SUDAH YANG TERBARU (HASIL DEPLOY BARU)
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxGMfcquNHqCc9TeMIieo7Ek2KsxrqjG4x0AfWqizgQMrRhk8SrC1jVS6OKYZSt0_G9mg/exec"; 
 
 const activityConfig = [
@@ -722,7 +723,7 @@ function calculateFinalScore() {
     document.getElementById("finalScoreDisplay").textContent = Math.round(final);
 }
 
-// --- FUNGSI SIMPAN YANG SUDAH DIPERBAIKI ---
+// ✅ FUNGSI SIMPAN YANG SUDAH DIPERBAIKI (LENGKAP)
 async function saveGrade() {
     const btn = document.getElementById("btnSave");
     const originalText = btn.textContent;
@@ -733,65 +734,44 @@ async function saveGrade() {
     // Format gabungan: [N:80] Komentar pembimbing...
     const finalVal = `[N:${score}] ${rawComment}`;
     
-    // Pastikan ID ada (Sheet biasanya butuh ID atau Baris)
-    // Asumsi di data JSON ada properti 'ID' atau 'No'
-    const idSiswa = selectedItem.ID || selectedItem.No || selectedItem.RowID; 
+    // ✅ Menggunakan ID yang dikirim dari Backend (Perbaikan Utama)
+    // Backend mengirim property 'row' atau 'id'
+    const idSiswa = selectedItem.id || selectedItem.row; 
 
     if(!idSiswa) {
-        alert("❌ Error: ID Laporan tidak ditemukan. Refresh halaman.");
+        alert("⚠️ Error: ID Laporan (Baris) tidak ditemukan. Coba refresh halaman.");
         return;
     }
 
-    // UI Loading
+    btn.textContent = "⏳ Menyimpan...";
     btn.disabled = true;
-    btn.textContent = "⏳ Mengirim ke Server...";
-    btn.style.background = "#64748b";
 
     try {
-        // Kirim sebagai POST JSON
-        // Pastikan Google Script Anda menangani doPost(e) -> JSON.parse(e.postData.contents)
-        const payload = {
-            action: 'simpanNilai',
-            id: idSiswa,
-            nilai: finalVal,
-            pembimbing: user.nama
-        };
-
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
-            body: JSON.stringify(payload)
-            // Catatan: mode 'no-cors' dihapus agar bisa membaca response JSON jika script di-deploy sbg 'Anyone'
-            // Jika masih error CORS, tambahkan: mode: 'no-cors' tapi response tidak bisa dibaca.
+            body: JSON.stringify({
+                action: 'simpanNilai', // Sesuai dengan backend function simpanNilai(p)
+                id: idSiswa,           // Mengirim nomor baris
+                nilai: finalVal
+            })
         });
-
-        // Cek response
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
 
         const result = await response.json();
 
-        if(result.status === 'success' || result.result === 'success') {
+        if(result.status === 'success' || result.status === 'ok'){
             alert("✅ Penilaian Berhasil Disimpan!");
             closeModal();
-            loadData(); // Refresh list
+            loadData(); // Refresh data list
         } else {
-            alert("⚠️ Gagal menyimpan: " + (result.message || "Unknown error"));
+            throw new Error(result.message || "Gagal menyimpan");
         }
-
     } catch (error) {
-        console.error("Save Error:", error);
-        alert("❌ Koneksi Error! Gagal menghubungi server.\nDetail: " + error.message);
-    } finally {
-        btn.disabled = false;
+        console.error(error);
+        alert("❌ Gagal: " + error.message);
         btn.textContent = originalText;
-        btn.style.background = "var(--primary)";
+        btn.disabled = false;
     }
 }
-
-// Auto Load saat pertama buka
-window.onload = loadData;
 </script>
-
 </body>
 </html>
