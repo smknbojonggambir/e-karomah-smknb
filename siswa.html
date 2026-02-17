@@ -72,35 +72,30 @@
         .gps-dot { width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
         .gps-pill.active .gps-dot { animation: pulse 2s infinite; }
 
-        /* Fitur Hadir Harian Style */
-        .attendance-box {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 16px;
-            padding: 15px;
+        /* --- STYLE BARU: HADIS CARD --- */
+        .hadits-card {
+            background: linear-gradient(to right, rgba(251, 191, 36, 0.1), rgba(16, 185, 129, 0.05));
+            border: 1px solid var(--gold-glow);
+            border-left: 4px solid var(--gold);
+            padding: 15px 20px;
+            border-radius: 12px;
             margin-bottom: 25px;
+            position: relative;
+            animation: fadeIn 0.8s ease;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: fadeIn 0.5s ease;
+            flex-direction: column;
+            justify-content: center;
         }
-        .attendance-info h4 { margin: 0; font-size: 14px; color: var(--primary); }
-        .attendance-info p { margin: 2px 0 0; font-size: 11px; color: var(--text-muted); }
-        .btn-hadir {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
+        .hadits-header {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+            color: var(--gold); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn-hadir.success {
-            background: rgba(255,255,255,0.1);
-            color: var(--primary);
-            cursor: default;
+        .hadits-text {
+            font-family: 'Poppins', sans-serif; font-size: 13px; font-style: italic;
+            color: #e2e8f0; line-height: 1.6; margin: 0 0 8px 0; transition: opacity 0.5s;
         }
+        .hadits-footer { font-size: 11px; color: #94a3b8; text-align: right; font-weight: 500; }
+        /* --------------------------- */
 
         .progress-container { margin-bottom: 20px; }
         .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: #cbd5e1; }
@@ -195,14 +190,13 @@
             </div>
         </div>
 
-        <div class="attendance-box" id="attendanceBox">
-            <div class="attendance-info">
-                <h4>Hadir Hari Ini</h4>
-                <p id="attendanceStatus">Anda belum melakukan absensi hari ini.</p>
+        <div class="hadits-card">
+            <div class="hadits-header">
+                <span>✨ Mutiara Hadis Hari Ini</span>
             </div>
-            <button class="btn-hadir" id="btnHadir" onclick="kirimPresensi()">Hadir</button>
+            <p class="hadits-text" id="haditsIndo">"Memuat hadis..."</p>
+            <div class="hadits-footer" id="haditsRiwayat">-</div>
         </div>
-
         <div class="progress-container">
             <div class="progress-label">
                 <span>Progress Amalan Hari Ini</span>
@@ -276,6 +270,20 @@ const activities = [
 
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
 
+// === DATA HADIS ===
+const haditsCollection = [
+    { text: "Senyummu di hadapan saudaramu adalah sedekah.", riwayat: "HR. Tirmidzi" },
+    { text: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", riwayat: "HR. Ahmad" },
+    { text: "Barangsiapa yang menempuh jalan untuk menuntut ilmu, Allah akan mudahkan baginya jalan menuju surga.", riwayat: "HR. Muslim" },
+    { text: "Kebersihan itu sebagian dari iman.", riwayat: "HR. Muslim" },
+    { text: "Janganlah engkau marah, maka bagimu surga.", riwayat: "HR. Thabrani" },
+    { text: "Tangan di atas (memberi) lebih baik daripada tangan di bawah (meminta).", riwayat: "HR. Bukhari & Muslim" },
+    { text: "Sholat berjamaah itu lebih utama 27 derajat daripada sholat sendirian.", riwayat: "HR. Bukhari & Muslim" },
+    { text: "Barangsiapa berpuasa Ramadhan karena iman dan mengharap pahala, niscaya diampuni dosa-dosanya yang telah lalu.", riwayat: "HR. Bukhari & Muslim" },
+    { text: "Makan sahurlah kalian, karena sesungguhnya dalam sahur itu terdapat keberkahan.", riwayat: "HR. Bukhari & Muslim" },
+    { text: "Puasanya orang yang sabar adalah setengah dari iman.", riwayat: "HR. Ibnu Majah" }
+];
+
 // ==========================================
 // INITIALIZATION
 // ==========================================
@@ -289,7 +297,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     updateUserProfileUI(user);
-    checkAttendanceStatus(); // Cek status absen saat load
 
     try {
         const username = user.username || user.id; 
@@ -308,7 +315,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     initGPS();
     renderActivities();
+    loadRandomHadits(); // Load hadis saat start
 });
+
+function loadRandomHadits() {
+    const randomIndex = Math.floor(Math.random() * haditsCollection.length);
+    const selectedHadits = haditsCollection[randomIndex];
+    
+    const textEl = document.getElementById('haditsIndo');
+    textEl.style.opacity = 0;
+    
+    setTimeout(() => {
+        textEl.innerHTML = `"${selectedHadits.text}"`;
+        document.getElementById('haditsRiwayat').innerText = selectedHadits.riwayat;
+        textEl.style.opacity = 1;
+    }, 200);
+}
 
 function updateUserProfileUI(user) {
     document.getElementById('namaSiswa').textContent = user.nama || "Siswa";
@@ -320,66 +342,6 @@ function updateUserProfileUI(user) {
     document.getElementById('inputNama').value = user.nama || "";
     document.getElementById('inputKelompok').value = user.kelompok || "";
     document.getElementById('inputPembimbing').value = pembimbingName;
-}
-
-// FUNGSI BARU: PRESENSI HARIAN
-async function kirimPresensi() {
-    const lat = document.getElementById('inputLat').value;
-    if(!lat) return alert("Tunggu hingga GPS mengunci lokasi!");
-
-    const btn = document.getElementById('btnHadir');
-    const statusText = document.getElementById('attendanceStatus');
-    
-    btn.disabled = true;
-    btn.textContent = "⌛...";
-
-    try {
-        const now = new Date();
-        const payload = {
-            action: "presensi",
-            Nama: document.getElementById('inputNama').value,
-            Kelompok: document.getElementById('inputKelompok').value,
-            Tanggal: now.toISOString().split('T')[0],
-            Waktu: now.toLocaleTimeString(),
-            LatLong: lat + ", " + document.getElementById('inputLong').value
-        };
-
-        await fetch(WEB_APP_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(payload)
-        });
-
-        // Simpan status ke local storage agar tidak hilang saat refresh
-        const today = new Date().toDateString();
-        localStorage.setItem("last_attendance", today);
-        
-        setAttendanceUI(true);
-        alert("✅ Absensi hari ini berhasil!");
-    } catch (err) {
-        alert("Gagal kirim absen: " + err.message);
-        btn.disabled = false;
-        btn.textContent = "Hadir";
-    }
-}
-
-function checkAttendanceStatus() {
-    const lastAbsen = localStorage.getItem("last_attendance");
-    const today = new Date().toDateString();
-    if (lastAbsen === today) {
-        setAttendanceUI(true);
-    }
-}
-
-function setAttendanceUI(isSuccess) {
-    if(isSuccess) {
-        const btn = document.getElementById('btnHadir');
-        const statusText = document.getElementById('attendanceStatus');
-        btn.classList.add('success');
-        btn.textContent = "Selesai";
-        btn.onclick = null;
-        statusText.textContent = "✅ Anda sudah hadir hari ini. Semangat!";
-    }
 }
 
 function renderActivities() {
@@ -490,6 +452,8 @@ function initGPS() {
     }
 }
 
+// === FUNGSI BARU: KOMPRESI GAMBAR ===
+// Mencegah Out of Memory dan Mempercepat Upload
 async function compressImage(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -498,8 +462,9 @@ async function compressImage(file) {
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
+                // Resize gambar
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 1000;
+                const MAX_WIDTH = 1000; // Maksimal lebar 1000px (cukup HD untuk laporan)
                 const scaleSize = MAX_WIDTH / img.width;
                 const width = (scaleSize < 1) ? MAX_WIDTH : img.width;
                 const height = (scaleSize < 1) ? (img.height * scaleSize) : img.height;
@@ -510,6 +475,7 @@ async function compressImage(file) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
                 
+                // Kompres jadi JPEG kualitas 60% (Ukuran file turun drastis)
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                 resolve(dataUrl);
             };
@@ -545,6 +511,7 @@ async function kirimLaporan() {
             Catatan: document.getElementById('inputCatatan').value
         };
 
+        // Loop untuk memproses data dan foto
         for (const act of activities) {
             const isChecked = document.getElementById(`chk_${act.id}`).checked;
             payload[`${act.id}_Status`] = isChecked ? "Ya" : "Tidak";
@@ -555,6 +522,7 @@ async function kirimLaporan() {
                 const fileInput = document.getElementById(`file_${act.id}`);
                 if (fileInput.files.length > 0) {
                     loaderStatus.textContent = `Mengompres Foto ${act.label}...`;
+                    // GUNAKAN FUNGSI KOMPRESI DI SINI
                     payload[`${act.id}_Foto`] = await compressImage(fileInput.files[0]);
                 } else {
                      throw new Error("Foto " + act.label + " wajib diisi!");
@@ -587,8 +555,11 @@ function logout() {
     location.href = "index.html";
 }
 </script>
-<script src="chat.js" defer></script>
-<script>
+     <script src="chat.js" defer></script>
+
+
+
+    <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
