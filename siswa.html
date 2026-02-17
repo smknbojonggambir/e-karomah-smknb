@@ -495,5 +495,17 @@ function logout() {
 }
 </script>
      <script src="chat.js" defer></script>
+
+
+
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW Otomatis Siap!', reg.scope))
+        .catch(err => console.log('SW Gagal:', err));
+    });
+  }
+</script>
 </body>
 </html>
