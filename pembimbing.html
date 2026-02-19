@@ -391,7 +391,7 @@ function formatTglIndo(isoDate) {
 }
 
 // ==========================================
-// 3. LOAD DATA (DENGAN FITUR MERGE CICILAN)
+// 3. LOAD DATA (DENGAN FITUR MERGE & FIX TANGGAL)
 // ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
@@ -406,63 +406,52 @@ async function loadData() {
         const res = await fetch(url);
         const data = await res.json();
         
-        let filteredData = data;
-        if(dateInput && data.length > 0) {
-            filteredData = data.filter(item => {
-                let itemDate = "";
-                if(item.Tanggal){
-                    const d = new Date(item.Tanggal);
-                    itemDate = d.toISOString().split('T')[0];
-                }
-                return itemDate === dateInput;
-            });
-        }
-
-        // --- SISTEM PENGGABUNGAN DATA (MERGING CICILAN) ---
+        // --- 1. PROSES PENGGABUNGAN (MERGE) CICILAN ---
         let groupedData = {};
         
-        filteredData.forEach(item => {
-            let namaSiswa = item.Nama || item.nama;
+        data.forEach(item => {
+            let namaSiswa = (item.Nama || item.nama || "").trim();
             let itemDate = "";
+            
+            // Fix Zona Waktu: Ambil tanggal lokal (WIB) agar sesuai dengan tampilan di kartu
             if(item.Tanggal){
                 const d = new Date(item.Tanggal);
-                itemDate = d.toISOString().split('T')[0];
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                itemDate = `${year}-${month}-${day}`; 
             }
             
-            // Kunci identifikasi: Nama + Tanggal (contoh: Via Siti Saadah_2026-02-19)
             let key = `${namaSiswa}_${itemDate}`;
 
             if (!groupedData[key]) {
-                // Jika belum ada kartu untuk siswa ini di tanggal ini, buat baru
+                // Buat wadah baru jika belum ada kartu untuk siswa di tanggal tersebut
                 groupedData[key] = { ...item };
+                groupedData[key]._filterDate = itemDate; // Simpan tanggal bersih untuk filter
             } else {
-                // Jika sudah ada, gabungkan isian cicilan aktivitasnya
+                // Jika sudah ada, gabungkan isian aktivitasnya (cicilan)
                 activityConfig.forEach(act => {
                     const statusSiswa = item[act.key] || item[act.key+'_Status'] || "";
-                    
-                    // Jika di baris cicilan ini aktivitas diisi "Ya", timpa data sebelumnya
                     if (String(statusSiswa).toLowerCase().includes('ya')) {
                         groupedData[key][act.key] = statusSiswa;
                         
-                        // Timpa Jam
                         const w1 = act.key + '_Waktu'; const w2 = 'Waktu_' + act.key;
                         if (item[w1] && item[w1] !== "-") groupedData[key][w1] = item[w1];
                         if (item[w2] && item[w2] !== "-") groupedData[key][w2] = item[w2];
                         
-                        // Timpa Foto
                         const f1 = act.key + '_Foto'; const f2 = 'Foto_' + act.key;
                         if (item[f1] && item[f1] !== "-") groupedData[key][f1] = item[f1];
                         if (item[f2] && item[f2] !== "-") groupedData[key][f2] = item[f2];
                     }
                 });
 
-                // Update ID baris ke laporan terbaru, agar saat disave nilainya masuk ke baris akhir
+                // Update ID baris ke yang terbaru agar saat dinilai masuk ke baris akhir
                 if (item.id || item.row) {
                     groupedData[key].id = item.id || item.row;
                     groupedData[key].row = item.id || item.row;
                 }
 
-                // Gabungkan Catatan Siswa jika ada tambahan teks dari cicilan
+                // Gabungkan catatan siswa
                 if(item.Catatan && item.Catatan !== "-" && String(item.Catatan).trim() !== "") {
                     if (!groupedData[key].Catatan || groupedData[key].Catatan === "-") {
                         groupedData[key].Catatan = item.Catatan;
@@ -471,16 +460,23 @@ async function loadData() {
                     }
                 }
 
-                // Jika di salah satu baris cicilan ternyata sudah pernah dinilai, munculkan status "SUDAH DINILAI"
+                // Cek jika di salah satu cicilan sudah dinilai pembimbing
                 if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
                     groupedData[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
                 }
             }
         });
 
-        // Ubah format Object kembali menjadi Array biasa
-        let myStudents = Object.values(groupedData);
-        // ------------------------------------------------
+        // Ubah kembali dari Objek menjadi Array
+        let mergedArray = Object.values(groupedData);
+
+        // --- 2. FILTER BERDASARKAN TANGGAL ---
+        let myStudents = [];
+        if(dateInput && mergedArray.length > 0) {
+            myStudents = mergedArray.filter(item => item._filterDate === dateInput);
+        } else {
+            myStudents = mergedArray;
+        }
 
         rawData = myStudents;
         updateCountChips(rawData);
