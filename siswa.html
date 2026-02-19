@@ -364,7 +364,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.setItem("user", JSON.stringify(user));
             updateUserProfileUI(user);
         }
-    } catch (e) { console.warn("Sinkronisasi offline."); }
+    } catch (e) { 
+        // Tidak perlu alert gagal pada offline sync, hanya log ke console
+        console.warn("Sinkronisasi offline.", e && e.message ? e.message : e);
+    }
 
     initGPS();
     renderActivities();
@@ -603,7 +606,14 @@ async function kirimLaporan() {
         alert("✅ Laporan berhasil terkirim ke " + payload.Pembimbing);
         location.reload();
     } catch (err) {
-        alert("Gagal: " + err.message);
+        // Tampilkan error user-friendly dan tidak pernah: "Gagal: undefined"
+        let msg = "";
+        if (err && err.message) {
+          msg = err.message;
+        } else if (typeof err === "string") {
+          msg = err;
+        }
+        alert("Gagal" + (msg && msg.trim() ? ": " + msg : ""));
     } finally {
         overlay.style.display = 'none';
         btn.disabled = false;
