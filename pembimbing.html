@@ -67,7 +67,7 @@
             cursor: pointer; transition: 0.2s; overflow: hidden;
         }
         .student-card:active { transform: scale(0.98); }
-        .student-card.priority { border-left: 4px solid var(--danger); } /* Merah jika belum dinilai */
+        .student-card.priority { border-left: 4px solid var(--danger); } 
         .student-card.done { border-left: 4px solid var(--primary); }
 
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
@@ -361,31 +361,16 @@ let selectedItem = null;
 let currentFilterType = 'all';
 let validationState = {}; 
 
-// ==========================================
-// 1. CEK LOGIN (TAHAN REFRESH & CASE-INSENSITIVE)
-// ==========================================
-let user = null;
-const savedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-
-if (savedUser) {
-    try {
-        user = JSON.parse(savedUser);
-    } catch(e) {
-        console.error("Format data sesi tidak valid.");
-    }
+// 1. CEK LOGIN
+const user = JSON.parse(localStorage.getItem("user"));
+if(!user || user.role !== 'pembimbing'){
+    alert("⛔ Akses Ditolak. Silakan login sebagai Pembimbing."); 
+    window.location.href='index.html';
 }
 
-// Cek apakah data valid dan role-nya 'pembimbing'
-if(!user || !user.role || String(user.role).toLowerCase() !== 'pembimbing'){
-    alert("⛔ Akses Ditolak atau Sesi Habis. Silakan login kembali."); 
-    window.location.href = 'index.html';
-}
-
-// Lolos pengecekan, tampilkan data di UI
-document.getElementById('mName').textContent = user.nama || user.Nama || "Pembimbing";
-document.getElementById('mGroup').textContent = "Kelompok: " + (user.kelompok || user.Kelompok || "-");
+document.getElementById('mName').textContent = user.nama || "Pembimbing";
+document.getElementById('mGroup').textContent = "Kelompok: " + (user.kelompok || "-");
 document.getElementById('dateFilter').valueAsDate = new Date();
-
 
 // ==========================================
 // 2. HELPER FUNCTIONS
@@ -393,7 +378,6 @@ document.getElementById('dateFilter').valueAsDate = new Date();
 function logout() {
     if(confirm("Yakin ingin keluar?")) {
         localStorage.removeItem("user");
-        sessionStorage.removeItem("user");
         window.location.href = "index.html";
     }
 }
@@ -401,119 +385,46 @@ function logout() {
 function formatTglIndo(isoDate) {
     if(!isoDate) return "-";
     const d = new Date(isoDate);
-    if(isNaN(d.getTime())) return isoDate; // Jika format sudah teks
+    if(isNaN(d.getTime())) return isoDate; 
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return d.toLocaleDateString('id-ID', options);
 }
 
 // ==========================================
-// 3. FUNGSI PENGGABUNGAN DATA (MENCICIL UPLOAD)
-// ==========================================
-function groupDataByStudentAndDate(data) {
-    const grouped = {};
-
-    data.forEach(item => {
-        // Ekstrak string tanggal saja (Y-m-d) mengabaikan jam
-        let tgl = "";
-        if (item.Tanggal) {
-            const d = new Date(item.Tanggal);
-            if (!isNaN(d.getTime())) {
-                tgl = d.toISOString().split('T')[0];
-            } else {
-                tgl = item.Tanggal; // Backup jika string murni
-            }
-        }
-
-        const studentName = item.Nama || item.nama;
-        const key = `${tgl}_${studentName}`; // Kunci penggabungan
-
-        if (!grouped[key]) {
-            // Jika belum ada, buat entri baru
-            grouped[key] = { ...item };
-            grouped[key].TanggalAsli = tgl; // simpan tanggal murni untuk filter
-        } else {
-            // Jika data pada tanggal dan nama yang sama sudah ada, kita gabung!
-            activityConfig.forEach(act => {
-                const currentStatus = String(item[act.key] || item[act.key+'_Status'] || "").toLowerCase();
-                
-                // Jika di baris baru ini siswa "Ya", timpa data kosong/lama
-                if (currentStatus.includes('ya')) {
-                    grouped[key][act.key] = item[act.key];
-                    grouped[key][act.key+'_Status'] = item[act.key+'_Status'];
-                    grouped[key][act.key+'_Waktu'] = item[act.key+'_Waktu'] || item['Waktu_'+act.key];
-                    grouped[key][act.key+'_Foto'] = item[act.key+'_Foto'] || item['Foto_'+act.key];
-                }
-            });
-
-            // Gabung catatan tambahan
-            if (item.Catatan && item.Catatan.trim() !== "") {
-                const oldNotes = grouped[key].Catatan || "";
-                if (!oldNotes.includes(item.Catatan)) {
-                    grouped[key].Catatan = oldNotes ? oldNotes + " | " + item.Catatan : item.Catatan;
-                }
-            }
-
-            // Timpa ID Baris menjadi baris paling akhir diupload anak di hari itu
-            if (item.id || item.row) {
-                grouped[key].id = item.id;
-                grouped[key].row = item.row;
-            }
-            
-            // Ambil data nilai jika pernah dinilai pembimbing
-            if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
-                grouped[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
-            }
-        }
-    });
-
-    return Object.values(grouped);
-}
-
-// ==========================================
-// 4. LOAD DATA & FILTERING
+// 3. LOAD DATA
 // ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
-    const dateInput = document.getElementById("dateFilter").value; // Tanggal yang dipilih pembimbing
-    const kelompok = encodeURIComponent(user.kelompok || user.Kelompok || "");
+    const dateInput = document.getElementById("dateFilter").value;
     
     list.innerHTML = "";
     loader.style.display = "block";
 
     try {
-        const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${kelompok}`;
+        const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
         const res = await fetch(url);
         const data = await res.json();
         
-        // --- 1. GABUNGKAN DATA (MENCICIL) DAHULU ---
-        const groupedData = groupDataByStudentAndDate(data);
-        
-        // --- 2. LAKUKAN FILTER BERDASARKAN TANGGAL ---
         let myStudents = [];
-        if(dateInput && groupedData.length > 0) {
-            myStudents = groupedData.filter(item => {
-                // Gunakan properti buatan dari fungsi groupDataByStudentAndDate
-                let itemDate = item.TanggalAsli; 
-                
-                // Fallback jika tidak ada (untuk keamanan ekstra)
-                if(!itemDate && item.Tanggal){
+        if(dateInput && data.length > 0) {
+            myStudents = data.filter(item => {
+                let itemDate = "";
+                if(item.Tanggal){
                     const d = new Date(item.Tanggal);
-                    if (!isNaN(d.getTime())) itemDate = d.toISOString().split('T')[0];
-                    else itemDate = item.Tanggal;
+                    itemDate = d.toISOString().split('T')[0];
                 }
-                
-                return itemDate === dateInput; // Cek kecocokan
+                return itemDate === dateInput;
             });
         } else {
-            myStudents = groupedData;
+            myStudents = data;
         }
 
         rawData = myStudents;
         updateCountChips(rawData);
 
         if(myStudents.length === 0) {
-            loader.innerHTML = `<div style="padding:40px; text-align:center; color:#94a3b8">🍃 Tidak ada laporan untuk ditampilkan pada <b>${dateInput}</b>.</div>`;
+            loader.innerHTML = `<div style="padding:40px; text-align:center; color:#94a3b8">🍃 Tidak ada laporan pada tanggal <b>${dateInput}</b>.</div>`;
             return;
         }
 
@@ -553,7 +464,6 @@ function renderList(data) {
     if(currentFilterType === 'pending') displayData = data.filter(item => !hasGrade(item));
     else if(currentFilterType === 'done') displayData = data.filter(item => hasGrade(item));
 
-    // Urutkan: Prioritas (belum dinilai) tampil di atas
     displayData.sort((a,b) => {
         const aDone = hasGrade(a);
         const bDone = hasGrade(b);
@@ -606,7 +516,7 @@ function createCard(item) {
 }
 
 // ==========================================
-// 5. INSPECTION MODE & MODAL
+// 4. INSPECTION MODE & MODAL
 // ==========================================
 function openInspectionMode(item) {
     selectedItem = item;
@@ -642,7 +552,7 @@ function switchTab(tabName) {
 }
 
 // ==========================================
-// 6. VALIDATION LIST LOGIC
+// 5. VALIDATION LIST LOGIC
 // ==========================================
 function renderValidationList(item) {
     const container = document.getElementById("validationContainer");
@@ -650,14 +560,25 @@ function renderValidationList(item) {
 
     activityConfig.forEach(act => {
         const status = item[act.key] || item[act.key+'_Status'] || "-";
-        const waktu = item[act.key+'_Waktu'] || item['Waktu_'+act.key] || "-";
+        let rawWaktu = item[act.key+'_Waktu'] || item['Waktu_'+act.key] || "-";
+        
+        // --- PERBAIKAN: Parsing Format Date Google Sheets (1899-12-30T05:13...) ---
+        let waktu = rawWaktu;
+        if (String(waktu).includes('T')) {
+            try {
+                // Ambil string jam yang terletak setelah huruf 'T'
+                waktu = String(waktu).split('T')[1].substring(0, 5); 
+            } catch(e) {
+                console.warn("Gagal mengekstrak waktu:", rawWaktu);
+            }
+        }
+        
         const isYa = String(status).toLowerCase().includes("ya");
 
         let anomalyHtml = "";
         let timeColor = "#94a3b8";
 
-        if(isYa && act.max) {
-            // Regex sederhana jam HH:MM
+        if(isYa && act.max && waktu !== "-") {
             const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
             if(timePattern.test(waktu)) {
                 if(waktu > act.max) {
@@ -669,21 +590,24 @@ function renderValidationList(item) {
 
         const needsCheck = isYa; 
         const checkId = `chk_${act.key}`;
-        if(!needsCheck) validationState[act.key] = true; 
+        
+        // Jika belum "ya" (belum dikerjakan/dicicil), otomatis lolos validasi untuk poin ini
+        validationState[act.key] = !needsCheck; 
 
+        // Teks disesuaikan agar cocok dengan sistem "cicil"
         const checkHtml = needsCheck 
             ? `<div class="check-box-wrapper">
                 <input type="checkbox" id="${checkId}" class="check-input" onchange="toggleValidation('${act.key}')">
                 <label for="${checkId}" class="check-label">Valid</label>
                </div>`
-            : `<span style="font-size:10px; color:#64748b; padding:5px;">(Tidak Dilakukan)</span>`;
+            : `<span style="font-size:10px; color:#64748b; padding:5px;">(Belum/Tidak)</span>`;
 
         const html = `
         <div class="val-item">
             <div class="val-info">
                 <span class="val-title" style="color:${isYa ? '#fff' : '#64748b'}">${act.label}</span>
                 <span class="val-time" style="color:${timeColor}">
-                    ${isYa ? '🕒 ' + waktu : '❌ Tidak melaksanakan'}
+                    ${isYa ? '🕒 ' + waktu : '❌ Belum / Tidak melaksanakan'}
                     ${anomalyHtml}
                 </span>
             </div>
@@ -723,7 +647,7 @@ function checkValidationCompletion() {
 }
 
 // ==========================================
-// 7. GALLERY LOGIC
+// 6. GALLERY LOGIC
 // ==========================================
 function renderPhotoGallery(item) {
     const container = document.getElementById("photoGalleryContainer");
@@ -777,14 +701,13 @@ function convertDriveLink(url) {
 }
 
 // ==========================================
-// 8. GRADING & SAVING
+// 7. GRADING & SAVING
 // ==========================================
 function setupGrading(item) {
     updateRubric('R1', 80); updateRubric('R2', 80); updateRubric('R3', 80);
     document.getElementById("inputCatatanPembimbing").value = "";
 
     const val = item.Nilai_Pembimbing || "";
-    // Parsing jika data sudah ada: "[N:85] Komentar..."
     if(val.includes("[N:")) {
         const matchTotal = val.match(/\[N:(\d+)\]/);
         if(matchTotal) {
@@ -812,18 +735,14 @@ function calculateFinalScore() {
     document.getElementById("finalScoreDisplay").textContent = Math.round(final);
 }
 
-// ✅ FUNGSI SIMPAN
 async function saveGrade() {
     const btn = document.getElementById("btnSave");
     const originalText = btn.textContent;
     
-    // Ambil Data
     const score = document.getElementById("finalScoreDisplay").textContent;
     const rawComment = document.getElementById("inputCatatanPembimbing").value;
-    // Format gabungan: [N:80] Komentar pembimbing...
     const finalVal = `[N:${score}] ${rawComment}`;
     
-    // ✅ Menggunakan ID yang dikirim dari Backend
     const idSiswa = selectedItem.id || selectedItem.row; 
 
     if(!idSiswa) {
@@ -838,8 +757,8 @@ async function saveGrade() {
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({
-                action: 'simpanNilai', // Sesuai dengan backend function simpanNilai(p)
-                id: idSiswa,           // Mengirim nomor baris terakhir siswa tersebut
+                action: 'simpanNilai',
+                id: idSiswa,           
                 nilai: finalVal
             })
         });
@@ -849,7 +768,7 @@ async function saveGrade() {
         if(result.status === 'success' || result.status === 'ok'){
             alert("✅ Penilaian Berhasil Disimpan!");
             closeModal();
-            loadData(); // Memuat ulang (otomatis mempertahankan filter tanggal yang sedang aktif)
+            loadData(); 
         } else {
             throw new Error(result.message || "Gagal menyimpan");
         }
@@ -862,7 +781,6 @@ async function saveGrade() {
 }
 </script>
 <script src="chat.js" defer></script>
-
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
