@@ -412,14 +412,49 @@ async function loadData() {
         data.forEach(item => {
             let namaSiswa = (item.Nama || item.nama || "").trim();
             let itemDate = "";
-            
-            // Fix Zona Waktu: Ambil tanggal lokal (WIB) agar sesuai dengan tampilan di kartu
-            if(item.Tanggal){
-                const d = new Date(item.Tanggal);
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                itemDate = `${year}-${month}-${day}`; 
+
+            // Perbaiki bug tanggal: Ambil tanggal di zona waktu WIB (Asia/Jakarta)
+            if (item.Tanggal) {
+                // Buat Date dari timestamp UTC, lalu ambil ke tanggal lokal WIB
+                // Untuk tipe "YYYY-MM-DD" cukup pake split
+                if (/^\d{4}-\d{2}-\d{2}/.test(item.Tanggal)) {
+                    // Google Sheets kadang menyimpan tgl UTC (misal 2024-04-18T17:00:00.000Z, yg berarti WIB = 19)
+                    // Jadi, parsing ISO string dan konversi ke waktu Asia/Jakarta
+                    let tglObj;
+                    // Cek apakah ada huruf "T", artinya ada time
+                    if (item.Tanggal.includes("T")) {
+                        try {
+                            // Buat Date lalu ambil YMD di zona WIB
+                            tglObj = new Date(item.Tanggal);
+                            // Konversi ke string tanggal lokal di Asia/Jakarta
+                            // NB: Date API JS hanya UTC/local browser, jadi pakai offset UTC+7
+                            // Hitung: waktu timestamp + 7 jam (25200000 ms)
+                            let tglWIBDate = new Date(tglObj.getTime() + (7 * 60 * 60 * 1000));
+                            // Ambil tanggal YMD-nya
+                            const year = tglWIBDate.getFullYear();
+                            const month = String(tglWIBDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(tglWIBDate.getDate()).padStart(2, '0');
+                            itemDate = `${year}-${month}-${day}`; 
+                        } catch (e) {
+                            // Jika parsing gagal, fallback
+                            const d = new Date(item.Tanggal);
+                            const year = d.getFullYear();
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const day = String(d.getDate()).padStart(2, '0');
+                            itemDate = `${year}-${month}-${day}`; 
+                        }
+                    } else {
+                        // Sudah format YYYY-MM-DD, tidak perlu konversi jam
+                        itemDate = item.Tanggal.substring(0,10);
+                    }
+                } else {
+                    // Jika bukan format standar, fallback seperti sebelumnya
+                    const d = new Date(item.Tanggal);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    itemDate = `${year}-${month}-${day}`; 
+                }
             }
             
             let key = `${namaSiswa}_${itemDate}`;
@@ -557,7 +592,7 @@ function createCard(item) {
         <div class="card-top">
             <div>
                 <h3 class="st-name">${item.Nama || item.nama}</h3>
-                <span class="st-date">📅 ${formatTglIndo(item.Tanggal)}</span>
+                <span class="st-date">📅 ${formatTglIndo(item._filterDate || item.Tanggal)}</span>
             </div>
             ${badgeHtml}
         </div>
@@ -581,7 +616,7 @@ function openInspectionMode(item) {
     validationState = {}; 
 
     document.getElementById("modalName").textContent = item.Nama || item.nama;
-    document.getElementById("modalDate").textContent = formatTglIndo(item.Tanggal);
+    document.getElementById("modalDate").textContent = formatTglIndo(item._filterDate || item.Tanggal);
     document.getElementById("modalCatatanSiswa").textContent = item.Catatan ? `"${item.Catatan}"` : "-";
 
     renderValidationList(item);
