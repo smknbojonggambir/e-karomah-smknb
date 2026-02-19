@@ -391,7 +391,69 @@ function formatTglIndo(isoDate) {
 }
 
 // ==========================================
-// 3. LOAD DATA
+// 3. FUNGSI PENGGABUNGAN DATA (MENCICIL UPLOAD)
+// ==========================================
+function groupDataByStudentAndDate(data) {
+    const grouped = {};
+
+    data.forEach(item => {
+        // Ambil tanggal (abaikan jam)
+        let tgl = "";
+        if (item.Tanggal) {
+            const d = new Date(item.Tanggal);
+            if (!isNaN(d.getTime())) {
+                tgl = d.toISOString().split('T')[0];
+            } else {
+                tgl = item.Tanggal; // Fallback jika format teks
+            }
+        }
+
+        const studentName = item.Nama || item.nama;
+        const key = `${tgl}_${studentName}`; // Kunci unik: Tanggal_Nama
+
+        if (!grouped[key]) {
+            // Jika belum ada, buat objek baru
+            grouped[key] = { ...item };
+        } else {
+            // Jika sudah ada, GABUNGKAN data kegiatannya
+            activityConfig.forEach(act => {
+                const currentStatus = String(item[act.key] || item[act.key+'_Status'] || "").toLowerCase();
+                
+                // Jika di baris baru ini siswa mengisi "Ya", timpa data yang lama
+                if (currentStatus.includes('ya')) {
+                    grouped[key][act.key] = item[act.key];
+                    grouped[key][act.key+'_Status'] = item[act.key+'_Status'];
+                    grouped[key][act.key+'_Waktu'] = item[act.key+'_Waktu'] || item['Waktu_'+act.key];
+                    grouped[key][act.key+'_Foto'] = item[act.key+'_Foto'] || item['Foto_'+act.key];
+                }
+            });
+
+            // Gabungkan catatan jika ada
+            if (item.Catatan && item.Catatan.trim() !== "") {
+                const oldNotes = grouped[key].Catatan || "";
+                grouped[key].Catatan = oldNotes ? oldNotes + " | " + item.Catatan : item.Catatan;
+            }
+
+            // Simpan ID/RowIndex yang paling baru untuk keperluan update nilai
+            // (Mengambil baris terakhir yang di-submit siswa pada hari itu)
+            if (item.id || item.row) {
+                grouped[key].id = item.id;
+                grouped[key].row = item.row;
+            }
+            
+            // Simpan nilai pembimbing jika di salah satu baris sudah dinilai
+            if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
+                grouped[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
+            }
+        }
+    });
+
+    // Ubah kembali objek menjadi array
+    return Object.values(grouped);
+}
+
+// ==========================================
+// 4. LOAD DATA & RENDER LIST
 // ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
@@ -406,10 +468,13 @@ async function loadData() {
         const res = await fetch(url);
         const data = await res.json();
         
+        // --- PROSES PENGGABUNGAN DATA DI SINI ---
+        const groupedData = groupDataByStudentAndDate(data);
+
         // Filter Client Side by Date
         let myStudents = [];
-        if(dateInput && data.length > 0) {
-            myStudents = data.filter(item => {
+        if(dateInput && groupedData.length > 0) {
+            myStudents = groupedData.filter(item => {
                 let itemDate = "";
                 if(item.Tanggal){
                     const d = new Date(item.Tanggal);
@@ -418,7 +483,7 @@ async function loadData() {
                 return itemDate === dateInput;
             });
         } else {
-            myStudents = data;
+            myStudents = groupedData;
         }
 
         rawData = myStudents;
@@ -517,7 +582,7 @@ function createCard(item) {
 }
 
 // ==========================================
-// 4. INSPECTION MODE & MODAL
+// 5. INSPECTION MODE & MODAL
 // ==========================================
 function openInspectionMode(item) {
     selectedItem = item;
@@ -553,7 +618,7 @@ function switchTab(tabName) {
 }
 
 // ==========================================
-// 5. VALIDATION LIST LOGIC
+// 6. VALIDATION LIST LOGIC
 // ==========================================
 function renderValidationList(item) {
     const container = document.getElementById("validationContainer");
@@ -634,7 +699,7 @@ function checkValidationCompletion() {
 }
 
 // ==========================================
-// 6. GALLERY LOGIC
+// 7. GALLERY LOGIC
 // ==========================================
 function renderPhotoGallery(item) {
     const container = document.getElementById("photoGalleryContainer");
@@ -688,7 +753,7 @@ function convertDriveLink(url) {
 }
 
 // ==========================================
-// 7. GRADING & SAVING
+// 8. GRADING & SAVING
 // ==========================================
 function setupGrading(item) {
     updateRubric('R1', 80); updateRubric('R2', 80); updateRubric('R3', 80);
@@ -723,7 +788,7 @@ function calculateFinalScore() {
     document.getElementById("finalScoreDisplay").textContent = Math.round(final);
 }
 
-// ✅ FUNGSI SIMPAN YANG SUDAH DIPERBAIKI (LENGKAP)
+// ✅ FUNGSI SIMPAN YANG SUDAH DIPERBAIKI
 async function saveGrade() {
     const btn = document.getElementById("btnSave");
     const originalText = btn.textContent;
@@ -734,56 +799,49 @@ async function saveGrade() {
     // Format gabungan: [N:80] Komentar pembimbing...
     const finalVal = `[N:${score}] ${rawComment}`;
     
-    // ✅ Menggunakan ID yang dikirim dari Backend (Perbaikan Utama)
-    // Backend mengirim property 'row' atau 'id'
-    const idSiswa = selectedItem.id || selectedItem.row; 
+    // Menggunakan properti id / row yang disimpan saat proses penggabungan data
+    const rowId = selectedItem.id || selectedItem.row; 
 
-    if(!idSiswa) {
-        alert("⚠️ Error: ID Laporan (Baris) tidak ditemukan. Coba refresh halaman.");
+    if (!rowId) {
+        alert("Gagal menyimpan: ID baris tidak ditemukan. Pastikan backend Spreadsheet/GAS mengirimkan 'id' atau 'row'.");
         return;
     }
 
-    btn.textContent = "⏳ Menyimpan...";
-    btn.disabled = true;
-
     try {
+        btn.disabled = true;
+        btn.textContent = "⏳ MENYIMPAN...";
+
+        // Siapkan data untuk Google Apps Script
+        const formData = new URLSearchParams();
+        formData.append("action", "simpanNilai");
+        formData.append("id", rowId);
+        formData.append("nilai", finalVal);
+
         const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'simpanNilai', // Sesuai dengan backend function simpanNilai(p)
-                id: idSiswa,           // Mengirim nomor baris
-                nilai: finalVal
-            })
+            method: "POST",
+            body: formData,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
         });
 
         const result = await response.json();
 
-        if(result.status === 'success' || result.status === 'ok'){
-            alert("✅ Penilaian Berhasil Disimpan!");
+        if (result.status === 'success') {
+            alert("✅ Penilaian berhasil disimpan!");
             closeModal();
-            loadData(); // Refresh data list
+            loadData(); // Refresh data untuk melihat perubahan
         } else {
-            throw new Error(result.message || "Gagal menyimpan");
+            throw new Error(result.message || "Terjadi kesalahan di sisi server.");
         }
+
     } catch (error) {
         console.error(error);
-        alert("❌ Gagal: " + error.message);
-        btn.textContent = originalText;
+        alert("❌ Gagal menyimpan data. Pastikan koneksi aman atau cek script backend Anda.\n\nDetail Error: " + error.message);
         btn.disabled = false;
+        btn.textContent = originalText;
     }
 }
-</script>
-    <script src="chat.js" defer></script>
-
-
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('SW Otomatis Siap!', reg.scope))
-        .catch(err => console.log('SW Gagal:', err));
-    });
-  }
 </script>
 </body>
 </html>
