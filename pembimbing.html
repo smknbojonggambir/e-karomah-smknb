@@ -337,7 +337,6 @@
 
 <script>
 // ================= CONFIG & SETUP =================
-// ✅ PASTIKAN URL INI SUDAH YANG TERBARU (HASIL DEPLOY BARU)
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec"; 
 
 const activityConfig = [
@@ -409,10 +408,10 @@ function groupDataByStudentAndDate(data) {
         }
 
         const studentName = item.Nama || item.nama;
-        const key = `${tgl}_${studentName}`; // Kunci unik: Tanggal_Nama
+        const key = `${tgl}_${studentName}`; // Kunci unik gabungan tanggal dan nama
 
         if (!grouped[key]) {
-            // Jika belum ada, buat objek baru
+            // Jika data belum ada, buat objek baru
             grouped[key] = { ...item };
         } else {
             // Jika sudah ada, GABUNGKAN data kegiatannya
@@ -428,32 +427,33 @@ function groupDataByStudentAndDate(data) {
                 }
             });
 
-            // Gabungkan catatan jika ada
+            // Gabungkan catatan (pastikan tidak duplikat)
             if (item.Catatan && item.Catatan.trim() !== "") {
                 const oldNotes = grouped[key].Catatan || "";
-                grouped[key].Catatan = oldNotes ? oldNotes + " | " + item.Catatan : item.Catatan;
+                if (!oldNotes.includes(item.Catatan)) {
+                    grouped[key].Catatan = oldNotes ? oldNotes + " | " + item.Catatan : item.Catatan;
+                }
             }
 
-            // Simpan ID/RowIndex yang paling baru untuk keperluan update nilai
-            // (Mengambil baris terakhir yang di-submit siswa pada hari itu)
+            // Simpan ID/Row terbaru agar saat 'Simpan Nilai', data masuk ke baris terakhir
             if (item.id || item.row) {
                 grouped[key].id = item.id;
                 grouped[key].row = item.row;
             }
             
-            // Simpan nilai pembimbing jika di salah satu baris sudah dinilai
+            // Pertahankan nilai pembimbing jika sudah dinilai sebelumnya
             if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
                 grouped[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
             }
         }
     });
 
-    // Ubah kembali objek menjadi array
+    // Kembalikan objek yang sudah digabung menjadi array biasa
     return Object.values(grouped);
 }
 
 // ==========================================
-// 4. LOAD DATA & RENDER LIST
+// 4. LOAD DATA
 // ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
@@ -468,9 +468,9 @@ async function loadData() {
         const res = await fetch(url);
         const data = await res.json();
         
-        // --- PROSES PENGGABUNGAN DATA DI SINI ---
+        // --- TERAPKAN FUNGSI PENGGABUNGAN DI SINI ---
         const groupedData = groupDataByStudentAndDate(data);
-
+        
         // Filter Client Side by Date
         let myStudents = [];
         if(dateInput && groupedData.length > 0) {
@@ -760,7 +760,6 @@ function setupGrading(item) {
     document.getElementById("inputCatatanPembimbing").value = "";
 
     const val = item.Nilai_Pembimbing || "";
-    // Parsing jika data sudah ada: "[N:85] Komentar..."
     if(val.includes("[N:")) {
         const matchTotal = val.match(/\[N:(\d+)\]/);
         if(matchTotal) {
@@ -783,64 +782,65 @@ function calculateFinalScore() {
     const r2 = parseInt(document.getElementById("valR2").textContent) || 0;
     const r3 = parseInt(document.getElementById("valR3").textContent) || 0;
     
-    // Bobot: 40% + 30% + 30%
     const final = (r1 * 0.4) + (r2 * 0.3) + (r3 * 0.3);
     document.getElementById("finalScoreDisplay").textContent = Math.round(final);
 }
 
-// ✅ FUNGSI SIMPAN YANG SUDAH DIPERBAIKI
+// ✅ FUNGSI SIMPAN
 async function saveGrade() {
     const btn = document.getElementById("btnSave");
     const originalText = btn.textContent;
     
-    // Ambil Data
     const score = document.getElementById("finalScoreDisplay").textContent;
     const rawComment = document.getElementById("inputCatatanPembimbing").value;
-    // Format gabungan: [N:80] Komentar pembimbing...
     const finalVal = `[N:${score}] ${rawComment}`;
     
-    // Menggunakan properti id / row yang disimpan saat proses penggabungan data
-    const rowId = selectedItem.id || selectedItem.row; 
+    // Pastikan kita menyimpan ke baris terbaru yang digabung
+    const idSiswa = selectedItem.id || selectedItem.row; 
 
-    if (!rowId) {
-        alert("Gagal menyimpan: ID baris tidak ditemukan. Pastikan backend Spreadsheet/GAS mengirimkan 'id' atau 'row'.");
+    if(!idSiswa) {
+        alert("⚠️ Error: ID Laporan (Baris) tidak ditemukan. Coba refresh halaman.");
         return;
     }
 
+    btn.textContent = "⏳ Menyimpan...";
+    btn.disabled = true;
+
     try {
-        btn.disabled = true;
-        btn.textContent = "⏳ MENYIMPAN...";
-
-        // Siapkan data untuk Google Apps Script
-        const formData = new URLSearchParams();
-        formData.append("action", "simpanNilai");
-        formData.append("id", rowId);
-        formData.append("nilai", finalVal);
-
         const response = await fetch(WEB_APP_URL, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            }
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'simpanNilai', 
+                id: idSiswa,           
+                nilai: finalVal
+            })
         });
 
         const result = await response.json();
 
-        if (result.status === 'success') {
-            alert("✅ Penilaian berhasil disimpan!");
+        if(result.status === 'success' || result.status === 'ok'){
+            alert("✅ Penilaian Berhasil Disimpan!");
             closeModal();
-            loadData(); // Refresh data untuk melihat perubahan
+            loadData(); 
         } else {
-            throw new Error(result.message || "Terjadi kesalahan di sisi server.");
+            throw new Error(result.message || "Gagal menyimpan");
         }
-
     } catch (error) {
         console.error(error);
-        alert("❌ Gagal menyimpan data. Pastikan koneksi aman atau cek script backend Anda.\n\nDetail Error: " + error.message);
-        btn.disabled = false;
+        alert("❌ Gagal: " + error.message);
         btn.textContent = originalText;
+        btn.disabled = false;
     }
+}
+</script>
+<script src="chat.js" defer></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW Otomatis Siap!', reg.scope))
+      .catch(err => console.log('SW Gagal:', err));
+  });
 }
 </script>
 </body>
