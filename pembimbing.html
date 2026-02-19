@@ -391,7 +391,7 @@ function formatTglIndo(isoDate) {
 }
 
 // ==========================================
-// 3. LOAD DATA
+// 3. LOAD DATA (DENGAN FITUR MERGE CICILAN)
 // ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
@@ -406,9 +406,9 @@ async function loadData() {
         const res = await fetch(url);
         const data = await res.json();
         
-        let myStudents = [];
+        let filteredData = data;
         if(dateInput && data.length > 0) {
-            myStudents = data.filter(item => {
+            filteredData = data.filter(item => {
                 let itemDate = "";
                 if(item.Tanggal){
                     const d = new Date(item.Tanggal);
@@ -416,9 +416,71 @@ async function loadData() {
                 }
                 return itemDate === dateInput;
             });
-        } else {
-            myStudents = data;
         }
+
+        // --- SISTEM PENGGABUNGAN DATA (MERGING CICILAN) ---
+        let groupedData = {};
+        
+        filteredData.forEach(item => {
+            let namaSiswa = item.Nama || item.nama;
+            let itemDate = "";
+            if(item.Tanggal){
+                const d = new Date(item.Tanggal);
+                itemDate = d.toISOString().split('T')[0];
+            }
+            
+            // Kunci identifikasi: Nama + Tanggal (contoh: Via Siti Saadah_2026-02-19)
+            let key = `${namaSiswa}_${itemDate}`;
+
+            if (!groupedData[key]) {
+                // Jika belum ada kartu untuk siswa ini di tanggal ini, buat baru
+                groupedData[key] = { ...item };
+            } else {
+                // Jika sudah ada, gabungkan isian cicilan aktivitasnya
+                activityConfig.forEach(act => {
+                    const statusSiswa = item[act.key] || item[act.key+'_Status'] || "";
+                    
+                    // Jika di baris cicilan ini aktivitas diisi "Ya", timpa data sebelumnya
+                    if (String(statusSiswa).toLowerCase().includes('ya')) {
+                        groupedData[key][act.key] = statusSiswa;
+                        
+                        // Timpa Jam
+                        const w1 = act.key + '_Waktu'; const w2 = 'Waktu_' + act.key;
+                        if (item[w1] && item[w1] !== "-") groupedData[key][w1] = item[w1];
+                        if (item[w2] && item[w2] !== "-") groupedData[key][w2] = item[w2];
+                        
+                        // Timpa Foto
+                        const f1 = act.key + '_Foto'; const f2 = 'Foto_' + act.key;
+                        if (item[f1] && item[f1] !== "-") groupedData[key][f1] = item[f1];
+                        if (item[f2] && item[f2] !== "-") groupedData[key][f2] = item[f2];
+                    }
+                });
+
+                // Update ID baris ke laporan terbaru, agar saat disave nilainya masuk ke baris akhir
+                if (item.id || item.row) {
+                    groupedData[key].id = item.id || item.row;
+                    groupedData[key].row = item.id || item.row;
+                }
+
+                // Gabungkan Catatan Siswa jika ada tambahan teks dari cicilan
+                if(item.Catatan && item.Catatan !== "-" && String(item.Catatan).trim() !== "") {
+                    if (!groupedData[key].Catatan || groupedData[key].Catatan === "-") {
+                        groupedData[key].Catatan = item.Catatan;
+                    } else if (!groupedData[key].Catatan.includes(item.Catatan)) {
+                        groupedData[key].Catatan += " | " + item.Catatan;
+                    }
+                }
+
+                // Jika di salah satu baris cicilan ternyata sudah pernah dinilai, munculkan status "SUDAH DINILAI"
+                if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
+                    groupedData[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
+                }
+            }
+        });
+
+        // Ubah format Object kembali menjadi Array biasa
+        let myStudents = Object.values(groupedData);
+        // ------------------------------------------------
 
         rawData = myStudents;
         updateCountChips(rawData);
