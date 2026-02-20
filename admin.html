@@ -171,11 +171,48 @@ body {
   margin-top: 5px;
 }
 
+/* --- BUTTONS --- */
+.btn {
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0f172a;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  padding: 5px 10px;
+}
+
+.btn-info {
+  background: #3b82f6;
+  color: white;
+  padding: 5px 10px;
+}
+
 /* --- TABLE & SEARCH --- */
 .table-controls {
   display: flex;
+  justify-content: space-between;
   gap: 10px;
   margin-bottom: 15px;
+  flex-wrap: wrap;
 }
 
 .search-bar {
@@ -204,7 +241,7 @@ body {
 
 .table-wrapper {
   overflow-x: auto;
-  max-height: 500px; /* Batas tinggi agar bisa scroll vertikal */
+  max-height: 500px;
 }
 
 table {
@@ -237,6 +274,11 @@ tbody tr {
 
 tbody tr:hover {
   background: #273549;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
 }
 
 /* --- UTILITIES & LOADING --- */
@@ -355,8 +397,9 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari nama, kelompok, dll...">
+              <input type="text" id="searchInput" onkeyup="searchTable('tableLaporan', 'searchInput')" placeholder="Cari laporan...">
             </div>
+            <button class="btn btn-primary"><i class='bx bx-export'></i> Export Excel</button>
           </div>
           <div class="table-wrapper">
             <table id="tableLaporan">
@@ -367,40 +410,203 @@ tbody tr:hover {
         </div>
       </div>
 
-      <div id="manajemen" class="page hidden"><h2 class="page-title">Manajemen</h2><div class="card">Segera hadir...</div></div>
-      <div id="siswa" class="page hidden"><h2 class="page-title">Data Siswa</h2><div class="card">Segera hadir...</div></div>
-      <div id="pembimbing" class="page hidden"><h2 class="page-title">Data Pembimbing</h2><div class="card">Segera hadir...</div></div>
-      <div id="kelompok" class="page hidden"><h2 class="page-title">Kelompok</h2><div class="card">Segera hadir...</div></div>
-      <div id="operasional" class="page hidden"><h2 class="page-title">Operasional</h2><div class="card">Segera hadir...</div></div>
-      <div id="penilaian" class="page hidden"><h2 class="page-title">Penilaian</h2><div class="card">Segera hadir...</div></div>
-      <div id="sertifikat" class="page hidden"><h2 class="page-title">Sertifikat</h2><div class="card">Segera hadir...</div></div>
+      <div id="manajemen" class="page hidden">
+        <h2 class="page-title">Manajemen Sistem</h2>
+        <div class="card">
+            <h3>Pengaturan Program Ramadan</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Atur konfigurasi dasar untuk aplikasi ini.</p>
+            <div class="grid-3">
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-size:13px;">Tahun Hijriah</label>
+                    <input type="text" value="1447 H" style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white;">
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-size:13px;">Status Program</label>
+                    <select style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white;">
+                        <option>Aktif</option>
+                        <option>Selesai</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 20px;"><i class='bx bx-save'></i> Simpan Pengaturan</button>
+        </div>
+      </div>
+
+      <div id="siswa" class="page hidden">
+        <h2 class="page-title">Data Siswa</h2>
+        <div class="card">
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" id="searchSiswa" onkeyup="searchTable('tableSiswa', 'searchSiswa')" placeholder="Cari nama siswa...">
+            </div>
+            <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Siswa</button>
+          </div>
+          <div class="table-wrapper">
+            <table id="tableSiswa">
+              <thead>
+                  <tr><th>NIS</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Aksi</th></tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="5" style="text-align: center; color: var(--text-muted);">Data siswa akan ditarik dari server...</td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="pembimbing" class="page hidden">
+        <h2 class="page-title">Data Pembimbing</h2>
+        <div class="card">
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Cari pembimbing...">
+            </div>
+            <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Pembimbing</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                  <tr><th>ID</th><th>Nama Pembimbing</th><th>No. HP</th><th>Jumlah Kelompok</th><th>Aksi</th></tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="5" style="text-align: center; color: var(--text-muted);">Data pembimbing akan ditarik dari server...</td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="kelompok" class="page hidden">
+        <h2 class="page-title">Manajemen Kelompok</h2>
+        <div class="card">
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Cari kelompok...">
+            </div>
+            <button class="btn btn-primary"><i class='bx bx-plus'></i> Buat Kelompok</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                  <tr><th>Nama Kelompok</th><th>Pembimbing</th><th>Total Siswa</th><th>Aksi</th></tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="4" style="text-align: center; color: var(--text-muted);">Data kelompok akan ditarik dari server...</td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="operasional" class="page hidden">
+        <h2 class="page-title">Operasional & Kegiatan</h2>
+        <div class="card">
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Cari jadwal...">
+            </div>
+            <button class="btn btn-primary"><i class='bx bx-calendar-plus'></i> Tambah Jadwal</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                  <tr><th>Tanggal</th><th>Nama Kegiatan</th><th>Penanggung Jawab</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="4" style="text-align: center; color: var(--text-muted);">Jadwal operasional akan ditarik dari server...</td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="penilaian" class="page hidden">
+        <h2 class="page-title">Rekap Penilaian</h2>
+        <div class="card">
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Cari siswa/kelompok...">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                  <tr><th>Nama Siswa</th><th>Kelompok</th><th>Hafalan</th><th>Kehadiran</th><th>Total Nilai</th><th>Aksi</th></tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="6" style="text-align: center; color: var(--text-muted);">Data penilaian akan ditarik dari server...</td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="sertifikat" class="page hidden">
+        <h2 class="page-title">Generate Sertifikat</h2>
+        <div class="card">
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Pilih siswa yang telah menyelesaikan program untuk mencetak sertifikat.</p>
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Cari siswa...">
+            </div>
+            <button class="btn btn-primary"><i class='bx bx-printer'></i> Cetak Semua (Lulus)</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                  <tr><th>Nama Siswa</th><th>Status Kelulusan</th><th>Predikat</th><th>Sertifikat</th></tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="4" style="text-align: center; color: var(--text-muted);">Data kelulusan akan ditarik dari server...</td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
 </div>
 
 <script>
+// URL SCRIPT GOOGLE KAMU
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec?action=rekapAdmin";
 let globalData = [];
-let chartInstance = null; // Menyimpan instance chart agar bisa di-update
+let chartInstance = null; 
 
 // Navigasi Menu
 function showPage(pageId, element){
-  // Sembunyikan semua halaman
   document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden"));
   document.getElementById(pageId).classList.remove("hidden");
   
-  // Ubah status menu aktif di sidebar
   if(element) {
     document.querySelectorAll(".sidebar li").forEach(li => li.classList.remove("active"));
     element.classList.add("active");
   }
 }
 
-// Fitur Pencarian Tabel
-function searchTable() {
-  const input = document.getElementById("searchInput").value.toLowerCase();
-  const rows = document.querySelectorAll("#tableLaporan tbody tr");
+// Fitur Pencarian Tabel Universal (Disesuaikan agar bisa dipakai di semua tabel)
+function searchTable(tableId, inputId) {
+  const input = document.getElementById(inputId).value.toLowerCase();
+  const rows = document.querySelectorAll(`#${tableId} tbody tr`);
   
   rows.forEach(row => {
     const textData = row.textContent.toLowerCase();
@@ -434,7 +640,6 @@ async function loadData(){
     renderDashboard();
     renderTable();
     
-    // Tampilkan konten dan sembunyikan loading
     loadingDiv.classList.add("hidden");
     mainContent.classList.remove("hidden");
 
@@ -470,13 +675,12 @@ function renderDashboard(){
   document.getElementById("totalLaporan").innerText = globalData.length;
   document.getElementById("rataNilai").innerText = globalData.length ? (totalNilai / globalData.length).toFixed(1) : 0;
 
-  // Persiapkan Data untuk Chart.js (Top 5)
   const topData = Object.entries(ranking)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const labels = topData.map(d => d[0]); // Nama
-  const dataPoints = topData.map(d => d[1]); // Nilai
+  const labels = topData.map(d => d[0]); 
+  const dataPoints = topData.map(d => d[1]);
 
   renderChart(labels, dataPoints);
 }
@@ -485,10 +689,8 @@ function renderDashboard(){
 function renderChart(labels, data) {
   const ctx = document.getElementById('rankingChart').getContext('2d');
   
-  // Hapus chart lama jika ada agar tidak menumpuk
   if(chartInstance) chartInstance.destroy();
 
-  // Konfigurasi Chart.js Tema Gelap
   Chart.defaults.color = '#94a3b8';
   Chart.defaults.font.family = "'Segoe UI', sans-serif";
 
@@ -499,7 +701,7 @@ function renderChart(labels, data) {
       datasets: [{
         label: 'Total Nilai Terkumpul',
         data: data,
-        backgroundColor: 'rgba(250, 204, 21, 0.8)', // Warna Kuning
+        backgroundColor: 'rgba(250, 204, 21, 0.8)',
         borderColor: '#facc15',
         borderWidth: 1,
         borderRadius: 6
@@ -513,13 +715,13 @@ function renderChart(labels, data) {
         x: { grid: { display: false } }
       },
       plugins: {
-        legend: { display: false } // Sembunyikan legenda
+        legend: { display: false }
       }
     }
   });
 }
 
-// Render Tabel
+// Render Tabel Laporan
 function renderTable(){
   const table = document.getElementById("tableLaporan");
   if (globalData.length === 0) {
@@ -527,19 +729,15 @@ function renderTable(){
       return;
   }
 
-  // Filter kolom yang tidak perlu ditampilkan (opsional)
   const headers = Object.keys(globalData[0]);
 
-  // Render Header
   table.querySelector("thead").innerHTML = 
     "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join("") + "</tr>";
 
-  // Render Body
   table.querySelector("tbody").innerHTML = 
     globalData.map(row => 
       "<tr>" + headers.map(h => {
         let val = row[h];
-        // Jika nilai berupa tanggal/timestamp panjang, bisa dipotong
         if(typeof val === 'string' && val.includes("T") && val.includes("Z")) {
            val = new Date(val).toLocaleDateString('id-ID');
         }
@@ -548,7 +746,6 @@ function renderTable(){
     ).join("");
 }
 
-// Jalankan saat dokumen siap
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
