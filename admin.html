@@ -451,11 +451,11 @@ tbody tr:hover {
             <div class="grid-3">
                 <div>
                     <label style="display:block; margin-bottom:5px; font-size:13px;">Tahun Hijriah</label>
-                    <input type="text" value="1447 H" style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white;">
+                    <input type="text" value="1447 H" style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white; box-sizing: border-box;">
                 </div>
                 <div>
                     <label style="display:block; margin-bottom:5px; font-size:13px;">Status Program</label>
-                    <select style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white;">
+                    <select style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white; box-sizing: border-box;">
                         <option>Aktif</option>
                         <option>Persiapan</option>
                         <option>Selesai</option>
@@ -498,223 +498,13 @@ tbody tr:hover {
                           <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
                       </td>
                   </tr>
-                  <tr>
-                      <td>100125</td><td>Budi Santoso</td><td>XI-MIPA 3</td><td>Umar bin Khattab</td>
-                      <td><span class="badge badge-pending">Nonaktif</span></td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <div id="pembimbing" class="page hidden">
-        <h2 class="page-title">Data Pembimbing</h2>
-        <div class="card">
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchPembimbing" onkeyup="searchTable('tablePembimbing', 'searchPembimbing')" placeholder="Cari pembimbing...">
-            </div>
-            <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Pembimbing</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tablePembimbing">
-              <thead>
-                  <tr><th>ID</th><th>Nama Pembimbing</th><th>No. Whatsapp</th><th>Jumlah Kelompok</th><th>Aksi</th></tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td>P-001</td><td>Ust. Hidayatullah, S.Pd.I</td><td>0812-3456-7890</td><td>2 Kelompok</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>P-002</td><td>Ustz. Fatimah Azzahra</td><td>0857-9876-5432</td><td>1 Kelompok</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
-
-      <div id="kelompok" class="page hidden">
-        <h2 class="page-title">Manajemen Kelompok</h2>
-        <div class="card">
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchKelompok" onkeyup="searchTable('tableKelompok', 'searchKelompok')" placeholder="Cari kelompok...">
-            </div>
-            <button class="btn btn-primary"><i class='bx bx-plus'></i> Buat Kelompok</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tableKelompok">
-              <thead>
-                  <tr><th>Kode</th><th>Nama Kelompok</th><th>Pembimbing</th><th>Total Siswa</th><th>Aksi</th></tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td>K-01</td><td>Abu Bakar</td><td>Ust. Hidayatullah, S.Pd.I</td><td>15 Siswa</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-show'></i> Lihat</button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>K-02</td><td>Khadijah</td><td>Ustz. Fatimah Azzahra</td><td>12 Siswa</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-show'></i> Lihat</button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="operasional" class="page hidden">
-        <h2 class="page-title">Operasional & Kegiatan</h2>
-        <div class="card">
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchOperasional" onkeyup="searchTable('tableOperasional', 'searchOperasional')" placeholder="Cari kegiatan...">
-            </div>
-            <button class="btn btn-primary"><i class='bx bx-calendar-plus'></i> Tambah Jadwal</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tableOperasional">
-              <thead>
-                  <tr><th>Tanggal</th><th>Nama Kegiatan</th><th>Penanggung Jawab</th><th>Status</th><th>Aksi</th></tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td>1 Ramadhan 1447</td><td>Tarhib Ramadhan & Pawai</td><td>Panitia Inti OSIS</td>
-                      <td><span class="badge badge-done">Selesai</span></td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>15 Ramadhan 1447</td><td>Peringatan Nuzulul Qur'an</td><td>Ekskul Rohis</td>
-                      <td><span class="badge badge-pending">Terjadwal</span></td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>25 Ramadhan 1447</td><td>Buka Bersama Akbar & Baksos</td><td>Seluruh Guru & OSIS</td>
-                      <td><span class="badge badge-pending">Terjadwal</span></td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                      </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="penilaian" class="page hidden">
-        <h2 class="page-title">Rekap Penilaian</h2>
-        <div class="card">
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchPenilaian" onkeyup="searchTable('tablePenilaian', 'searchPenilaian')" placeholder="Cari siswa/kelompok...">
-            </div>
-            <button class="btn btn-success"><i class='bx bx-export'></i> Unduh Rekap</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tablePenilaian">
-              <thead>
-                  <tr><th>Nama Siswa</th><th>Kelompok</th><th>Hafalan (Rata-rata)</th><th>Kehadiran</th><th>Total Poin</th><th>Aksi</th></tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td>Ahmad Fadhil</td><td>Abu Bakar</td><td>90 (Sangat Baik)</td><td>100% (30/30)</td><td>450 Poin</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-show'></i> Detail</button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>Siti Aisyah</td><td>Khadijah</td><td>85 (Baik)</td><td>95% (28/30)</td><td>410 Poin</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-show'></i> Detail</button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>Budi Santoso</td><td>Umar bin Khattab</td><td>75 (Cukup)</td><td>80% (24/30)</td><td>360 Poin</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-show'></i> Detail</button>
-                      </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="sertifikat" class="page hidden">
-        <h2 class="page-title">Generate Sertifikat</h2>
-        <div class="card">
-          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Pilih siswa yang telah menyelesaikan program untuk mencetak sertifikat.</p>
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchSertifikat" onkeyup="searchTable('tableSertifikat', 'searchSertifikat')" placeholder="Cari siswa...">
-            </div>
-            <button class="btn btn-primary"><i class='bx bx-printer'></i> Cetak Semua (Lulus)</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tableSertifikat">
-              <thead>
-                  <tr><th>Nama Siswa</th><th>Status Kelulusan</th><th>Predikat</th><th>Aksi</th></tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td>Ahmad Fadhil</td>
-                      <td><span class="badge badge-active">Lulus</span></td>
-                      <td>Mumtadz (Sangat Baik)</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-printer'></i> Cetak PDF</button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>Siti Aisyah</td>
-                      <td><span class="badge badge-active">Lulus</span></td>
-                      <td>Jayyid Jiddan (Baik Sekali)</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-printer'></i> Cetak PDF</button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>Budi Santoso</td>
-                      <td><span class="badge badge-pending">Belum Memenuhi</span></td>
-                      <td>-</td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info" disabled style="opacity: 0.5; cursor: not-allowed;"><i class='bx bx-printer'></i> Cetak PDF</button>
-                      </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </div>
   </div>
 </div>
 
@@ -724,7 +514,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pb
 let globalData = [];
 let chartInstance = null; 
 
-// Navigasi Menu
+// 1. Navigasi Menu
 function showPage(pageId, element){
   document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden"));
   document.getElementById(pageId).classList.remove("hidden");
@@ -735,7 +525,7 @@ function showPage(pageId, element){
   }
 }
 
-// Fitur Pencarian Tabel Universal (Disesuaikan agar bisa dipakai di semua tabel)
+// 2. Fitur Pencarian Tabel Universal
 function searchTable(tableId, inputId) {
   const input = document.getElementById(inputId).value.toLowerCase();
   const rows = document.querySelectorAll(`#${tableId} tbody tr`);
@@ -746,44 +536,41 @@ function searchTable(tableId, inputId) {
   });
 }
 
-// Helper untuk field huruf besar/kecil
+// 3. Helper untuk mencocokkan field dari Google Sheet
 function getField(obj, key){
   return obj[key] || obj[key.charAt(0).toUpperCase() + key.slice(1)] || "";
 }
 
-// Ambil Data dari API Google Apps Script
+// 4. Ambil Data dari API Google Apps Script
 async function loadData(){
   const loadingDiv = document.getElementById("loading-indicator");
   const loadingText = document.getElementById("loading-text");
   const mainContent = document.getElementById("main-content");
 
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'GET',
-      mode: 'cors',
-      redirect: 'follow'
-    });
+    const res = await fetch(SCRIPT_URL);
+    if (!res.ok) throw new Error("Gagal terhubung ke Google Script");
     
-    const rawText = await res.text();
-    const raw = JSON.parse(rawText);
-    
+    // Perbaikan keamanan parsing JSON
+    const raw = await res.json();
     globalData = Array.isArray(raw) ? raw : (raw.data || []);
 
     renderDashboard();
-    renderTable();
+    renderTable(); // Merender Laporan
     
+    // Sembunyikan loading, tampilkan konten
     loadingDiv.classList.add("hidden");
     mainContent.classList.remove("hidden");
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Fetch Error:", error);
     document.querySelector(".spinner").style.display = "none";
-    loadingText.innerText = "Gagal memuat data. Pastikan URL Script benar dan hak akses telah dibuka.";
+    loadingText.innerText = "Gagal memuat data. Pastikan URL Script benar dan di-deploy sebagai 'Web App' (Anyone).";
     loadingText.style.color = "#ef4444"; 
   }
 }
 
-// Render Dashboard & Chart
+// 5. Render Dashboard & Chart
 function renderDashboard(){
   if (globalData.length === 0) return;
 
@@ -817,7 +604,7 @@ function renderDashboard(){
   renderChart(labels, dataPoints);
 }
 
-// Fungsi Render Chart.js
+// 6. Fungsi Render Chart.js
 function renderChart(labels, data) {
   const ctx = document.getElementById('rankingChart').getContext('2d');
   
@@ -853,31 +640,34 @@ function renderChart(labels, data) {
   });
 }
 
-// Render Tabel Laporan
+// 7. Render Tabel Dinamis (Laporan)
 function renderTable(){
-  const table = document.getElementById("tableLaporan");
+  const thead = document.querySelector("#tableLaporan thead");
+  const tbody = document.querySelector("#tableLaporan tbody");
+  
+  // PERBAIKAN BUG: Hanya mengedit isinya, tidak menimpa elemen tag-nya
   if (globalData.length === 0) {
-      table.innerHTML = "<tr><td style='text-align:center;'>Belum ada data laporan.</td></tr>";
+      tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center;'>Belum ada data laporan.</td></tr>";
+      thead.innerHTML = "";
       return;
   }
 
   const headers = Object.keys(globalData[0]);
 
-  table.querySelector("thead").innerHTML = 
-    "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join("") + "</tr>";
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join("") + "</tr>";
 
-  table.querySelector("tbody").innerHTML = 
-    globalData.map(row => 
-      "<tr>" + headers.map(h => {
-        let val = row[h];
-        if(typeof val === 'string' && val.includes("T") && val.includes("Z")) {
-           val = new Date(val).toLocaleDateString('id-ID');
-        }
-        return `<td>${val !== undefined && val !== null ? val : '-'}</td>`;
-      }).join("") + "</tr>"
-    ).join("");
+  tbody.innerHTML = globalData.map(row => 
+    "<tr>" + headers.map(h => {
+      let val = row[h];
+      if(typeof val === 'string' && val.includes("T") && val.includes("Z")) {
+         val = new Date(val).toLocaleDateString('id-ID');
+      }
+      return `<td>${val !== undefined && val !== null ? val : '-'}</td>`;
+    }).join("") + "</tr>"
+  ).join("");
 }
 
+// Eksekusi load data saat halaman siap
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
