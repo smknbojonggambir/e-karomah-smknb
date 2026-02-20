@@ -9,95 +9,168 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Segoe UI;
-  background:#0f172a;
-  color:#fff;
+/* CSS Reset & Variables */
+:root {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --accent: #facc15;
+  --text-main: #f8fafc;
 }
 
-.wrapper{
-  display:flex;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
 }
 
-.sidebar{
-  width:240px;
-  background:#1e293b;
-  height:100vh;
-  padding:20px;
+.wrapper {
+  display: flex;
+  min-height: 100vh;
 }
 
-.sidebar h2{
-  color:#facc15;
+/* Sidebar Styling */
+.sidebar {
+  width: 240px;
+  background: var(--bg-card);
+  padding: 20px;
+  flex-shrink: 0;
 }
 
-.sidebar ul{
-  list-style:none;
-  padding:0;
+.sidebar h2 {
+  color: var(--accent);
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
-.sidebar li{
-  padding:12px;
-  cursor:pointer;
-  border-radius:8px;
-  margin-bottom:6px;
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.sidebar li:hover{
-  background:#334155;
+.sidebar li {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background 0.2s ease;
 }
 
-.content{
-  flex:1;
-  padding:25px;
+.sidebar li:hover {
+  background: var(--bg-hover);
 }
 
-.card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:14px;
-  margin-bottom:20px;
+/* Content & Layout */
+.content {
+  flex: 1;
+  padding: 25px;
+  overflow-x: hidden; /* Mencegah horizontal scroll di luar tabel */
 }
 
-.grid-3{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:20px;
+.card {
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.stat{
-  font-size:24px;
-  font-weight:bold;
-  margin-top:10px;
-  color:#facc15;
+.card h3 {
+  margin-top: 0;
+  color: var(--accent);
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
-th,td{
-  border:1px solid #334155;
-  padding:6px;
-  text-align:left;
+.stat {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 10px;
+  color: var(--accent);
 }
 
-th{
-  background:#334155;
+/* Table Styling */
+.table-wrapper {
+  overflow-x: auto; /* Agar tabel bisa digeser jika kolomnya banyak */
+  width: 100%;
 }
 
-.hidden{
-  display:none;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 600px; /* Minimal lebar tabel agar tidak terlalu padat */
 }
 
-select{
-  padding:6px;
-  border-radius:6px;
-  background:#1e293b;
-  color:#fff;
-  border:1px solid #334155;
+th, td {
+  border-bottom: 1px solid var(--bg-hover);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+th {
+  background: var(--bg-hover);
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: #273549;
+}
+
+/* Utilities */
+.hidden {
+  display: none !important;
+}
+
+select {
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--bg-hover);
+  outline: none;
+}
+
+ul#topRanking {
+  padding-left: 20px;
+  margin: 0;
+}
+
+ul#topRanking li {
+  margin-bottom: 8px;
+}
+
+#loading-indicator {
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: auto;
+    height: auto;
+    padding: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .sidebar ul {
+    display: flex;
+    gap: 10px;
+  }
+  .sidebar li {
+    margin-bottom: 0;
+  }
 }
 </style>
 </head>
@@ -105,96 +178,97 @@ select{
 <body>
 
 <div class="wrapper">
+  <div class="sidebar">
+    <h2>Ramadan Panel</h2>
+    <ul>
+      <li onclick="showPage('dashboard')">Dashboard</li>
+      <li onclick="showPage('laporan')">Laporan</li>
+      <li onclick="showPage('manajemen')">Manajemen</li>
+      <li onclick="showPage('siswa')">Data Siswa</li>
+      <li onclick="showPage('pembimbing')">Data Pembimbing</li>
+      <li onclick="showPage('kelompok')">Kelompok</li>
+      <li onclick="showPage('operasional')">Operasional</li>
+      <li onclick="showPage('penilaian')">Penilaian</li>
+      <li onclick="showPage('sertifikat')">Sertifikat</li>
+    </ul>
+  </div>
 
-<div class="sidebar">
-  <h2>Ramadan Panel</h2>
-  <ul>
-    <li onclick="showPage('dashboard')">Dashboard</li>
-    <li onclick="showPage('manajemen')">Manajemen</li>
-    <li onclick="showPage('siswa')">Data Siswa</li>
-    <li onclick="showPage('pembimbing')">Data Pembimbing</li>
-    <li onclick="showPage('kelompok')">Kelompok</li>
-    <li onclick="showPage('operasional')">Operasional</li>
-    <li onclick="showPage('penilaian')">Penilaian</li>
-    <li onclick="showPage('laporan')">Laporan</li>
-    <li onclick="showPage('sertifikat')">Sertifikat</li>
-  </ul>
-</div>
+  <div class="content">
+    <div id="loading-indicator">Memuat data dari server...</div>
 
-<div class="content">
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <div class="card">
-    <h3>Statistik Ramadan</h3>
-    <div class="grid-3">
-      <div>
-        Total Siswa
-        <div class="stat" id="totalSiswa">0</div>
+    <div id="dashboard" class="page">
+      <div class="card">
+        <h3>Statistik Ramadan</h3>
+        <div class="grid-3">
+          <div>
+            Total Siswa
+            <div class="stat" id="totalSiswa">0</div>
+          </div>
+          <div>
+            Total Laporan
+            <div class="stat" id="totalLaporan">0</div>
+          </div>
+          <div>
+            Rata-rata Nilai
+            <div class="stat" id="rataNilai">0</div>
+          </div>
+        </div>
       </div>
-      <div>
-        Total Laporan
-        <div class="stat" id="totalLaporan">0</div>
-      </div>
-      <div>
-        Rata-rata Nilai
-        <div class="stat" id="rataNilai">0</div>
+
+      <div class="card">
+        <h3>Top 5 Nilai Tertinggi</h3>
+        <ul id="topRanking"><li>Belum ada data</li></ul>
       </div>
     </div>
+
+    <div id="laporan" class="page hidden">
+      <div class="card">
+        <h3>Data Laporan</h3>
+        <div class="table-wrapper">
+          <table id="tableLaporan">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="manajemen" class="page hidden"><div class="card">Halaman Manajemen</div></div>
+    <div id="siswa" class="page hidden"><div class="card">Halaman Data Siswa</div></div>
+    <div id="pembimbing" class="page hidden"><div class="card">Halaman Data Pembimbing</div></div>
+    <div id="kelompok" class="page hidden"><div class="card">Halaman Kelompok</div></div>
+    <div id="operasional" class="page hidden"><div class="card">Halaman Operasional</div></div>
+    <div id="penilaian" class="page hidden"><div class="card">Halaman Penilaian</div></div>
+    <div id="sertifikat" class="page hidden"><div class="card">Halaman Sertifikat</div></div>
+
   </div>
-
-  <div class="card">
-    <h3>Top 5 Nilai Tertinggi</h3>
-    <ul id="topRanking"></ul>
-  </div>
-</div>
-
-<!-- LAPORAN -->
-<div id="laporan" class="hidden">
-  <div class="card">
-    <h3>Data Laporan</h3>
-    <table id="tableLaporan">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- PAGE LAINNYA -->
-<div id="manajemen" class="hidden"><div class="card">Halaman Manajemen</div></div>
-<div id="siswa" class="hidden"><div class="card">Halaman Data Siswa</div></div>
-<div id="pembimbing" class="hidden"><div class="card">Halaman Data Pembimbing</div></div>
-<div id="kelompok" class="hidden"><div class="card">Halaman Kelompok</div></div>
-<div id="operasional" class="hidden"><div class="card">Halaman Operasional</div></div>
-<div id="penilaian" class="hidden"><div class="card">Halaman Penilaian</div></div>
-<div id="sertifikat" class="hidden"><div class="card">Halaman Sertifikat</div></div>
-
-</div>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec";
+let globalData = [];
 
-let globalData=[];
-
+// Navigasi Halaman
 function showPage(page){
-  document.querySelectorAll(".content > div").forEach(d=>d.classList.add("hidden"));
+  document.querySelectorAll(".content > .page").forEach(d => d.classList.add("hidden"));
   document.getElementById(page).classList.remove("hidden");
 }
 
-function getField(obj,key){
-  return obj[key] || obj[key.charAt(0).toUpperCase()+key.slice(1)] || "";
+// Helper untuk mengambil field dari object JSON (mengatasi perbedaan besar/kecil huruf)
+function getField(obj, key){
+  return obj[key] || obj[key.charAt(0).toUpperCase() + key.slice(1)] || "";
 }
 
+// Menghitung status validasi aktivitas (Bisa digunakan di kemudian hari)
 function hitungAktivitas(item){
-  const aktivitas=[
+  const aktivitas = [
     "Sahur_Status","Subuh_Status","Olahraga_Status","Keluarga_Status",
     "Dzuhur_Status","Pesantren_Status","Ashar_Status","Aksi_Status",
     "Buka_Status","Magrib_Status","Isya_Status",
     "Tarawih_Status","Tadarus_Status","Tidur_Status"
   ];
-  let total=0;
-  aktivitas.forEach(k=>{
+  let total = 0;
+  aktivitas.forEach(k => {
     if(item[k] && item[k].toString().toLowerCase().includes("valid")){
       total++;
     }
@@ -202,65 +276,90 @@ function hitungAktivitas(item){
   return total;
 }
 
+// Fetch Data dari API
 async function loadData(){
-  const res=await fetch(SCRIPT_URL);
-  const raw=await res.json();
+  const loading = document.getElementById("loading-indicator");
+  loading.style.display = "block";
+  loading.innerText = "Memuat data dari server...";
 
-  if(Array.isArray(raw)) globalData=raw;
-  else if(raw.data) globalData=raw.data;
-  else globalData=[];
+  try {
+    const res = await fetch(SCRIPT_URL);
+    if (!res.ok) throw new Error("Jaringan bermasalah");
+    
+    const raw = await res.json();
+    
+    if (Array.isArray(raw)) globalData = raw;
+    else if (raw.data) globalData = raw.data;
+    else globalData = [];
 
-  renderDashboard();
-  renderTable();
+    renderDashboard();
+    renderTable();
+    
+    loading.style.display = "none"; // Sembunyikan loading jika sukses
+  } catch (error) {
+    console.error("Gagal mengambil data:", error);
+    loading.innerText = "Gagal memuat data. Periksa koneksi atau URL script Anda.";
+    loading.style.color = "#ef4444"; // Warna merah untuk error
+  }
 }
 
+// Render Data Dashboard
 function renderDashboard(){
-  const siswaSet=new Set();
-  let totalNilai=0;
+  if (globalData.length === 0) return;
 
-  globalData.forEach(item=>{
-    siswaSet.add(getField(item,"Nama"));
-    totalNilai+=Number(getField(item,"Nilai_Pembimbing")||0);
+  const siswaSet = new Set();
+  let totalNilai = 0;
+  const ranking = {};
+
+  globalData.forEach(item => {
+    const nama = getField(item, "Nama");
+    const nilai = Number(getField(item, "Nilai_Pembimbing") || 0);
+    
+    if (nama) {
+        siswaSet.add(nama);
+        if(!ranking[nama]) ranking[nama] = 0;
+        ranking[nama] += nilai; // Asumsi: Nilai diakumulasikan per nama
+    }
+    
+    totalNilai += nilai;
   });
 
-  document.getElementById("totalSiswa").innerText=siswaSet.size;
-  document.getElementById("totalLaporan").innerText=globalData.length;
-  document.getElementById("rataNilai").innerText=
-    globalData.length ? (totalNilai/globalData.length).toFixed(1):0;
+  // Update Statistik
+  document.getElementById("totalSiswa").innerText = siswaSet.size;
+  document.getElementById("totalLaporan").innerText = globalData.length;
+  document.getElementById("rataNilai").innerText = globalData.length ? (totalNilai / globalData.length).toFixed(1) : 0;
 
-  const ranking={};
+  // Update Top 5 Ranking
+  const top = Object.entries(ranking)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
 
-  globalData.forEach(item=>{
-    const nama=getField(item,"Nama");
-    const nilai=Number(getField(item,"Nilai_Pembimbing")||0);
-    if(!ranking[nama]) ranking[nama]=0;
-    ranking[nama]+=nilai;
-  });
-
-  const top=Object.entries(ranking)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,5);
-
-  document.getElementById("topRanking").innerHTML=
-    top.map((r,i)=>`<li>${i+1}. ${r[0]} - ${r[1]}</li>`).join("");
+  const listHtml = top.map((r, i) => `<li><strong>${i + 1}. ${r[0]}</strong> - Skor: ${r[1]}</li>`).join("");
+  document.getElementById("topRanking").innerHTML = listHtml || "<li>Belum ada data</li>";
 }
 
+// Render Tabel Laporan
 function renderTable(){
-  const table=document.getElementById("tableLaporan");
-  if(globalData.length===0) return;
+  const table = document.getElementById("tableLaporan");
+  if (globalData.length === 0) {
+      table.innerHTML = "<tr><td>Tidak ada data laporan.</td></tr>";
+      return;
+  }
 
-  const headers=Object.keys(globalData[0]);
+  // Ambil semua header dari object pertama
+  const headers = Object.keys(globalData[0]);
 
-  table.querySelector("thead").innerHTML=
-    "<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
+  table.querySelector("thead").innerHTML = 
+    "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join("") + "</tr>";
 
-  table.querySelector("tbody").innerHTML=
-    globalData.map(row=>
-      "<tr>"+headers.map(h=>`<td>${row[h]}</td>`).join("")+"</tr>"
+  table.querySelector("tbody").innerHTML = 
+    globalData.map(row => 
+      "<tr>" + headers.map(h => `<td>${row[h] !== undefined && row[h] !== null ? row[h] : '-'}</td>`).join("") + "</tr>"
     ).join("");
 }
 
-document.addEventListener("DOMContentLoaded",loadData);
+// Jalankan ketika halaman dimuat
+document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
 </body>
