@@ -1,642 +1,299 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-KAROMAH | Dashboard Admin</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
-  <style>
-    :root {
-      --primary: #10b981;
-      --primary-dark: #059669;
-      --gold: #fbbf24;
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --border: rgba(255,255,255,0.1);
-      --danger: #ef4444;
-      --success: #22c55e;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Ramadan</title>
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: 265px 1fr;
-      min-height: 100vh;
-      background: var(--bg);
-    }
-    aside {
-      background: #020617;
-      border-right: 1px solid var(--border);
-      min-height: 100vh;
-      padding: 0 0 20px 0;
-      position: sticky;
-      top: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 100;
-    }
-    .brand {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--gold);
-      letter-spacing: 1px;
-      padding: 26px 30px 14px 30px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-group {
-      margin: 10px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 0 20px;
-    }
-    .nav-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin: 15px 0 3px 8px; letter-spacing: 1.5px;
-      font-weight: 700;
-    }
-    .nav-item {
-      padding: 11px 18px;
-      border-radius: 8px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .25s, color .18s;
-    }
-    .nav-item.active, .nav-item:hover {
-      background: rgba(16,185,129,0.15);
-      color: var(--primary);
-      font-weight: 700;
-    }
-    .btn-logout {
-      margin: 15px 20px 0 20px;
-      padding: 12px;
-      border-radius: 8px;
-      background: none;
-      color: #fca5a5;
-      border: 1px solid rgba(239,68,68,0.3);
-      cursor: pointer;
-      font-weight: 700;
-      text-align: center;
-      transition: 0.2s;
-    }
-    .btn-logout:hover { background: var(--danger); color: #fff; border-color: var(--danger);}
-    main {
-      padding: 0;
-      min-height: 100vh;
-      overflow: hidden;
-      position: relative;
-      transition: background 0.2s;
-    }
-    .page {
-      display: none;
-    }
-    .page.active {
-      display: block;
-      animation: fadeIn .5s;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(16px);}
-      to {opacity: 1; transform: none;}
-    }
-    h1 {
-      margin: 0 0 22px 0;
-      font-size: 23px;
-      font-weight: 700;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-      letter-spacing: 0.5px;
-      background: transparent;
-    }
-    /* Cards */
-    .card-row {
-      display: flex;
-      gap: 22px;
-      flex-wrap: wrap;
-    }
-    .stat-card {
-      flex:1;
-      min-width: 170px;
-      background: var(--card);
-      border-radius: 13px;
-      border: 1px solid var(--border);
-      padding: 22px 22px 17px 22px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: box-shadow .2s;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat-card .stat-label {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 600;
-      letter-spacing: .2px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-    .stat-card .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 1px;
-      margin-bottom: 0;
-    }
-    .stat-card .stat-extra {
-      font-size: 12px;
-      margin-top: 2px;
-    }
-    .stat-green { border-left: 6px solid var(--primary); }
-    .stat-gold { border-left: 6px solid var(--gold);}
-    .stat-blue { border-left: 6px solid #38bdf8;}
-    .stat-red { border-left: 6px solid var(--danger);}
-    /* Charts */
-    .charts-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 22px;
-      margin-bottom: 22px;
-    }
-    .chart-card {
-      flex: 1 0 250px;
-      min-width: 280px;
-      background: var(--card);
-      border-radius: 13px;
-      border: 1px solid var(--border);
-      padding: 23px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.07);
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .chart-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 7px;
-      letter-spacing: .2px;
-    }
-    .rankings-row {
-      display: flex;
-      flex-wrap:wrap;
-      gap:18px;
-      margin-top:10px;
-    }
-    .ranking-card {
-      background: var(--card);
-      border:1px solid var(--border);
-      border-radius: 13px;
-      flex:1 0 295px;
-      min-width: 260px;
-      padding: 17px 22px;
-    }
-    .ranking-title {
-      font-size:14px;
-      color: var(--gold);
-      font-weight:700;
-      margin-bottom:9px;
-    }
-    .ranking-list {
-      list-style:none; padding:0; margin:0;
-    }
-    .ranking-list li {
-      display:flex;justify-content:space-between;
-      align-items:center;
-      padding:7px 0;
-      border-bottom:1px dashed var(--border);
-      font-size:14px;
-      color: var(--text-muted);
-    }
-    .ranking-list li:last-child{border-bottom:none;}
-    .badge-green {background: var(--primary); color:#fff; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; margin-left:9px}
-    .badge-red {background: var(--danger); color:#fff; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; margin-left:9px}
-    .badge-gold {background: var(--gold); color:#000; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; margin-left:9px}
-    /* Utility & Button */
-    .btn {
-      padding:8px 18px;
-      border-radius:6px;
-      border:none;
-      font-size:14px;
-      font-weight:600;
-      color:#fff;
-      background:var(--primary);
-      cursor:pointer;
-      transition:.12s;
-      display:inline-flex;align-items:center;gap:5px;
-    }
-    .btn-gold {background:var(--gold);color:#000;}
-    .btn-danger {background:var(--danger);}
-    .btn:disabled{opacity:.6;cursor:default;}
-    /* Table Styles Shared */
-    .table-wrap {
-      overflow-x:auto;
-    }
-    table {
-      width:100%;
-      border-collapse: collapse;
-      margin: 10px 0 0 0;
-      min-width:600px;
-      font-size:14px;
-      background: transparent;
-    }
-    th, td {padding:11px 12px; text-align:left; border-bottom:1px solid var(--border);}
-    th {color: var(--text-muted); font-size: 12px; text-transform: uppercase; font-weight:700; letter-spacing:1px;}
-    tr:not(.no-hover):hover {background:rgba(255,255,255,0.03);}
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    /* Custom components */
-    .section-title {
-      font-size:18px;
-      font-weight:700;
-      margin:25px 0 12px 0;
-      border-left:4px solid var(--primary);
-      padding-left:10px;
-      color:var(--primary);
-      background: none;
-    }
-    /* Pagination */
-    .pagination {
-      display: flex; gap: 7px; align-items: center; justify-content: flex-end;
-      margin-top: 10px;
-    }
-    .page-btn {
-      background: var(--card);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size:13px;
-      padding:4px 12px;
-      cursor:pointer;
-      transition:.15s;
-    }
-    .page-btn.active, .page-btn:hover {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary-dark);
-    }
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 60px 18px 40px 18px;
-      color: var(--text-muted);
-    }
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:#0f172a;
+  color:#fff;
+}
 
-    /* Certificate generator base style (reused from your style) */
-    /* ... (sertifikat print style here, same as above, trimmed for brevity) ... */
-    /* Responsive */
-    @media (max-width: 900px) {
-      .card-row,.charts-row,.rankings-row{flex-direction:column;}
-      .layout {grid-template-columns: 1fr;}
-      aside {width: 100vw;min-width: 0;}
-    }
-    @media (max-width:599px){
-      .table-wrap{min-width: 100vw;}
-      .card{padding:16px;}
-    }
-    .footer-fixed {
-      position: fixed; bottom: 0; right: 0; left:265px;
-      background: #020617; border-top: 1px solid var(--border); padding: 10px 0;
-      text-align: center; color: var(--text-muted); font-size: 12px; z-index: 90;
-      box-shadow:0 -4px 10px rgba(0,0,0,0.18);
-    }
-    .footer-fixed a {color:var(--gold);font-weight:700;text-decoration:none;}
-    .footer-fixed a:hover{color:var(--primary);}
-    @media (max-width:800px) {.footer-fixed{left:0;width:100vw;}}
-  </style>
+.container{
+  padding:30px;
+  max-width:1300px;
+  margin:auto;
+}
+
+h1{
+  margin-bottom:20px;
+  color:#facc15;
+}
+
+.btn{
+  padding:10px 14px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-gold{
+  background:#facc15;
+  color:#000;
+}
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:25px;
+}
+
+.stat-card{
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.4);
+}
+
+.stat-green{background:#064e3b;}
+.stat-gold{background:#854d0e;}
+.stat-blue{background:#1e3a8a;}
+
+.stat-label{
+  font-size:14px;
+  opacity:0.8;
+}
+
+.stat-value{
+  font-size:26px;
+  font-weight:bold;
+  margin-top:8px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:14px;
+}
+
+ul{
+  list-style:none;
+  padding:0;
+}
+
+li{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.badge-green{
+  background:#16a34a;
+  padding:5px 10px;
+  border-radius:8px;
+  font-size:12px;
+}
+
+input,select{
+  background:#1e293b;
+  color:#fff;
+  border:1px solid #334155;
+}
+
+#loading-indicator{
+  display:none;
+  margin-bottom:15px;
+}
+</style>
 </head>
+
 <body>
-  <div class="layout">
-    <aside>
-      <div>
-        <div class="brand"><span>🌙</span> E-KAROMAH</div>
-        <div class="nav-group">
-          <div class="nav-label">Utama</div>
-          <div class="nav-item active" data-target="dashboard"><i class='bx bx-bar-chart'></i> Dashboard</div>
-          <div class="nav-label">Manajemen</div>
-          <div class="nav-item" data-target="siswa"><i class='bx bx-group'></i> Data Siswa</div>
-          <div class="nav-item" data-target="pembimbing"><i class='bx bx-user-voice'></i> Data Pembimbing</div>
-          <div class="nav-item" data-target="kelompok"><i class='bx bx-grid'></i> Kelompok</div>
-          <div class="nav-label">Operasional</div>
-          <div class="nav-item" data-target="penilaian"><i class='bx bx-notepad'></i> Penilaian</div>
-          <div class="nav-item" data-target="laporan"><i class='bx bx-file-find'></i> Laporan</div>
-          <div class="nav-item" data-target="sertifikat"><i class='bx bx-award'></i> Sertifikat</div>
-        </div>
-      </div>
-      <button class="btn-logout" onclick="logout()"><i class='bx bx-log-out'></i> Logout</button>
-    </aside>
-    <main>
-      <!-- Dashboard Page -->
-      <section id="dashboard" class="page active">
-        <h1>Dashboard Ramadan</h1>
-        <div class="card-row" id="dashboard-stats">
-          <!-- Stat cards, filled by JS -->
-        </div>
-        <div class="charts-row">
-          <div class="chart-card">
-            <div class="chart-label">Siswa vs Pembimbing</div>
-            <canvas id="chart-doughnut"></canvas>
-          </div>
-          <div class="chart-card">
-            <div class="chart-label">Laporan per Kelompok</div>
-            <canvas id="chart-bar"></canvas>
-          </div>
-          <div class="chart-card">
-            <div class="chart-label">Tren Laporan Harian</div>
-            <canvas id="chart-line"></canvas>
-          </div>
-        </div>
-        <div class="rankings-row">
-          <div class="ranking-card">
-            <div class="ranking-title">Top 5 Siswa Teraktif</div>
-            <ul class="ranking-list" id="ranking-top-siswa"></ul>
-          </div>
-          <div class="ranking-card">
-            <div class="ranking-title">Top 3 Kelompok Teraktif</div>
-            <ul class="ranking-list" id="ranking-top-group"></ul>
-          </div>
-          <div class="ranking-card">
-            <div class="ranking-title">Siswa Belum Mengumpulkan</div>
-            <ul class="ranking-list" id="ranking-belum-lapor"></ul>
-          </div>
-        </div>
-      </section>
-      <!-- Data Siswa Page -->
-      <section id="siswa" class="page">
-        <h1>Manajemen Data Siswa</h1>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
-          <input type="text" id="search-siswa" placeholder="Cari siswa..." style="background:#151f30;border:1px solid var(--border);border-radius:6px;padding:7px 12px;min-width:140px;color:var(--text);font-size:13px;">
-          <select id="filter-siswa-kelompok" style="background:#151f30;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;"><option value="">Semua Kelompok</option></select>
-        </div>
-        <div class="card">
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Username</th><th>Nama</th><th>Kelompok</th><th>Total Laporan</th><th>Nilai Akhir</th><th>Predikat</th></tr></thead>
-              <tbody id="table-siswa"></tbody>
-            </table>
-          </div>
-          <div class="pagination" id="pagination-siswa"></div>
-        </div>
-      </section>
-      <!-- Data Pembimbing Page -->
-      <section id="pembimbing" class="page">
-        <h1>Manajemen Data Pembimbing</h1>
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <button class="btn btn-gold" onclick="showPembimbingModal('add')"><i class='bx bx-plus'></i> Tambah Pembimbing</button>
-        </div>
-        <div class="card">
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Username</th><th>Nama</th><th>Kelompok</th><th>Aksi</th></tr></thead>
-              <tbody id="table-pembimbing"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      <!-- Kelompok Page -->
-      <section id="kelompok" class="page">
-        <h1>Daftar Kelompok & Status</h1>
-        <div class="card">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Nama Kelompok</th><th>Jumlah Siswa</th><th>Pembimbing</th><th>Status</th></tr>
-              </thead>
-              <tbody id="table-kelompok"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      <!-- Penilaian Page -->
-      <section id="penilaian" class="page">
-        <h1>Input & Monitoring Penilaian</h1>
-        <div class="card" style="margin-bottom:20px;">
-          <div class="section-title">📝 Input Nilai Siswa</div>
-          <form id="form-input-nilai" onsubmit="return submitNilai(event)">
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-              <select id="input-nilai-kelompok" required onchange="renderNilaiSiswaOptions()" style="padding:8px 13px;border-radius:7px;border:1px solid var(--border);color:var(--text);background:#151f30;">
-                <option value="">Pilih Kelompok</option>
-              </select>
-              <select id="input-nilai-siswa" required style="padding:8px 13px;border-radius:7px;border:1px solid var(--border);color:var(--text);background:#151f30;">
-                <option value="">Pilih Siswa</option>
-              </select>
-              <input type="number" id="input-aktif" min="0" max="100" placeholder="Keaktifan (0-100)" style="width:130px;padding:8px 10px;border-radius:7px;background:#151f30;border:1px solid var(--border);color:var(--text);" required>
-              <input type="number" id="input-akhlak" min="0" max="100" placeholder="Akhlak (0-100)" style="width:130px;padding:8px 10px;border-radius:7px;background:#151f30;border:1px solid var(--border);color:var(--text);" required>
-              <input type="number" id="input-laporan" min="0" max="100" placeholder="Laporan (0-100)" style="width:130px;padding:8px 10px;border-radius:7px;background:#151f30;border:1px solid var(--border);color:var(--text);" required>
-            </div>
-            <textarea id="input-catatan" rows="2" placeholder="Catatan pembimbing (opsional)" style="width:100%;border-radius:6px;background:#151f30;border:1px solid var(--border);color:var(--text);padding:10px;"></textarea>
-            <div style="margin-top:9px;"><button class="btn btn-primary" type="submit"><i class='bx bx-save'></i> Simpan Nilai</button></div>
-          </form>
-        </div>
-        <div class="section-title">📊 Monitoring Nilai Per Kelompok</div>
-        <div class="card">
-          <div id="monitoring-nilai" class="table-wrap" style="overflow-x:auto;"></div>
-        </div>
-        <div class="card" style="margin-top:25px;">
-          <div class="section-title">🗒 Catatan/Admin Evaluasi Per Kelompok</div>
-          <div id="admin-evaluasi-area"></div>
-        </div>
-      </section>
-      <!-- Laporan Page -->
-      <section id="laporan" class="page">
-        <h1>Rekapitulasi Laporan</h1>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;">
-          <div>
-            <button class="btn btn-gold" onclick="exportToExcel()"><i class='bx bx-spreadsheet'></i> Export Excel</button>
-            <button class="btn btn-primary" onclick="exportToPDF()"><i class='bx bx-printer'></i> Export PDF</button>
-            <button class="btn" onclick="window.print()"><i class='bx bx-printer'></i> Cetak</button>
-          </div>
-        </div>
-        <div class="card" id="laporan-print">
-          <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>No</th><th>Nama</th><th>Kelompok</th><th>Total Laporan</th>
-                <th>Nilai Akhir</th><th>Predikat</th><th>Status Kelulusan</th>
-              </tr>
-            </thead>
-            <tbody id="laporan-table-body"></tbody>
-          </table>
-          </div>
-        </div>
-      </section>
-      <!-- Sertifikat Page -->
-      <section id="sertifikat" class="page">
-        <h1>Generator Sertifikat</h1>
-        <div class="card">
-          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:18px;">
-            <button class="btn" onclick="fillCertAuto()"><i class='bx bx-magic-wand'></i> Ambil Otomatis</button>
-            <label>
-              <input type="file" id="upload-cert-logo" accept="image/*" style="display:none;" onchange="uploadLogoCert(event)">
-              <span class="btn btn-gold"><i class='bx bx-image'></i> Logo Sekolah</span>
-            </label>
-            <label>
-              <input type="file" id="upload-cert-sign-kepsek" accept="image/*" style="display:none;" onchange="uploadSignCert('kepsek',event)">
-              <span class="btn btn-gold"><i class='bx bx-pencil'></i> TTD Kepsek</span>
-            </label>
-            <label>
-              <input type="file" id="upload-cert-sign-ketua" accept="image/*" style="display:none;" onchange="uploadSignCert('ketua',event)">
-              <span class="btn btn-gold"><i class='bx bx-pencil'></i> TTD Ketua</span>
-            </label>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px;">
-            <select id="sertif-siswa-pilih" style="min-width:180px;padding:7px 13px;border-radius:8px;background:#151f30;color:var(--text);border:1px solid var(--border);"></select>
-            <input type="text" id="sertif-nomor" readonly placeholder="Nomor Sertifikat" style="padding:7px 10px;border-radius:8px;background:#151f30;color:var(--gold);border:1px solid var(--gold);width:220px;">
-            <button class="btn btn-primary" onclick="previewCertificate()"><i class='bx bx-show'></i> Preview</button>
-            <button class="btn btn-gold" onclick="printCertificate()"><i class='bx bx-printer'></i> Cetak</button>
-          </div>
-          <!-- Sertifikat Preview Area -->
-          <div id="certificate-preview" class="print-area" style="display:none;margin-top:24px;"></div>
-        </div>
-      </section>
-      <!-- Loading Indicator -->
-      <div id="loading-indicator" class="loading" style="display:none;">Memuat data...</div>
-    </main>
-  </div>
-  <div class="footer-fixed">
-    <span>&copy; 2025 E-KAROMAH App. Developer <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a></span>
-  </div>
-  <!-- Modals Here (JS) -->
 
-<script src="app-ekaromah.js?v=1.0"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+<div class="container">
+
+<h1><i class='bx bx-moon'></i> Dashboard Ramadan Ultimate</h1>
+
+<div id="loading-indicator">
+  <i class='bx bx-loader bx-spin'></i> Memuat data...
+</div>
+
+<!-- FILTER -->
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
+  <input type="date" id="filter-start" class="btn">
+  <input type="date" id="filter-end" class="btn">
+  <select id="filter-kelompok" class="btn btn-gold">
+    <option value="">Semua Kelompok</option>
+  </select>
+  <button class="btn" onclick="fetchLaporanData()">
+    <i class='bx bx-filter'></i> Terapkan Filter
+  </button>
+</div>
+
+<!-- STAT -->
+<div class="stat-grid" id="dashboard-stats"></div>
+
+<div class="grid-2">
+
+  <div class="card">
+    <h3>Top 5 Siswa Ramadan</h3>
+    <ul id="ranking-top-siswa"></ul>
+  </div>
+
+  <div class="card">
+    <h3>Chart Aktivitas</h3>
+    <canvas id="chartDoughnut"></canvas>
+  </div>
+
+</div>
+
+</div>
+
 <script>
-  // Basic SPA Routing
-  document.querySelectorAll('.nav-item').forEach(n => {
-    n.onclick = function(){
-      document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-      n.classList.add('active');
-      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-      const t = n.getAttribute('data-target');
-      document.getElementById(t).classList.add('active');
-      window.scrollTo(0, 0);
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec";
+
+let chartDoughnut;
+let autoRefreshInterval;
+
+function animateCounter(element,target){
+  let start=0;
+  const duration=800;
+  const step=target/(duration/16);
+  function update(){
+    start+=step;
+    if(start>=target){
+      element.innerText=target;
+    }else{
+      element.innerText=Math.floor(start);
+      requestAnimationFrame(update);
+    }
+  }
+  update();
+}
+
+function hitungAktivitas(item){
+  const aktivitas=[
+    "Sahur_Status","Subuh_Status","Olahraga_Status","Keluarga_Status",
+    "Dzuhur_Status","Pesantren_Status","Ashar_Status","Aksi_Status",
+    "Buka_Status","Magrib_Status","Isya_Status",
+    "Tarawih_Status","Tadarus_Status","Tidur_Status"
+  ];
+  let total=0;
+  aktivitas.forEach(k=>{
+    if(item[k] && item[k].toString().toLowerCase().includes("valid")){
+      total++;
     }
   });
+  return total;
+}
 
-  // Logout (simple)
-  function logout() {
-    if (confirm("Yakin ingin keluar?")) {
-      localStorage.removeItem("user");
-      window.location.href = "index.html";
-    }
-  }
-</script>
-<!-- Modular JS: All heavy logic, fetch, chart, interaksi, validator, localstorage goes in app-ekaromah.js -->
+async function fetchLaporanData(){
 
-  <script>
-  // URL Google Apps Script Anda
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec";
+  const startDate=document.getElementById("filter-start").value;
+  const endDate=document.getElementById("filter-end").value;
+  const filterKelompok=document.getElementById("filter-kelompok").value;
 
-  async function fetchLaporanData() {
-    const loading = document.getElementById('loading-indicator');
-    const tbodyLaporan = document.getElementById('laporan-table-body');
-    const tbodySiswa = document.getElementById('table-siswa');
+  const loading=document.getElementById("loading-indicator");
+  loading.style.display='block';
 
-    if(loading) loading.style.display = 'block';
+  try{
 
-    try {
-      // PERBAIKAN 1: Tambahkan redirect: 'follow' (PENTING untuk Google Script)
-      const response = await fetch(SCRIPT_URL, {
-        method: 'GET',
-        redirect: 'follow' 
+    const response=await fetch(SCRIPT_URL);
+    const raw=await response.json();
+    let dataList=Array.isArray(raw)?raw:(raw.data||[]);
+
+    if(startDate && endDate){
+      dataList=dataList.filter(item=>{
+        const t=item.tanggal||item.Tanggal;
+        if(!t) return false;
+        return t>=startDate && t<=endDate;
       });
-      
-      const data = await response.json(); 
-      
-      // PERBAIKAN 2: Tampilkan data di Console untuk mengintip format aslinya
-      console.log("CEK DATA DARI GOOGLE SCRIPT:", data);
-      
-      const dataList = Array.isArray(data) ? data : (data.data || []);
-
-      // Jika data ternyata kosong
-      if(dataList.length === 0) {
-        console.warn("Data berhasil ditarik, tapi isinya KOSONG. Cek nama sheet atau isinya.");
-      }
-
-      if(tbodyLaporan) {
-        tbodyLaporan.innerHTML = ''; 
-        dataList.forEach((item, index) => {
-          const tr = document.createElement('tr');
-          // PERHATIAN: Perhatikan console.log di Inspect Element untuk mencocokkan ini
-          tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${item.nama || item.Nama || item.NAMA || '-'}</td>
-            <td>${item.kelompok || item.Kelompok || item.KELOMPOK || '-'}</td>
-            <td>${item.total_laporan || item['Total Laporan'] || item.TOTAL_LAPORAN || '0'}</td>
-            <td>${item.nilai_akhir || item['Nilai Akhir'] || item.NILAI_AKHIR || '0'}</td>
-            <td><span class="${getBadgeClass(item.predikat || item.Predikat)}">${item.predikat || item.Predikat || item.PREDIKAT || '-'}</span></td>
-            <td>${item.status_kelulusan || item['Status Kelulusan'] || item.STATUS_KELULUSAN || '-'}</td>
-          `;
-          tbodyLaporan.appendChild(tr);
-        });
-      }
-
-      if(tbodySiswa) {
-        tbodySiswa.innerHTML = '';
-        dataList.forEach((item) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${item.username || item.Username || item.USERNAME || '-'}</td>
-            <td>${item.nama || item.Nama || item.NAMA || '-'}</td>
-            <td>${item.kelompok || item.Kelompok || item.KELOMPOK || '-'}</td>
-            <td>${item.total_laporan || item['Total Laporan'] || '0'}</td>
-            <td>${item.nilai_akhir || item['Nilai Akhir'] || '0'}</td>
-            <td>${item.predikat || item.Predikat || '-'}</td>
-          `;
-          tbodySiswa.appendChild(tr);
-        });
-      }
-
-    } catch (error) {
-      console.error("Error Detail:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal Memuat Data',
-        text: 'Cek Console (F12) untuk melihat detail error.',
-        background: '#1e293b',
-        color: '#f1f5f9'
-      });
-    } finally {
-      if(loading) loading.style.display = 'none';
     }
-  }
 
-  function getBadgeClass(predikat) {
-    if(!predikat) return 'badge-gold';
-    const p = predikat.toString().toLowerCase();
-    if(p.includes('baik') || p.includes('a')) return 'badge-green';
-    if(p.includes('kurang') || p.includes('c')) return 'badge-red';
-    return 'badge-gold';
-  }
+    if(filterKelompok){
+      dataList=dataList.filter(item=>{
+        return (item.kelompok||item.Kelompok)===filterKelompok;
+      });
+    }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    fetchLaporanData();
-  });
+    const siswaMap={};
+    let totalPoinGlobal=0;
+
+    dataList.forEach(item=>{
+      const nama=item.nama||item.Nama||"-";
+      const kelompok=item.kelompok||item.Kelompok||"-";
+
+      const aktivitas=hitungAktivitas(item);
+      const poin=aktivitas*10;
+      totalPoinGlobal+=poin;
+
+      if(!siswaMap[nama]){
+        siswaMap[nama]={nama,kelompok,total_poin:0};
+      }
+
+      siswaMap[nama].total_poin+=poin;
+    });
+
+    const siswaList=Object.values(siswaMap);
+
+    document.getElementById("dashboard-stats").innerHTML=`
+      <div class="stat-card stat-green">
+        <div class="stat-label">Total Siswa Aktif</div>
+        <div class="stat-value" id="counter-siswa">0</div>
+      </div>
+      <div class="stat-card stat-gold">
+        <div class="stat-label">Total Laporan</div>
+        <div class="stat-value" id="counter-laporan">0</div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div class="stat-label">Total Poin Ramadan</div>
+        <div class="stat-value" id="counter-poin">0</div>
+      </div>
+    `;
+
+    animateCounter(document.getElementById("counter-siswa"),siswaList.length);
+    animateCounter(document.getElementById("counter-laporan"),dataList.length);
+    animateCounter(document.getElementById("counter-poin"),totalPoinGlobal);
+
+    const leaderboard=siswaList
+      .sort((a,b)=>b.total_poin-a.total_poin)
+      .slice(0,5);
+
+    document.getElementById("ranking-top-siswa").innerHTML=
+      leaderboard.map((s,i)=>`
+        <li>
+          ${i+1}. ${s.nama}
+          <span class="badge-green">${s.total_poin} poin</span>
+        </li>
+      `).join("");
+
+    if(chartDoughnut) chartDoughnut.destroy();
+    chartDoughnut=new Chart(document.getElementById("chartDoughnut"),{
+      type:'doughnut',
+      data:{
+        labels:["Total Poin"],
+        datasets:[{
+          data:[totalPoinGlobal],
+          backgroundColor:["#facc15"]
+        }]
+      }
+    });
+
+    if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+    autoRefreshInterval=setInterval(fetchLaporanData,30000);
+
+  }catch(err){
+    console.error(err);
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+document.addEventListener("DOMContentLoaded",fetchLaporanData);
 </script>
-  
+
 </body>
 </html>
