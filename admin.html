@@ -551,54 +551,58 @@
   // URL Google Apps Script Anda
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec";
 
-  // Fungsi untuk mengambil data dari Google Script
   async function fetchLaporanData() {
     const loading = document.getElementById('loading-indicator');
     const tbodyLaporan = document.getElementById('laporan-table-body');
     const tbodySiswa = document.getElementById('table-siswa');
 
-    // Tampilkan indikator loading
     if(loading) loading.style.display = 'block';
 
     try {
-      // Fetch data dari URL Apps Script
-      const response = await fetch(SCRIPT_URL);
+      // PERBAIKAN 1: Tambahkan redirect: 'follow' (PENTING untuk Google Script)
+      const response = await fetch(SCRIPT_URL, {
+        method: 'GET',
+        redirect: 'follow' 
+      });
       
-      // Mengubah response menjadi JSON
       const data = await response.json(); 
       
-      // Asumsi: Google Script mengembalikan array of objects. 
-      // Sesuaikan key (seperti data.data) jika JSON dari G-Script dibungkus properti tertentu.
+      // PERBAIKAN 2: Tampilkan data di Console untuk mengintip format aslinya
+      console.log("CEK DATA DARI GOOGLE SCRIPT:", data);
+      
       const dataList = Array.isArray(data) ? data : (data.data || []);
 
-      // 1. Render Tabel Laporan
+      // Jika data ternyata kosong
+      if(dataList.length === 0) {
+        console.warn("Data berhasil ditarik, tapi isinya KOSONG. Cek nama sheet atau isinya.");
+      }
+
       if(tbodyLaporan) {
-        tbodyLaporan.innerHTML = ''; // Kosongkan tabel sebelum diisi
+        tbodyLaporan.innerHTML = ''; 
         dataList.forEach((item, index) => {
           const tr = document.createElement('tr');
-          // PERHATIAN: Sesuaikan item.nama, item.kelompok dll dengan KEY/Header di Google Sheet Anda
+          // PERHATIAN: Perhatikan console.log di Inspect Element untuk mencocokkan ini
           tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${item.nama || item.Nama || '-'}</td>
-            <td>${item.kelompok || item.Kelompok || '-'}</td>
-            <td>${item.total_laporan || item['Total Laporan'] || '0'}</td>
-            <td>${item.nilai_akhir || item['Nilai Akhir'] || '0'}</td>
-            <td><span class="${getBadgeClass(item.predikat || item.Predikat)}">${item.predikat || item.Predikat || '-'}</span></td>
-            <td>${item.status_kelulusan || item['Status Kelulusan'] || '-'}</td>
+            <td>${item.nama || item.Nama || item.NAMA || '-'}</td>
+            <td>${item.kelompok || item.Kelompok || item.KELOMPOK || '-'}</td>
+            <td>${item.total_laporan || item['Total Laporan'] || item.TOTAL_LAPORAN || '0'}</td>
+            <td>${item.nilai_akhir || item['Nilai Akhir'] || item.NILAI_AKHIR || '0'}</td>
+            <td><span class="${getBadgeClass(item.predikat || item.Predikat)}">${item.predikat || item.Predikat || item.PREDIKAT || '-'}</span></td>
+            <td>${item.status_kelulusan || item['Status Kelulusan'] || item.STATUS_KELULUSAN || '-'}</td>
           `;
           tbodyLaporan.appendChild(tr);
         });
       }
 
-      // 2. Render Tabel Siswa (opsional, karena strukturnya mirip)
       if(tbodySiswa) {
         tbodySiswa.innerHTML = '';
         dataList.forEach((item) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${item.username || item.Username || '-'}</td>
-            <td>${item.nama || item.Nama || '-'}</td>
-            <td>${item.kelompok || item.Kelompok || '-'}</td>
+            <td>${item.username || item.Username || item.USERNAME || '-'}</td>
+            <td>${item.nama || item.Nama || item.NAMA || '-'}</td>
+            <td>${item.kelompok || item.Kelompok || item.KELOMPOK || '-'}</td>
             <td>${item.total_laporan || item['Total Laporan'] || '0'}</td>
             <td>${item.nilai_akhir || item['Nilai Akhir'] || '0'}</td>
             <td>${item.predikat || item.Predikat || '-'}</td>
@@ -608,21 +612,19 @@
       }
 
     } catch (error) {
-      console.error("Error saat mengambil data:", error);
+      console.error("Error Detail:", error);
       Swal.fire({
         icon: 'error',
         title: 'Gagal Memuat Data',
-        text: 'Tidak dapat terhubung ke server Google Script.',
+        text: 'Cek Console (F12) untuk melihat detail error.',
         background: '#1e293b',
         color: '#f1f5f9'
       });
     } finally {
-      // Sembunyikan indikator loading
       if(loading) loading.style.display = 'none';
     }
   }
 
-  // Fungsi bantuan untuk warna badge predikat
   function getBadgeClass(predikat) {
     if(!predikat) return 'badge-gold';
     const p = predikat.toString().toLowerCase();
@@ -631,7 +633,6 @@
     return 'badge-gold';
   }
 
-  // Jalankan fetch saat halaman pertama kali dimuat
   document.addEventListener("DOMContentLoaded", () => {
     fetchLaporanData();
   });
