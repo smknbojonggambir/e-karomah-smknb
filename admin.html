@@ -508,9 +508,10 @@ tbody tr:hover {
   </div>
 </div>
 
-// URL SCRIPT GOOGLE KAMU
+// GANTI DENGAN URL DEPLOYMENT BARU KAMU JIKA BERUBAH
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec?action=rekapAdmin";
-let globalData = [];
+
+let dataMaster = { laporan: [], siswa: [], kelompok: [] };
 let chartInstance = null; 
 
 // 1. Navigasi Menu
@@ -530,170 +531,144 @@ function searchTable(tableId, inputId) {
   const rows = document.querySelectorAll(`#${tableId} tbody tr`);
   
   rows.forEach(row => {
-    const textData = row.textContent.toLowerCase();
-    row.style.display = textData.includes(input) ? "" : "none";
+    row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
   });
 }
 
-// 3. Helper Cerdas untuk mencocokkan field dari Google Sheet (TOLERAN TERHADAP NAMA KOLOM)
-function getField(obj, keyword){
-  if(!obj) return "";
-  // Cari nama kolom yang mengandung kata kunci (tidak peduli huruf besar/kecil atau ada spasi)
-  const foundKey = Object.keys(obj).find(k => k.toLowerCase().includes(keyword.toLowerCase()));
-  return foundKey ? obj[foundKey] : "";
-}
-
-// 4. Ambil Data dari API Google Apps Script
+// 3. Ambil Semua Data dari Google Script
 async function loadData(){
   const loadingDiv = document.getElementById("loading-indicator");
-  const loadingText = document.getElementById("loading-text");
   const mainContent = document.getElementById("main-content");
 
   try {
     const res = await fetch(SCRIPT_URL);
-    if (!res.ok) throw new Error("Gagal terhubung ke Google Script");
+    if (!res.ok) throw new Error("Gagal terhubung");
     
     const raw = await res.json();
-    let rawData = Array.isArray(raw) ? raw : (raw.data || raw.result || []);
-
-    // PERBAIKAN: Cek apakah data dari GAS berupa Array 2D (baris dan kolom murni)
-    if (rawData.length > 0 && Array.isArray(rawData[0])) {
-        // Ubah Array 2D menjadi Array of Objects agar mudah dibaca tabel
-        const headers = rawData[0];
-        globalData = rawData.slice(1).map(row => {
-            let obj = {};
-            headers.forEach((header, index) => {
-                obj[header] = row[index] !== undefined ? row[index] : "";
-            });
-            return obj;
-        });
-    } else {
-        // Jika formatnya sudah Array of Objects
-        globalData = rawData;
+    
+    // Simpan data ke variabel global berdasarkan kategorinya
+    if (raw.status === "success") {
+        dataMaster.laporan = raw.laporan || [];
+        dataMaster.siswa = raw.siswa || [];
+        dataMaster.kelompok = raw.kelompok || [];
     }
 
+    // Render semua komponen
     renderDashboard();
-    renderTable(); 
+    renderTableLaporan();
+    renderTableSiswa(); 
     
-    // Sembunyikan loading, tampilkan konten
     loadingDiv.classList.add("hidden");
     mainContent.classList.remove("hidden");
 
   } catch (error) {
-    console.error("Fetch Error:", error);
+    console.error("Error:", error);
+    document.getElementById("loading-text").innerText = "Gagal memuat data. Cek console log.";
     document.querySelector(".spinner").style.display = "none";
-    loadingText.innerText = "Gagal memuat data. Pastikan URL Web App Google Script benar dan datanya tidak kosong.";
-    loadingText.style.color = "#ef4444"; 
   }
 }
 
-// 5. Render Dashboard & Chart
+// 4. Render Dashboard
 function renderDashboard(){
-  if (globalData.length === 0) return;
-
-  const siswaSet = new Set();
-  let totalNilai = 0;
-  let countNilai = 0;
+  const laporan = dataMaster.laporan;
+  let totalNilai = 0, countNilai = 0;
   const ranking = {};
 
-  globalData.forEach(item => {
-    // Menggunakan getField agar lebih fleksibel mencari kolom "nama" dan "nilai"
-    const nama = getField(item, "nama"); 
-    const nilaiRaw = getField(item, "nilai");
-    const nilai = Number(nilaiRaw) || 0;
+  laporan.forEach(item => {
+    const nama = item.nama || item.nama_siswa; 
+    const nilai = Number(item.nilai_pembimbing) || 0;
     
     if (nama) {
-        siswaSet.add(nama);
         if(!ranking[nama]) ranking[nama] = 0;
         ranking[nama] += nilai;
     }
-    
-    if(nilaiRaw !== "") {
+    if(item.nilai_pembimbing !== undefined && item.nilai_pembimbing !== "") {
         totalNilai += nilai;
         countNilai++;
     }
   });
 
-  document.getElementById("totalSiswa").innerText = siswaSet.size;
-  document.getElementById("totalLaporan").innerText = globalData.length;
-  // Hitung rata-rata hanya dari data yang memiliki nilai
+  // Karena data siswa sudah diambil langsung dari sheet USERS, kita hitung dari sana
+  const siswaAktif = dataMaster.siswa.filter(s => s.role !== 'admin' && s.role !== 'pembimbing');
+
+  document.getElementById("totalSiswa").innerText = siswaAktif.length;
+  document.getElementById("totalLaporan").innerText = laporan.length;
   document.getElementById("rataNilai").innerText = countNilai ? (totalNilai / countNilai).toFixed(1) : 0;
 
-  const topData = Object.entries(ranking)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
-  const labels = topData.map(d => d[0]); 
-  const dataPoints = topData.map(d => d[1]);
-
-  renderChart(labels, dataPoints);
+  const topData = Object.entries(ranking).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  renderChart(topData.map(d => d[0]), topData.map(d => d[1]));
 }
 
-// 6. Fungsi Render Chart.js
+// 5. Render Chart
 function renderChart(labels, data) {
   const ctx = document.getElementById('rankingChart').getContext('2d');
-  
   if(chartInstance) chartInstance.destroy();
-
-  Chart.defaults.color = '#94a3b8';
-  Chart.defaults.font.family = "'Segoe UI', sans-serif";
-
   chartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Total Nilai Terkumpul',
-        data: data,
-        backgroundColor: 'rgba(250, 204, 21, 0.8)',
-        borderColor: '#facc15',
-        borderWidth: 1,
-        borderRadius: 6
+        label: 'Total Nilai Terkumpul', data: data,
+        backgroundColor: '#facc15', borderRadius: 6
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true, grid: { color: '#334155' } },
-        x: { grid: { display: false } }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
+    options: { responsive: true, maintainAspectRatio: false }
   });
 }
 
-// 7. Render Tabel Dinamis (Laporan)
-function renderTable(){
+// 6. Render Laporan
+function renderTableLaporan(){
   const thead = document.querySelector("#tableLaporan thead");
   const tbody = document.querySelector("#tableLaporan tbody");
+  const data = dataMaster.laporan;
   
-  if (globalData.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center; padding: 20px;'>Data laporan kosong atau tidak ditemukan.</td></tr>";
-      thead.innerHTML = "";
+  if (data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center;'>Belum ada laporan.</td></tr>";
       return;
   }
 
-  // Ambil header dari keys object pertama
-  const headers = Object.keys(globalData[0]);
+  const headers = Object.keys(data[0]).filter(h => h !== 'id_baris');
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`).join("") + "</tr>";
 
-  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join("") + "</tr>";
-
-  tbody.innerHTML = globalData.map(row => 
+  tbody.innerHTML = data.map(row => 
     "<tr>" + headers.map(h => {
       let val = row[h];
-      // Format tanggal jika terdeteksi format ISO
-      if(typeof val === 'string' && val.includes("T") && val.includes("Z") && val.length > 15) {
+      if(typeof val === 'string' && val.includes("T") && val.includes("Z")) {
          try { val = new Date(val).toLocaleDateString('id-ID'); } catch(e){}
       }
-      return `<td>${val !== undefined && val !== null ? val : '-'}</td>`;
+      return `<td>${val || '-'}</td>`;
     }).join("") + "</tr>"
   ).join("");
 }
 
-// Eksekusi load data saat halaman siap
+// 7. Render Data Siswa
+function renderTableSiswa() {
+  const tbody = document.querySelector("#tableSiswa tbody");
+  const data = dataMaster.siswa;
+  
+  // Saring hanya yang role-nya bukan admin/pembimbing (asumsi role siswa kosong atau 'siswa')
+  const siswaSaja = data.filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
+
+  if (siswaSaja.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data siswa.</td></tr>";
+      return;
+  }
+
+  // Asumsi header sheet USERS: username (sebagai NIS), nama, kelompok
+  tbody.innerHTML = siswaSaja.map(row => `
+    <tr>
+      <td>${row.username || '-'}</td>
+      <td>${row.nama || '-'}</td>
+      <td>-</td> <td>${row.kelompok || '-'}</td>
+      <td><span class="badge badge-active">Aktif</span></td>
+      <td class="action-buttons">
+          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+      </td>
+    </tr>
+  `).join("");
+}
+
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
