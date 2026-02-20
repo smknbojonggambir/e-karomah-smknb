@@ -158,20 +158,26 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pb
 let chartDoughnut;
 let autoRefreshInterval;
 
-function animateCounter(element,target){
+function getField(obj, ...keys){
+  for(const k of keys){
+    if(obj[k] !== undefined) return obj[k];
+  }
+  return "";
+}
+
+function animateCounter(el,target){
+  if(!el) return;
   let start=0;
-  const duration=800;
-  const step=target/(duration/16);
-  function update(){
+  const step=Math.max(1,Math.floor(target/30));
+  const interval=setInterval(()=>{
     start+=step;
     if(start>=target){
-      element.innerText=target;
+      el.innerText=target;
+      clearInterval(interval);
     }else{
-      element.innerText=Math.floor(start);
-      requestAnimationFrame(update);
+      el.innerText=start;
     }
-  }
-  update();
+  },20);
 }
 
 function hitungAktivitas(item){
@@ -192,53 +198,61 @@ function hitungAktivitas(item){
 
 async function fetchLaporanData(){
 
-  const startDate=document.getElementById("filter-start").value;
-  const endDate=document.getElementById("filter-end").value;
-  const filterKelompok=document.getElementById("filter-kelompok").value;
-
   const loading=document.getElementById("loading-indicator");
-  loading.style.display='block';
+  if(loading) loading.style.display='block';
 
   try{
 
-    const response=await fetch(SCRIPT_URL);
-    const raw=await response.json();
-    let dataList=Array.isArray(raw)?raw:(raw.data||[]);
+    const res=await fetch(SCRIPT_URL+"?action=getAll");
+    const raw=await res.json();
 
-    if(startDate && endDate){
-      dataList=dataList.filter(item=>{
-        const t=item.tanggal||item.Tanggal;
-        if(!t) return false;
-        return t>=startDate && t<=endDate;
-      });
+    let dataList=[];
+
+    if(Array.isArray(raw)){
+      dataList=raw;
+    }else if(raw.data){
+      dataList=raw.data;
+    }else if(raw.result){
+      dataList=raw.result;
     }
 
-    if(filterKelompok){
-      dataList=dataList.filter(item=>{
-        return (item.kelompok||item.Kelompok)===filterKelompok;
-      });
+    if(!Array.isArray(dataList) || dataList.length===0){
+      document.getElementById("dashboard-stats").innerHTML="<p>Tidak ada data ditemukan.</p>";
+      return;
     }
 
     const siswaMap={};
+    const kelompokSet=new Set();
     let totalPoinGlobal=0;
 
     dataList.forEach(item=>{
-      const nama=item.nama||item.Nama||"-";
-      const kelompok=item.kelompok||item.Kelompok||"-";
+
+      const nama=getField(item,"nama","Nama");
+      const kelompok=getField(item,"kelompok","Kelompok");
+
+      if(kelompok) kelompokSet.add(kelompok);
 
       const aktivitas=hitungAktivitas(item);
       const poin=aktivitas*10;
+
       totalPoinGlobal+=poin;
 
       if(!siswaMap[nama]){
-        siswaMap[nama]={nama,kelompok,total_poin:0};
+        siswaMap[nama]={
+          nama,
+          kelompok,
+          total_poin:0,
+          total_laporan:0
+        };
       }
 
       siswaMap[nama].total_poin+=poin;
+      siswaMap[nama].total_laporan++;
     });
 
     const siswaList=Object.values(siswaMap);
 
+    // ================= STAT =================
     document.getElementById("dashboard-stats").innerHTML=`
       <div class="stat-card stat-green">
         <div class="stat-label">Total Siswa Aktif</div>
@@ -258,6 +272,16 @@ async function fetchLaporanData(){
     animateCounter(document.getElementById("counter-laporan"),dataList.length);
     animateCounter(document.getElementById("counter-poin"),totalPoinGlobal);
 
+    // ================= DROPDOWN KELOMPOK =================
+    const dropdown=document.getElementById("filter-kelompok");
+    if(dropdown){
+      dropdown.innerHTML="<option value=''>Semua Kelompok</option>";
+      kelompokSet.forEach(k=>{
+        dropdown.innerHTML+=`<option value="${k}">${k}</option>`;
+      });
+    }
+
+    // ================= LEADERBOARD =================
     const leaderboard=siswaList
       .sort((a,b)=>b.total_poin-a.total_poin)
       .slice(0,5);
@@ -270,11 +294,12 @@ async function fetchLaporanData(){
         </li>
       `).join("");
 
+    // ================= CHART =================
     if(chartDoughnut) chartDoughnut.destroy();
     chartDoughnut=new Chart(document.getElementById("chartDoughnut"),{
       type:'doughnut',
       data:{
-        labels:["Total Poin"],
+        labels:["Total Poin Ramadan"],
         datasets:[{
           data:[totalPoinGlobal],
           backgroundColor:["#facc15"]
@@ -282,13 +307,15 @@ async function fetchLaporanData(){
       }
     });
 
+    // ================= AUTO REFRESH =================
     if(autoRefreshInterval) clearInterval(autoRefreshInterval);
     autoRefreshInterval=setInterval(fetchLaporanData,30000);
 
   }catch(err){
-    console.error(err);
+    console.error("ERROR:",err);
+    document.getElementById("dashboard-stats").innerHTML="<p>Gagal mengambil data.</p>";
   }finally{
-    loading.style.display='none';
+    if(loading) loading.style.display='none';
   }
 }
 
