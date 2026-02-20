@@ -277,16 +277,25 @@ function hitungAktivitas(item){
 }
 
 // Fetch Data dari API
+// Fetch Data dari API
 async function loadData(){
   const loading = document.getElementById("loading-indicator");
   loading.style.display = "block";
   loading.innerText = "Memuat data dari server...";
 
   try {
-    const res = await fetch(SCRIPT_URL);
-    if (!res.ok) throw new Error("Jaringan bermasalah");
+    // Menambahkan parameter redirect dan cors
+    const res = await fetch(SCRIPT_URL, {
+      method: 'GET',
+      mode: 'cors',
+      redirect: 'follow'
+    });
     
-    const raw = await res.json();
+    // Baca sebagai teks dulu untuk mencegah error JSON parse
+    const rawText = await res.text();
+    
+    // Coba jadikan JSON
+    const raw = JSON.parse(rawText);
     
     if (Array.isArray(raw)) globalData = raw;
     else if (raw.data) globalData = raw.data;
@@ -295,11 +304,11 @@ async function loadData(){
     renderDashboard();
     renderTable();
     
-    loading.style.display = "none"; // Sembunyikan loading jika sukses
+    loading.style.display = "none"; 
   } catch (error) {
-    console.error("Gagal mengambil data:", error);
-    loading.innerText = "Gagal memuat data. Periksa koneksi atau URL script Anda.";
-    loading.style.color = "#ef4444"; // Warna merah untuk error
+    console.error("Detail Error:", error);
+    loading.innerText = "Gagal memuat data. Tekan F12 lalu cek tab Console untuk melihat detail error.";
+    loading.style.color = "#ef4444"; 
   }
 }
 
