@@ -195,15 +195,41 @@ body {
 }
 
 .btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 6px 10px;
+}
+
+.btn-danger:hover {
   background: #ef4444;
   color: white;
-  padding: 5px 10px;
 }
 
 .btn-info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  padding: 6px 10px;
+}
+
+.btn-info:hover {
   background: #3b82f6;
   color: white;
-  padding: 5px 10px;
+}
+
+.btn-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  padding: 6px 10px;
+}
+
+.btn-success:hover {
+  background: #22c55e;
+  color: white;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 /* --- TABLE & SEARCH --- */
@@ -276,10 +302,17 @@ tbody tr:hover {
   background: #273549;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 5px;
+/* Status Badges */
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
 }
+
+.badge-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.badge-pending { background: rgba(250, 204, 21, 0.1); color: #facc15; }
+.badge-done { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
 
 /* --- UTILITIES & LOADING --- */
 .hidden { display: none !important; }
@@ -397,9 +430,9 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" id="searchInput" onkeyup="searchTable('tableLaporan', 'searchInput')" placeholder="Cari laporan...">
+              <input type="text" id="searchLaporan" onkeyup="searchTable('tableLaporan', 'searchLaporan')" placeholder="Cari laporan...">
             </div>
-            <button class="btn btn-primary"><i class='bx bx-export'></i> Export Excel</button>
+            <button class="btn btn-success"><i class='bx bx-export'></i> Export Excel</button>
           </div>
           <div class="table-wrapper">
             <table id="tableLaporan">
@@ -424,6 +457,7 @@ tbody tr:hover {
                     <label style="display:block; margin-bottom:5px; font-size:13px;">Status Program</label>
                     <select style="width:100%; padding:10px; border-radius:5px; background:var(--bg-main); border:1px solid var(--border-color); color:white;">
                         <option>Aktif</option>
+                        <option>Persiapan</option>
                         <option>Selesai</option>
                     </select>
                 </div>
@@ -438,18 +472,39 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" id="searchSiswa" onkeyup="searchTable('tableSiswa', 'searchSiswa')" placeholder="Cari nama siswa...">
+              <input type="text" id="searchSiswa" onkeyup="searchTable('tableSiswa', 'searchSiswa')" placeholder="Cari nama atau NIS...">
             </div>
             <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Siswa</button>
           </div>
           <div class="table-wrapper">
             <table id="tableSiswa">
               <thead>
-                  <tr><th>NIS</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Aksi</th></tr>
+                  <tr><th>NIS</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Status</th><th>Aksi</th></tr>
               </thead>
               <tbody>
                   <tr>
-                      <td colspan="5" style="text-align: center; color: var(--text-muted);">Data siswa akan ditarik dari server...</td>
+                      <td>100123</td><td>Ahmad Fadhil</td><td>X-MIPA 1</td><td>Abu Bakar</td>
+                      <td><span class="badge badge-active">Aktif</span></td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>100124</td><td>Siti Aisyah</td><td>X-IPS 2</td><td>Khadijah</td>
+                      <td><span class="badge badge-active">Aktif</span></td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>100125</td><td>Budi Santoso</td><td>XI-MIPA 3</td><td>Umar bin Khattab</td>
+                      <td><span class="badge badge-pending">Nonaktif</span></td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
                   </tr>
               </tbody>
             </table>
@@ -463,18 +518,29 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" placeholder="Cari pembimbing...">
+              <input type="text" id="searchPembimbing" onkeyup="searchTable('tablePembimbing', 'searchPembimbing')" placeholder="Cari pembimbing...">
             </div>
             <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Pembimbing</button>
           </div>
           <div class="table-wrapper">
-            <table>
+            <table id="tablePembimbing">
               <thead>
-                  <tr><th>ID</th><th>Nama Pembimbing</th><th>No. HP</th><th>Jumlah Kelompok</th><th>Aksi</th></tr>
+                  <tr><th>ID</th><th>Nama Pembimbing</th><th>No. Whatsapp</th><th>Jumlah Kelompok</th><th>Aksi</th></tr>
               </thead>
               <tbody>
                   <tr>
-                      <td colspan="5" style="text-align: center; color: var(--text-muted);">Data pembimbing akan ditarik dari server...</td>
+                      <td>P-001</td><td>Ust. Hidayatullah, S.Pd.I</td><td>0812-3456-7890</td><td>2 Kelompok</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>P-002</td><td>Ustz. Fatimah Azzahra</td><td>0857-9876-5432</td><td>1 Kelompok</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
                   </tr>
               </tbody>
             </table>
@@ -488,18 +554,29 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" placeholder="Cari kelompok...">
+              <input type="text" id="searchKelompok" onkeyup="searchTable('tableKelompok', 'searchKelompok')" placeholder="Cari kelompok...">
             </div>
             <button class="btn btn-primary"><i class='bx bx-plus'></i> Buat Kelompok</button>
           </div>
           <div class="table-wrapper">
-            <table>
+            <table id="tableKelompok">
               <thead>
-                  <tr><th>Nama Kelompok</th><th>Pembimbing</th><th>Total Siswa</th><th>Aksi</th></tr>
+                  <tr><th>Kode</th><th>Nama Kelompok</th><th>Pembimbing</th><th>Total Siswa</th><th>Aksi</th></tr>
               </thead>
               <tbody>
                   <tr>
-                      <td colspan="4" style="text-align: center; color: var(--text-muted);">Data kelompok akan ditarik dari server...</td>
+                      <td>K-01</td><td>Abu Bakar</td><td>Ust. Hidayatullah, S.Pd.I</td><td>15 Siswa</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-show'></i> Lihat</button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>K-02</td><td>Khadijah</td><td>Ustz. Fatimah Azzahra</td><td>12 Siswa</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-show'></i> Lihat</button>
+                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+                      </td>
                   </tr>
               </tbody>
             </table>
@@ -513,18 +590,36 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" placeholder="Cari jadwal...">
+              <input type="text" id="searchOperasional" onkeyup="searchTable('tableOperasional', 'searchOperasional')" placeholder="Cari kegiatan...">
             </div>
             <button class="btn btn-primary"><i class='bx bx-calendar-plus'></i> Tambah Jadwal</button>
           </div>
           <div class="table-wrapper">
-            <table>
+            <table id="tableOperasional">
               <thead>
-                  <tr><th>Tanggal</th><th>Nama Kegiatan</th><th>Penanggung Jawab</th><th>Status</th></tr>
+                  <tr><th>Tanggal</th><th>Nama Kegiatan</th><th>Penanggung Jawab</th><th>Status</th><th>Aksi</th></tr>
               </thead>
               <tbody>
                   <tr>
-                      <td colspan="4" style="text-align: center; color: var(--text-muted);">Jadwal operasional akan ditarik dari server...</td>
+                      <td>1 Ramadhan 1447</td><td>Tarhib Ramadhan & Pawai</td><td>Panitia Inti OSIS</td>
+                      <td><span class="badge badge-done">Selesai</span></td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>15 Ramadhan 1447</td><td>Peringatan Nuzulul Qur'an</td><td>Ekskul Rohis</td>
+                      <td><span class="badge badge-pending">Terjadwal</span></td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>25 Ramadhan 1447</td><td>Buka Bersama Akbar & Baksos</td><td>Seluruh Guru & OSIS</td>
+                      <td><span class="badge badge-pending">Terjadwal</span></td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+                      </td>
                   </tr>
               </tbody>
             </table>
@@ -538,17 +633,33 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" placeholder="Cari siswa/kelompok...">
+              <input type="text" id="searchPenilaian" onkeyup="searchTable('tablePenilaian', 'searchPenilaian')" placeholder="Cari siswa/kelompok...">
             </div>
+            <button class="btn btn-success"><i class='bx bx-export'></i> Unduh Rekap</button>
           </div>
           <div class="table-wrapper">
-            <table>
+            <table id="tablePenilaian">
               <thead>
-                  <tr><th>Nama Siswa</th><th>Kelompok</th><th>Hafalan</th><th>Kehadiran</th><th>Total Nilai</th><th>Aksi</th></tr>
+                  <tr><th>Nama Siswa</th><th>Kelompok</th><th>Hafalan (Rata-rata)</th><th>Kehadiran</th><th>Total Poin</th><th>Aksi</th></tr>
               </thead>
               <tbody>
                   <tr>
-                      <td colspan="6" style="text-align: center; color: var(--text-muted);">Data penilaian akan ditarik dari server...</td>
+                      <td>Ahmad Fadhil</td><td>Abu Bakar</td><td>90 (Sangat Baik)</td><td>100% (30/30)</td><td>450 Poin</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-show'></i> Detail</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>Siti Aisyah</td><td>Khadijah</td><td>85 (Baik)</td><td>95% (28/30)</td><td>410 Poin</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-show'></i> Detail</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>Budi Santoso</td><td>Umar bin Khattab</td><td>75 (Cukup)</td><td>80% (24/30)</td><td>360 Poin</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-show'></i> Detail</button>
+                      </td>
                   </tr>
               </tbody>
             </table>
@@ -563,18 +674,39 @@ tbody tr:hover {
           <div class="table-controls">
             <div class="search-bar">
               <i class='bx bx-search'></i>
-              <input type="text" placeholder="Cari siswa...">
+              <input type="text" id="searchSertifikat" onkeyup="searchTable('tableSertifikat', 'searchSertifikat')" placeholder="Cari siswa...">
             </div>
             <button class="btn btn-primary"><i class='bx bx-printer'></i> Cetak Semua (Lulus)</button>
           </div>
           <div class="table-wrapper">
-            <table>
+            <table id="tableSertifikat">
               <thead>
-                  <tr><th>Nama Siswa</th><th>Status Kelulusan</th><th>Predikat</th><th>Sertifikat</th></tr>
+                  <tr><th>Nama Siswa</th><th>Status Kelulusan</th><th>Predikat</th><th>Aksi</th></tr>
               </thead>
               <tbody>
                   <tr>
-                      <td colspan="4" style="text-align: center; color: var(--text-muted);">Data kelulusan akan ditarik dari server...</td>
+                      <td>Ahmad Fadhil</td>
+                      <td><span class="badge badge-active">Lulus</span></td>
+                      <td>Mumtadz (Sangat Baik)</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-printer'></i> Cetak PDF</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>Siti Aisyah</td>
+                      <td><span class="badge badge-active">Lulus</span></td>
+                      <td>Jayyid Jiddan (Baik Sekali)</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info"><i class='bx bx-printer'></i> Cetak PDF</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>Budi Santoso</td>
+                      <td><span class="badge badge-pending">Belum Memenuhi</span></td>
+                      <td>-</td>
+                      <td class="action-buttons">
+                          <button class="btn btn-info" disabled style="opacity: 0.5; cursor: not-allowed;"><i class='bx bx-printer'></i> Cetak PDF</button>
+                      </td>
                   </tr>
               </tbody>
             </table>
