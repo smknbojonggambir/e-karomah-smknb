@@ -185,52 +185,16 @@ body {
   transition: 0.2s;
 }
 
-.btn-primary {
-  background: var(--accent);
-  color: #0f172a;
-}
+.btn-primary { background: var(--accent); color: #0f172a; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 6px 10px; }
+.btn-danger:hover { background: #ef4444; color: white; }
+.btn-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 6px 10px; }
+.btn-info:hover { background: #3b82f6; color: white; }
+.btn-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 6px 10px; }
+.btn-success:hover { background: #22c55e; color: white; }
 
-.btn-primary:hover {
-  background: var(--accent-hover);
-}
-
-.btn-danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  padding: 6px 10px;
-}
-
-.btn-danger:hover {
-  background: #ef4444;
-  color: white;
-}
-
-.btn-info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-  padding: 6px 10px;
-}
-
-.btn-info:hover {
-  background: #3b82f6;
-  color: white;
-}
-
-.btn-success {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-  padding: 6px 10px;
-}
-
-.btn-success:hover {
-  background: #22c55e;
-  color: white;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
+.action-buttons { display: flex; gap: 8px; }
 
 /* --- TABLE & SEARCH --- */
 .table-controls {
@@ -252,67 +216,19 @@ body {
   max-width: 300px;
 }
 
-.search-bar i {
-  color: var(--text-muted);
-  margin-right: 10px;
-}
+.search-bar i { color: var(--text-muted); margin-right: 10px; }
+.search-bar input { background: transparent; border: none; color: var(--text-main); outline: none; width: 100%; }
 
-.search-bar input {
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  outline: none;
-  width: 100%;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-  max-height: 500px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  min-width: 800px;
-}
-
-th, td {
-  border-bottom: 1px solid var(--border-color);
-  padding: 12px 15px;
-  text-align: left;
-}
-
-th {
-  background: var(--bg-hover);
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 11px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-tbody tr {
-  transition: background 0.2s;
-}
-
-tbody tr:hover {
-  background: #273549;
-}
+.table-wrapper { overflow-x: auto; max-height: 500px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; }
+th, td { border-bottom: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
+th { background: var(--bg-hover); color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; position: sticky; top: 0; z-index: 10; }
+tbody tr { transition: background 0.2s; }
+tbody tr:hover { background: #273549; }
 
 /* Status Badges */
-.badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
 .badge-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
-.badge-pending { background: rgba(250, 204, 21, 0.1); color: #facc15; }
-.badge-done { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
 
 /* --- UTILITIES & LOADING --- */
 .hidden { display: none !important; }
@@ -340,11 +256,7 @@ tbody tr:hover {
   100% { transform: rotate(360deg); }
 }
 
-.chart-container {
-  position: relative;
-  height: 300px;
-  width: 100%;
-}
+.chart-container { position: relative; height: 300px; width: 100%; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -389,7 +301,6 @@ tbody tr:hover {
       
       <div id="dashboard" class="page">
         <h2 class="page-title">Dashboard Overview</h2>
-        
         <div class="grid-3">
           <div class="stat-box">
             <div class="stat-icon"><i class='bx bx-user'></i></div>
@@ -413,7 +324,6 @@ tbody tr:hover {
             </div>
           </div>
         </div>
-
         <div class="card" style="margin-top: 20px;">
           <div class="card-header">
             <h3>Top 5 Siswa (Berdasarkan Nilai)</h3>
@@ -479,46 +389,82 @@ tbody tr:hover {
           <div class="table-wrapper">
             <table id="tableSiswa">
               <thead>
-                  <tr><th>NIS</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Status</th><th>Aksi</th></tr>
+                  <tr><th>NIS / Username</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Status</th><th>Aksi</th></tr>
               </thead>
-              <tbody>
-                  <tr>
-                      <td>100123</td><td>Ahmad Fadhil</td><td>X-MIPA 1</td><td>Abu Bakar</td>
-                      <td><span class="badge badge-active">Aktif</span></td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>100124</td><td>Siti Aisyah</td><td>X-IPS 2</td><td>Khadijah</td>
-                      <td><span class="badge badge-active">Aktif</span></td>
-                      <td class="action-buttons">
-                          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
-                          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
-                      </td>
-                  </tr>
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
       </div>
 
+      <div id="pembimbing" class="page hidden">
+        <h2 class="page-title">Data Pembimbing</h2>
+        <div class="card">
+            <p style="text-align:center; color: var(--text-muted); padding: 20px;">Tabel Data Pembimbing akan segera hadir (Dalam Pengembangan).</p>
+        </div>
       </div>
+
+      <div id="kelompok" class="page hidden">
+        <h2 class="page-title">Data Kelompok</h2>
+        <div class="card">
+            <div class="table-controls">
+              <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchKelompok" onkeyup="searchTable('tableKelompok', 'searchKelompok')" placeholder="Cari kelompok...">
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table id="tableKelompok">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+
+      <div id="operasional" class="page hidden">
+        <h2 class="page-title">Operasional</h2>
+        <div class="card">
+             <p style="text-align:center; color: var(--text-muted); padding: 20px;">Menu Operasional (Dalam Pengembangan).</p>
+        </div>
+      </div>
+
+      <div id="penilaian" class="page hidden">
+        <h2 class="page-title">Penilaian</h2>
+        <div class="card">
+             <p style="text-align:center; color: var(--text-muted); padding: 20px;">Menu Penilaian Rekap Akhir (Dalam Pengembangan).</p>
+        </div>
+      </div>
+
+      <div id="sertifikat" class="page hidden">
+        <h2 class="page-title">Sertifikat</h2>
+        <div class="card">
+             <p style="text-align:center; color: var(--text-muted); padding: 20px;">Menu Pembuatan Sertifikat (Dalam Pengembangan).</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
+
 <script>
-// GANTI DENGAN URL DEPLOYMENT BARU KAMU JIKA BERUBAH
-// Pastikan ada tulisan "?action=rekapAdmin" di ujung URL-nya!
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec?action=rekapAdmin"; 
 
 let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
 let chartInstance = null; 
 
-// 1. Navigasi Menu 
+// 1. Navigasi Menu (Sudah Diperbaiki Pencegah Error)
 function showPage(pageId, element){ 
+  const targetPage = document.getElementById(pageId);
+  
+  if (!targetPage) {
+      alert("Halaman belum siap!");
+      return;
+  }
+
   document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden")); 
-  document.getElementById(pageId).classList.remove("hidden"); 
+  targetPage.classList.remove("hidden"); 
+
   if(element) { 
     document.querySelectorAll(".sidebar li").forEach(li => li.classList.remove("active")); 
     element.classList.add("active"); 
@@ -555,12 +501,13 @@ async function loadData(){
     renderDashboard(); 
     renderTableLaporan(); 
     renderTableSiswa(); 
+    renderTableKelompok(); // Memanggil fungsi render tabel kelompok
     
     loadingDiv.classList.add("hidden"); 
     mainContent.classList.remove("hidden"); 
   } catch (error) { 
     console.error("Error:", error); 
-    document.getElementById("loading-text").innerText = "Gagal memuat data. Cek URL Deployment dan pastikan '?action=rekapAdmin' sudah ditambahkan."; 
+    document.getElementById("loading-text").innerText = "Gagal memuat data. Pastikan link Google Script benar."; 
     document.querySelector(".spinner").style.display = "none"; 
   } 
 } 
@@ -585,7 +532,6 @@ function renderDashboard(){
     } 
   }); 
   
-  // Karena data siswa sudah diambil langsung dari sheet USERS, kita hitung dari sana 
   const siswaAktif = dataMaster.siswa.filter(s => s.role !== 'admin' && s.role !== 'pembimbing'); 
   
   document.getElementById("totalSiswa").innerText = siswaAktif.length; 
@@ -643,7 +589,6 @@ function renderTableSiswa() {
   const tbody = document.querySelector("#tableSiswa tbody"); 
   const data = dataMaster.siswa; 
   
-  // Saring hanya yang role-nya bukan admin/pembimbing
   const siswaSaja = data.filter(u => u.role !== 'admin' && u.role !== 'pembimbing'); 
   
   if (siswaSaja.length === 0) { 
@@ -665,6 +610,25 @@ function renderTableSiswa() {
     </tr>
   `).join(""); 
 } 
+
+// 8. Render Data Kelompok (Baru Ditambahkan)
+function renderTableKelompok() {
+  const thead = document.querySelector("#tableKelompok thead");
+  const tbody = document.querySelector("#tableKelompok tbody");
+  const data = dataMaster.kelompok;
+  
+  if (data.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center;'>Belum ada data kelompok.</td></tr>";
+    return;
+  }
+  
+  const headers = Object.keys(data[0]).filter(h => h !== 'id_baris'); 
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`).join("") + "</tr>"; 
+
+  tbody.innerHTML = data.map(row => 
+    "<tr>" + headers.map(h => `<td>${row[h] || '-'}</td>`).join("") + "</tr>" 
+  ).join(""); 
+}
 
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
