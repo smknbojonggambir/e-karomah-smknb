@@ -509,165 +509,162 @@ tbody tr:hover {
 </div>
 <script>
 // GANTI DENGAN URL DEPLOYMENT BARU KAMU JIKA BERUBAH
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec";
+// Pastikan ada tulisan "?action=rekapAdmin" di ujung URL-nya!
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec?action=rekapAdmin"; 
 
-let dataMaster = { laporan: [], siswa: [], kelompok: [] };
+let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
 let chartInstance = null; 
 
-// 1. Navigasi Menu
-function showPage(pageId, element){
-  document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden"));
-  document.getElementById(pageId).classList.remove("hidden");
-  
-  if(element) {
-    document.querySelectorAll(".sidebar li").forEach(li => li.classList.remove("active"));
-    element.classList.add("active");
-  }
-}
+// 1. Navigasi Menu 
+function showPage(pageId, element){ 
+  document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden")); 
+  document.getElementById(pageId).classList.remove("hidden"); 
+  if(element) { 
+    document.querySelectorAll(".sidebar li").forEach(li => li.classList.remove("active")); 
+    element.classList.add("active"); 
+  } 
+} 
 
-// 2. Fitur Pencarian Tabel Universal
-function searchTable(tableId, inputId) {
-  const input = document.getElementById(inputId).value.toLowerCase();
-  const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-  
-  rows.forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
-  });
-}
+// 2. Fitur Pencarian Tabel Universal 
+function searchTable(tableId, inputId) { 
+  const input = document.getElementById(inputId).value.toLowerCase(); 
+  const rows = document.querySelectorAll(`#${tableId} tbody tr`); 
+  rows.forEach(row => { 
+    row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none"; 
+  }); 
+} 
 
-// 3. Ambil Semua Data dari Google Script
-async function loadData(){
-  const loadingDiv = document.getElementById("loading-indicator");
-  const mainContent = document.getElementById("main-content");
-
-  try {
-    const res = await fetch(SCRIPT_URL);
-    if (!res.ok) throw new Error("Gagal terhubung");
+// 3. Ambil Semua Data dari Google Script 
+async function loadData(){ 
+  const loadingDiv = document.getElementById("loading-indicator"); 
+  const mainContent = document.getElementById("main-content"); 
+  try { 
+    const res = await fetch(SCRIPT_URL); 
+    if (!res.ok) throw new Error("Gagal terhubung"); 
     
-    const raw = await res.json();
+    const raw = await res.json(); 
     
-    // Simpan data ke variabel global berdasarkan kategorinya
-    if (raw.status === "success") {
-        dataMaster.laporan = raw.laporan || [];
-        dataMaster.siswa = raw.siswa || [];
-        dataMaster.kelompok = raw.kelompok || [];
-    }
-
-    // Render semua komponen
-    renderDashboard();
-    renderTableLaporan();
+    // Simpan data ke variabel global berdasarkan kategorinya 
+    if (raw.status === "success") { 
+      dataMaster.laporan = raw.laporan || []; 
+      dataMaster.siswa = raw.siswa || []; 
+      dataMaster.kelompok = raw.kelompok || []; 
+    } 
+    
+    // Render semua komponen 
+    renderDashboard(); 
+    renderTableLaporan(); 
     renderTableSiswa(); 
     
-    loadingDiv.classList.add("hidden");
-    mainContent.classList.remove("hidden");
+    loadingDiv.classList.add("hidden"); 
+    mainContent.classList.remove("hidden"); 
+  } catch (error) { 
+    console.error("Error:", error); 
+    document.getElementById("loading-text").innerText = "Gagal memuat data. Cek URL Deployment dan pastikan '?action=rekapAdmin' sudah ditambahkan."; 
+    document.querySelector(".spinner").style.display = "none"; 
+  } 
+} 
 
-  } catch (error) {
-    console.error("Error:", error);
-    document.getElementById("loading-text").innerText = "Gagal memuat data. Cek console log.";
-    document.querySelector(".spinner").style.display = "none";
-  }
-}
-
-// 4. Render Dashboard
-function renderDashboard(){
-  const laporan = dataMaster.laporan;
-  let totalNilai = 0, countNilai = 0;
-  const ranking = {};
-
-  laporan.forEach(item => {
+// 4. Render Dashboard 
+function renderDashboard(){ 
+  const laporan = dataMaster.laporan; 
+  let totalNilai = 0, countNilai = 0; 
+  const ranking = {}; 
+  
+  laporan.forEach(item => { 
     const nama = item.nama || item.nama_siswa; 
-    const nilai = Number(item.nilai_pembimbing) || 0;
+    const nilai = Number(item.nilai_pembimbing) || 0; 
     
-    if (nama) {
-        if(!ranking[nama]) ranking[nama] = 0;
-        ranking[nama] += nilai;
-    }
-    if(item.nilai_pembimbing !== undefined && item.nilai_pembimbing !== "") {
-        totalNilai += nilai;
-        countNilai++;
-    }
-  });
-
-  // Karena data siswa sudah diambil langsung dari sheet USERS, kita hitung dari sana
-  const siswaAktif = dataMaster.siswa.filter(s => s.role !== 'admin' && s.role !== 'pembimbing');
-
-  document.getElementById("totalSiswa").innerText = siswaAktif.length;
-  document.getElementById("totalLaporan").innerText = laporan.length;
-  document.getElementById("rataNilai").innerText = countNilai ? (totalNilai / countNilai).toFixed(1) : 0;
-
-  const topData = Object.entries(ranking).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  renderChart(topData.map(d => d[0]), topData.map(d => d[1]));
-}
-
-// 5. Render Chart
-function renderChart(labels, data) {
-  const ctx = document.getElementById('rankingChart').getContext('2d');
-  if(chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Total Nilai Terkumpul', data: data,
-        backgroundColor: '#facc15', borderRadius: 6
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-}
-
-// 6. Render Laporan
-function renderTableLaporan(){
-  const thead = document.querySelector("#tableLaporan thead");
-  const tbody = document.querySelector("#tableLaporan tbody");
-  const data = dataMaster.laporan;
+    if (nama) { 
+      if(!ranking[nama]) ranking[nama] = 0; 
+      ranking[nama] += nilai; 
+    } 
+    if(item.nilai_pembimbing !== undefined && item.nilai_pembimbing !== "") { 
+      totalNilai += nilai; 
+      countNilai++; 
+    } 
+  }); 
   
-  if (data.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center;'>Belum ada laporan.</td></tr>";
-      return;
-  }
+  // Karena data siswa sudah diambil langsung dari sheet USERS, kita hitung dari sana 
+  const siswaAktif = dataMaster.siswa.filter(s => s.role !== 'admin' && s.role !== 'pembimbing'); 
+  
+  document.getElementById("totalSiswa").innerText = siswaAktif.length; 
+  document.getElementById("totalLaporan").innerText = laporan.length; 
+  document.getElementById("rataNilai").innerText = countNilai ? (totalNilai / countNilai).toFixed(1) : 0; 
+  
+  const topData = Object.entries(ranking).sort((a, b) => b[1] - a[1]).slice(0, 5); 
+  renderChart(topData.map(d => d[0]), topData.map(d => d[1])); 
+} 
 
-  const headers = Object.keys(data[0]).filter(h => h !== 'id_baris');
-  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`).join("") + "</tr>";
+// 5. Render Chart 
+function renderChart(labels, data) { 
+  const ctx = document.getElementById('rankingChart').getContext('2d'); 
+  if(chartInstance) chartInstance.destroy(); 
+  chartInstance = new Chart(ctx, { 
+    type: 'bar', 
+    data: { 
+      labels: labels, 
+      datasets: [{ 
+        label: 'Total Nilai Terkumpul', data: data, 
+        backgroundColor: '#facc15', borderRadius: 6 
+      }] 
+    }, 
+    options: { responsive: true, maintainAspectRatio: false } 
+  }); 
+} 
 
+// 6. Render Laporan 
+function renderTableLaporan(){ 
+  const thead = document.querySelector("#tableLaporan thead"); 
+  const tbody = document.querySelector("#tableLaporan tbody"); 
+  const data = dataMaster.laporan; 
+  
+  if (data.length === 0) { 
+    tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center;'>Belum ada laporan.</td></tr>"; 
+    return; 
+  } 
+  
+  const headers = Object.keys(data[0]).filter(h => h !== 'id_baris'); 
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`).join("") + "</tr>"; 
+  
   tbody.innerHTML = data.map(row => 
-    "<tr>" + headers.map(h => {
-      let val = row[h];
-      if(typeof val === 'string' && val.includes("T") && val.includes("Z")) {
-         try { val = new Date(val).toLocaleDateString('id-ID'); } catch(e){}
-      }
-      return `<td>${val || '-'}</td>`;
-    }).join("") + "</tr>"
-  ).join("");
-}
+    "<tr>" + headers.map(h => { 
+      let val = row[h]; 
+      if(typeof val === 'string' && val.includes("T") && val.includes("Z")) { 
+        try { val = new Date(val).toLocaleDateString('id-ID'); } catch(e){} 
+      } 
+      return `<td>${val || '-'}</td>`; 
+    }).join("") + "</tr>" 
+  ).join(""); 
+} 
 
-// 7. Render Data Siswa
-function renderTableSiswa() {
-  const tbody = document.querySelector("#tableSiswa tbody");
-  const data = dataMaster.siswa;
+// 7. Render Data Siswa 
+function renderTableSiswa() { 
+  const tbody = document.querySelector("#tableSiswa tbody"); 
+  const data = dataMaster.siswa; 
   
-  // Saring hanya yang role-nya bukan admin/pembimbing (asumsi role siswa kosong atau 'siswa')
-  const siswaSaja = data.filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
-
-  if (siswaSaja.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data siswa.</td></tr>";
-      return;
-  }
-
-  // Asumsi header sheet USERS: username (sebagai NIS), nama, kelompok
+  // Saring hanya yang role-nya bukan admin/pembimbing
+  const siswaSaja = data.filter(u => u.role !== 'admin' && u.role !== 'pembimbing'); 
+  
+  if (siswaSaja.length === 0) { 
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data siswa.</td></tr>"; 
+    return; 
+  } 
+  
   tbody.innerHTML = siswaSaja.map(row => `
     <tr>
       <td>${row.username || '-'}</td>
       <td>${row.nama || '-'}</td>
-      <td>-</td> <td>${row.kelompok || '-'}</td>
+      <td>-</td>
+      <td>${row.kelompok || '-'}</td>
       <td><span class="badge badge-active">Aktif</span></td>
       <td class="action-buttons">
           <button class="btn btn-info"><i class='bx bx-edit'></i></button>
           <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
       </td>
     </tr>
-  `).join("");
-}
+  `).join(""); 
+} 
 
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
