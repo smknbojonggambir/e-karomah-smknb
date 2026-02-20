@@ -12,10 +12,14 @@
 /* CSS Reset & Variables */
 :root {
   --bg-main: #0f172a;
+  --bg-sidebar: #1e293b;
   --bg-card: #1e293b;
   --bg-hover: #334155;
   --accent: #facc15;
+  --accent-hover: #eab308;
   --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
 }
 
 body {
@@ -30,18 +34,32 @@ body {
   min-height: 100vh;
 }
 
-/* Sidebar Styling */
+/* --- SIDEBAR STYLING --- */
 .sidebar {
-  width: 240px;
-  background: var(--bg-card);
+  width: 250px;
+  background: var(--bg-sidebar);
   padding: 20px;
   flex-shrink: 0;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
 }
 
-.sidebar h2 {
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--accent);
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.sidebar-header i {
+  font-size: 28px;
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 20px;
 }
 
 .sidebar ul {
@@ -55,122 +73,211 @@ body {
   cursor: pointer;
   border-radius: 8px;
   margin-bottom: 8px;
-  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+
+.sidebar li i {
+  font-size: 20px;
 }
 
 .sidebar li:hover {
   background: var(--bg-hover);
+  color: var(--text-main);
 }
 
-/* Content & Layout */
+.sidebar li.active {
+  background: var(--accent);
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* --- CONTENT & CARDS --- */
 .content {
   flex: 1;
-  padding: 25px;
-  overflow-x: hidden; /* Mencegah horizontal scroll di luar tabel */
+  padding: 30px;
+  overflow-x: hidden;
+}
+
+.page-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
 .card {
   background: var(--bg-card);
-  padding: 20px;
-  border-radius: 14px;
-  margin-bottom: 20px;
+  padding: 20px 25px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-color);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
 .card h3 {
-  margin-top: 0;
-  color: var(--accent);
+  margin: 0;
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .grid-3 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
 }
 
-.stat {
-  font-size: 28px;
-  font-weight: bold;
-  margin-top: 10px;
-  color: var(--accent);
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: var(--bg-hover);
+  padding: 20px;
+  border-radius: 10px;
 }
 
-/* Table Styling */
-.table-wrapper {
-  overflow-x: auto; /* Agar tabel bisa digeser jika kolomnya banyak */
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(250, 204, 21, 0.1);
+  color: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+
+.stat-info span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.stat-info .stat {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-main);
+  margin-top: 5px;
+}
+
+/* --- TABLE & SEARCH --- */
+.table-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 15px;
   width: 100%;
+  max-width: 300px;
+}
+
+.search-bar i {
+  color: var(--text-muted);
+  margin-right: 10px;
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  outline: none;
+  width: 100%;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  max-height: 500px; /* Batas tinggi agar bisa scroll vertikal */
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  min-width: 600px; /* Minimal lebar tabel agar tidak terlalu padat */
+  min-width: 800px;
 }
 
 th, td {
-  border-bottom: 1px solid var(--bg-hover);
-  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 15px;
   text-align: left;
 }
 
 th {
   background: var(--bg-hover);
-  white-space: nowrap;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+tbody tr {
+  transition: background 0.2s;
 }
 
 tbody tr:hover {
   background: #273549;
 }
 
-/* Utilities */
-.hidden {
-  display: none !important;
+/* --- UTILITIES & LOADING --- */
+.hidden { display: none !important; }
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 15px;
 }
 
-select {
-  padding: 8px;
-  border-radius: 6px;
-  background: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--bg-hover);
-  outline: none;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-ul#topRanking {
-  padding-left: 20px;
-  margin: 0;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-ul#topRanking li {
-  margin-bottom: 8px;
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
 }
 
-#loading-indicator {
-  color: var(--accent);
-  font-weight: 600;
-  margin-bottom: 15px;
-}
-
-/* Responsive Mobile */
+/* Responsive */
 @media (max-width: 768px) {
-  .wrapper {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: auto;
-    height: auto;
-    padding: 15px;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-  .sidebar ul {
-    display: flex;
-    gap: 10px;
-  }
-  .sidebar li {
-    margin-bottom: 0;
-  }
+  .wrapper { flex-direction: column; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); padding: 15px; }
+  .sidebar ul { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
+  .sidebar li { white-space: nowrap; margin-bottom: 0; }
+  .content { padding: 15px; }
 }
 </style>
 </head>
@@ -179,140 +286,167 @@ ul#topRanking li {
 
 <div class="wrapper">
   <div class="sidebar">
-    <h2>Ramadan Panel</h2>
-    <ul>
-      <li onclick="showPage('dashboard')">Dashboard</li>
-      <li onclick="showPage('laporan')">Laporan</li>
-      <li onclick="showPage('manajemen')">Manajemen</li>
-      <li onclick="showPage('siswa')">Data Siswa</li>
-      <li onclick="showPage('pembimbing')">Data Pembimbing</li>
-      <li onclick="showPage('kelompok')">Kelompok</li>
-      <li onclick="showPage('operasional')">Operasional</li>
-      <li onclick="showPage('penilaian')">Penilaian</li>
-      <li onclick="showPage('sertifikat')">Sertifikat</li>
+    <div class="sidebar-header">
+      <i class='bx bx-moon'></i>
+      <h2>Ramadan Panel</h2>
+    </div>
+    <ul id="menuList">
+      <li onclick="showPage('dashboard', this)" class="active"><i class='bx bx-grid-alt'></i> Dashboard</li>
+      <li onclick="showPage('laporan', this)"><i class='bx bx-file'></i> Laporan</li>
+      <li onclick="showPage('manajemen', this)"><i class='bx bx-cog'></i> Manajemen</li>
+      <li onclick="showPage('siswa', this)"><i class='bx bx-user'></i> Data Siswa</li>
+      <li onclick="showPage('pembimbing', this)"><i class='bx bx-group'></i> Pembimbing</li>
+      <li onclick="showPage('kelompok', this)"><i class='bx bx-sitemap'></i> Kelompok</li>
+      <li onclick="showPage('operasional', this)"><i class='bx bx-briefcase'></i> Operasional</li>
+      <li onclick="showPage('penilaian', this)"><i class='bx bx-star'></i> Penilaian</li>
+      <li onclick="showPage('sertifikat', this)"><i class='bx bx-certification'></i> Sertifikat</li>
     </ul>
   </div>
 
   <div class="content">
-    <div id="loading-indicator">Memuat data dari server...</div>
+    
+    <div id="loading-indicator" class="loader-container">
+      <div class="spinner"></div>
+      <span id="loading-text" style="color: var(--text-muted);">Memuat data dari server...</span>
+    </div>
 
-    <div id="dashboard" class="page">
-      <div class="card">
-        <h3>Statistik Ramadan</h3>
+    <div id="main-content" class="hidden">
+      
+      <div id="dashboard" class="page">
+        <h2 class="page-title">Dashboard Overview</h2>
+        
         <div class="grid-3">
-          <div>
-            Total Siswa
-            <div class="stat" id="totalSiswa">0</div>
+          <div class="stat-box">
+            <div class="stat-icon"><i class='bx bx-user'></i></div>
+            <div class="stat-info">
+              <span>Total Siswa Aktif</span>
+              <div class="stat" id="totalSiswa">0</div>
+            </div>
           </div>
-          <div>
-            Total Laporan
-            <div class="stat" id="totalLaporan">0</div>
+          <div class="stat-box">
+            <div class="stat-icon"><i class='bx bx-file'></i></div>
+            <div class="stat-info">
+              <span>Total Laporan Masuk</span>
+              <div class="stat" id="totalLaporan">0</div>
+            </div>
           </div>
-          <div>
-            Rata-rata Nilai
-            <div class="stat" id="rataNilai">0</div>
+          <div class="stat-box">
+            <div class="stat-icon"><i class='bx bx-line-chart'></i></div>
+            <div class="stat-info">
+              <span>Rata-rata Nilai</span>
+              <div class="stat" id="rataNilai">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3>Top 5 Siswa (Berdasarkan Nilai)</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="rankingChart"></canvas>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <h3>Top 5 Nilai Tertinggi</h3>
-        <ul id="topRanking"><li>Belum ada data</li></ul>
-      </div>
-    </div>
-
-    <div id="laporan" class="page hidden">
-      <div class="card">
-        <h3>Data Laporan</h3>
-        <div class="table-wrapper">
-          <table id="tableLaporan">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
+      <div id="laporan" class="page hidden">
+        <h2 class="page-title">Data Laporan Harian</h2>
+        <div class="card">
+          <div class="table-controls">
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari nama, kelompok, dll...">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="tableLaporan">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      <div id="manajemen" class="page hidden"><h2 class="page-title">Manajemen</h2><div class="card">Segera hadir...</div></div>
+      <div id="siswa" class="page hidden"><h2 class="page-title">Data Siswa</h2><div class="card">Segera hadir...</div></div>
+      <div id="pembimbing" class="page hidden"><h2 class="page-title">Data Pembimbing</h2><div class="card">Segera hadir...</div></div>
+      <div id="kelompok" class="page hidden"><h2 class="page-title">Kelompok</h2><div class="card">Segera hadir...</div></div>
+      <div id="operasional" class="page hidden"><h2 class="page-title">Operasional</h2><div class="card">Segera hadir...</div></div>
+      <div id="penilaian" class="page hidden"><h2 class="page-title">Penilaian</h2><div class="card">Segera hadir...</div></div>
+      <div id="sertifikat" class="page hidden"><h2 class="page-title">Sertifikat</h2><div class="card">Segera hadir...</div></div>
+
     </div>
-
-    <div id="manajemen" class="page hidden"><div class="card">Halaman Manajemen</div></div>
-    <div id="siswa" class="page hidden"><div class="card">Halaman Data Siswa</div></div>
-    <div id="pembimbing" class="page hidden"><div class="card">Halaman Data Pembimbing</div></div>
-    <div id="kelompok" class="page hidden"><div class="card">Halaman Kelompok</div></div>
-    <div id="operasional" class="page hidden"><div class="card">Halaman Operasional</div></div>
-    <div id="penilaian" class="page hidden"><div class="card">Halaman Penilaian</div></div>
-    <div id="sertifikat" class="page hidden"><div class="card">Halaman Sertifikat</div></div>
-
   </div>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YCqyJTYQkOfljm1Pbqxy7QoCw9apkHBhDYRVwjRHcihPDN1hn5vpyxkoJ9HqkFCv5g/exec?action=rekapAdmin";
 let globalData = [];
+let chartInstance = null; // Menyimpan instance chart agar bisa di-update
 
-// Navigasi Halaman
-function showPage(page){
-  document.querySelectorAll(".content > .page").forEach(d => d.classList.add("hidden"));
-  document.getElementById(page).classList.remove("hidden");
+// Navigasi Menu
+function showPage(pageId, element){
+  // Sembunyikan semua halaman
+  document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden"));
+  document.getElementById(pageId).classList.remove("hidden");
+  
+  // Ubah status menu aktif di sidebar
+  if(element) {
+    document.querySelectorAll(".sidebar li").forEach(li => li.classList.remove("active"));
+    element.classList.add("active");
+  }
 }
 
-// Helper untuk mengambil field dari object JSON (mengatasi perbedaan besar/kecil huruf)
+// Fitur Pencarian Tabel
+function searchTable() {
+  const input = document.getElementById("searchInput").value.toLowerCase();
+  const rows = document.querySelectorAll("#tableLaporan tbody tr");
+  
+  rows.forEach(row => {
+    const textData = row.textContent.toLowerCase();
+    row.style.display = textData.includes(input) ? "" : "none";
+  });
+}
+
+// Helper untuk field huruf besar/kecil
 function getField(obj, key){
   return obj[key] || obj[key.charAt(0).toUpperCase() + key.slice(1)] || "";
 }
 
-// Menghitung status validasi aktivitas (Bisa digunakan di kemudian hari)
-function hitungAktivitas(item){
-  const aktivitas = [
-    "Sahur_Status","Subuh_Status","Olahraga_Status","Keluarga_Status",
-    "Dzuhur_Status","Pesantren_Status","Ashar_Status","Aksi_Status",
-    "Buka_Status","Magrib_Status","Isya_Status",
-    "Tarawih_Status","Tadarus_Status","Tidur_Status"
-  ];
-  let total = 0;
-  aktivitas.forEach(k => {
-    if(item[k] && item[k].toString().toLowerCase().includes("valid")){
-      total++;
-    }
-  });
-  return total;
-}
-
-// Fetch Data dari API
-// Fetch Data dari API
+// Ambil Data dari API Google Apps Script
 async function loadData(){
-  const loading = document.getElementById("loading-indicator");
-  loading.style.display = "block";
-  loading.innerText = "Memuat data dari server...";
+  const loadingDiv = document.getElementById("loading-indicator");
+  const loadingText = document.getElementById("loading-text");
+  const mainContent = document.getElementById("main-content");
 
   try {
-    // Menambahkan parameter redirect dan cors
     const res = await fetch(SCRIPT_URL, {
       method: 'GET',
       mode: 'cors',
       redirect: 'follow'
     });
     
-    // Baca sebagai teks dulu untuk mencegah error JSON parse
     const rawText = await res.text();
-    
-    // Coba jadikan JSON
     const raw = JSON.parse(rawText);
     
-    if (Array.isArray(raw)) globalData = raw;
-    else if (raw.data) globalData = raw.data;
-    else globalData = [];
+    globalData = Array.isArray(raw) ? raw : (raw.data || []);
 
     renderDashboard();
     renderTable();
     
-    loading.style.display = "none"; 
+    // Tampilkan konten dan sembunyikan loading
+    loadingDiv.classList.add("hidden");
+    mainContent.classList.remove("hidden");
+
   } catch (error) {
-    console.error("Detail Error:", error);
-    loading.innerText = "Gagal memuat data. Tekan F12 lalu cek tab Console untuk melihat detail error.";
-    loading.style.color = "#ef4444"; 
+    console.error("Error:", error);
+    document.querySelector(".spinner").style.display = "none";
+    loadingText.innerText = "Gagal memuat data. Pastikan URL Script benar dan hak akses telah dibuka.";
+    loadingText.style.color = "#ef4444"; 
   }
 }
 
-// Render Data Dashboard
+// Render Dashboard & Chart
 function renderDashboard(){
   if (globalData.length === 0) return;
 
@@ -327,47 +461,94 @@ function renderDashboard(){
     if (nama) {
         siswaSet.add(nama);
         if(!ranking[nama]) ranking[nama] = 0;
-        ranking[nama] += nilai; // Asumsi: Nilai diakumulasikan per nama
+        ranking[nama] += nilai;
     }
-    
     totalNilai += nilai;
   });
 
-  // Update Statistik
   document.getElementById("totalSiswa").innerText = siswaSet.size;
   document.getElementById("totalLaporan").innerText = globalData.length;
   document.getElementById("rataNilai").innerText = globalData.length ? (totalNilai / globalData.length).toFixed(1) : 0;
 
-  // Update Top 5 Ranking
-  const top = Object.entries(ranking)
+  // Persiapkan Data untuk Chart.js (Top 5)
+  const topData = Object.entries(ranking)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const listHtml = top.map((r, i) => `<li><strong>${i + 1}. ${r[0]}</strong> - Skor: ${r[1]}</li>`).join("");
-  document.getElementById("topRanking").innerHTML = listHtml || "<li>Belum ada data</li>";
+  const labels = topData.map(d => d[0]); // Nama
+  const dataPoints = topData.map(d => d[1]); // Nilai
+
+  renderChart(labels, dataPoints);
 }
 
-// Render Tabel Laporan
+// Fungsi Render Chart.js
+function renderChart(labels, data) {
+  const ctx = document.getElementById('rankingChart').getContext('2d');
+  
+  // Hapus chart lama jika ada agar tidak menumpuk
+  if(chartInstance) chartInstance.destroy();
+
+  // Konfigurasi Chart.js Tema Gelap
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Total Nilai Terkumpul',
+        data: data,
+        backgroundColor: 'rgba(250, 204, 21, 0.8)', // Warna Kuning
+        borderColor: '#facc15',
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#334155' } },
+        x: { grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false } // Sembunyikan legenda
+      }
+    }
+  });
+}
+
+// Render Tabel
 function renderTable(){
   const table = document.getElementById("tableLaporan");
   if (globalData.length === 0) {
-      table.innerHTML = "<tr><td>Tidak ada data laporan.</td></tr>";
+      table.innerHTML = "<tr><td style='text-align:center;'>Belum ada data laporan.</td></tr>";
       return;
   }
 
-  // Ambil semua header dari object pertama
+  // Filter kolom yang tidak perlu ditampilkan (opsional)
   const headers = Object.keys(globalData[0]);
 
+  // Render Header
   table.querySelector("thead").innerHTML = 
     "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join("") + "</tr>";
 
+  // Render Body
   table.querySelector("tbody").innerHTML = 
     globalData.map(row => 
-      "<tr>" + headers.map(h => `<td>${row[h] !== undefined && row[h] !== null ? row[h] : '-'}</td>`).join("") + "</tr>"
+      "<tr>" + headers.map(h => {
+        let val = row[h];
+        // Jika nilai berupa tanggal/timestamp panjang, bisa dipotong
+        if(typeof val === 'string' && val.includes("T") && val.includes("Z")) {
+           val = new Date(val).toLocaleDateString('id-ID');
+        }
+        return `<td>${val !== undefined && val !== null ? val : '-'}</td>`;
+      }).join("") + "</tr>"
     ).join("");
 }
 
-// Jalankan ketika halaman dimuat
+// Jalankan saat dokumen siap
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
