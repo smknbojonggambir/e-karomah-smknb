@@ -59,6 +59,55 @@
         .chip.active { background: rgba(16, 185, 129, 0.2); border-color: var(--primary); color: var(--primary); font-weight: 600; }
         .chip-count { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px; }
 
+        /* --- Summary Table --- */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        .summary-table th {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 15px;
+            font-weight: 600;
+            border-bottom: 1px solid #334155;
+            white-space: nowrap;
+        }
+        .summary-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+            white-space: nowrap;
+        }
+        .summary-table tbody tr {
+            transition: background 0.2s;
+        }
+        .summary-table tbody tr:hover {
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+        .summary-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-belum { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-sudah { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
         /* --- Cards --- */
         .card-list { display: flex; flex-direction: column; gap: 12px; }
         .student-card {
@@ -221,57 +270,6 @@
             padding: 10px 0; text-align: center; color: #94a3b8;
             font-size: 12px; z-index: 50;
         }
-
-/* --- Summary Table --- */
-        .table-responsive {
-            overflow-x: auto;
-            margin-bottom: 20px;
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            text-align: left;
-        }
-        .summary-table th {
-            background: #0f172a;
-            color: #94a3b8;
-            padding: 12px 15px;
-            font-weight: 600;
-            border-bottom: 1px solid #334155;
-            white-space: nowrap;
-        }
-        .summary-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #334155;
-            color: #e2e8f0;
-            white-space: nowrap;
-        }
-        .summary-table tbody tr {
-            transition: background 0.2s;
-        }
-        .summary-table tbody tr:hover {
-            background: rgba(255,255,255,0.05);
-            cursor: pointer;
-        }
-        .summary-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .status-belum { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .status-sudah { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-
-        
     </style>
 </head>
 <body>
@@ -285,18 +283,22 @@
 </header>
 
 <div class="container">
-
-
-    <div class="container">
     <div id="mentorNotification" style="display:none; margin-bottom: 20px; padding: 15px; border-radius: 10px; font-size: 13px; line-height: 1.5;"></div>
     
     <div class="filter-container">
-    <div class="filter-container">
         <div class="filter-row">
-            <input type="date" id="dateFilter" onchange="loadData()">
+            <input type="text" id="searchName" placeholder="🔍 Cari nama siswa..." oninput="renderList(rawData)" style="flex: 1.5;">
+            <input type="date" id="dateFilter" onchange="loadData()" style="flex: 1;">
             <button onclick="loadData()" style="background:#334155; border:1px solid #475569; color:white; border-radius:8px; padding:0 15px; cursor:pointer; font-size:18px;">🔄</button>
-        
-        <div id="summaryTableWrapper" class="table-responsive" style="display: none;">
+        </div>
+        <div class="filter-chips">
+            <div class="chip active" onclick="setFilter('all', this)">Semua <span class="chip-count" id="countAll">0</span></div>
+            <div class="chip" onclick="setFilter('pending', this)">Perlu Pemeriksaan <span class="chip-count" id="countPending" style="background:var(--danger); color:white">0</span></div>
+            <div class="chip" onclick="setFilter('done', this)">Selesai <span class="chip-count" id="countDone" style="background:var(--primary); color:white">0</span></div>
+        </div>
+    </div>
+
+    <div id="summaryTableWrapper" class="table-responsive" style="display: none;">
         <table class="summary-table">
             <thead>
                 <tr>
@@ -308,14 +310,6 @@
             </thead>
             <tbody id="summaryTableBody"></tbody>
         </table>
-    </div>
-        
-        </div>
-        <div class="filter-chips">
-            <div class="chip active" onclick="setFilter('all', this)">Semua <span class="chip-count" id="countAll">0</span></div>
-            <div class="chip" onclick="setFilter('pending', this)">Perlu Pemeriksaan <span class="chip-count" id="countPending" style="background:var(--danger); color:white">0</span></div>
-            <div class="chip" onclick="setFilter('done', this)">Selesai <span class="chip-count" id="countDone" style="background:var(--primary); color:white">0</span></div>
-        </div>
     </div>
 
     <div id="loading"><div class="spinner"></div>Mengambil data laporan siswa...</div>
@@ -409,7 +403,6 @@
 
 <script>
 // ================= CONFIG & SETUP =================
-// ✅ PASTIKAN URL INI SUDAH YANG TERBARU (HASIL DEPLOY BARU)
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec"; 
 
 const activityConfig = [
@@ -427,13 +420,11 @@ const activityConfig = [
     { key: "Keluarga", label: "Bantu Orang Tua", hasPhoto: false, max: null }
 ];
 
-// Global Variables
 let rawData = [];
 let selectedItem = null;
 let currentFilterType = 'all';
 let validationState = {}; 
 
-// 1. CEK LOGIN
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'pembimbing'){
     alert("⛔ Akses Ditolak. Silakan login sebagai Pembimbing."); 
@@ -444,9 +435,6 @@ document.getElementById('mName').textContent = user.nama || "Pembimbing";
 document.getElementById('mGroup').textContent = "Kelompok: " + (user.kelompok || "-");
 document.getElementById('dateFilter').valueAsDate = new Date();
 
-// ==========================================
-// 2. HELPER FUNCTIONS
-// ==========================================
 function logout() {
     if(confirm("Yakin ingin keluar?")) {
         localStorage.removeItem("user");
@@ -462,15 +450,14 @@ function formatTglIndo(isoDate) {
     return d.toLocaleDateString('id-ID', options);
 }
 
-// ==========================================
-// 3. LOAD DATA (DENGAN FITUR MERGE & FIX TANGGAL)
-// ==========================================
 async function loadData() {
     const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
     const dateInput = document.getElementById("dateFilter").value;
+    const tableWrapper = document.getElementById("summaryTableWrapper");
     
     list.innerHTML = "";
+    if (tableWrapper) tableWrapper.style.display = "none";
     loader.style.display = "block";
 
     try {
@@ -478,37 +465,24 @@ async function loadData() {
         const res = await fetch(url);
         const data = await res.json();
         
-        // --- 1. PROSES PENGGABUNGAN (MERGE) CICILAN ---
         let groupedData = {};
         
         data.forEach(item => {
             let namaSiswa = (item.Nama || item.nama || "").trim();
             let itemDate = "";
 
-            // Perbaiki bug tanggal: Ambil tanggal di zona waktu WIB (Asia/Jakarta)
             if (item.Tanggal) {
-                // Buat Date dari timestamp UTC, lalu ambil ke tanggal lokal WIB
-                // Untuk tipe "YYYY-MM-DD" cukup pake split
                 if (/^\d{4}-\d{2}-\d{2}/.test(item.Tanggal)) {
-                    // Google Sheets kadang menyimpan tgl UTC (misal 2024-04-18T17:00:00.000Z, yg berarti WIB = 19)
-                    // Jadi, parsing ISO string dan konversi ke waktu Asia/Jakarta
                     let tglObj;
-                    // Cek apakah ada huruf "T", artinya ada time
                     if (item.Tanggal.includes("T")) {
                         try {
-                            // Buat Date lalu ambil YMD di zona WIB
                             tglObj = new Date(item.Tanggal);
-                            // Konversi ke string tanggal lokal di Asia/Jakarta
-                            // NB: Date API JS hanya UTC/local browser, jadi pakai offset UTC+7
-                            // Hitung: waktu timestamp + 7 jam (25200000 ms)
                             let tglWIBDate = new Date(tglObj.getTime() + (7 * 60 * 60 * 1000));
-                            // Ambil tanggal YMD-nya
                             const year = tglWIBDate.getFullYear();
                             const month = String(tglWIBDate.getMonth() + 1).padStart(2, '0');
                             const day = String(tglWIBDate.getDate()).padStart(2, '0');
                             itemDate = `${year}-${month}-${day}`; 
                         } catch (e) {
-                            // Jika parsing gagal, fallback
                             const d = new Date(item.Tanggal);
                             const year = d.getFullYear();
                             const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -516,11 +490,9 @@ async function loadData() {
                             itemDate = `${year}-${month}-${day}`; 
                         }
                     } else {
-                        // Sudah format YYYY-MM-DD, tidak perlu konversi jam
                         itemDate = item.Tanggal.substring(0,10);
                     }
                 } else {
-                    // Jika bukan format standar, fallback seperti sebelumnya
                     const d = new Date(item.Tanggal);
                     const year = d.getFullYear();
                     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -532,11 +504,9 @@ async function loadData() {
             let key = `${namaSiswa}_${itemDate}`;
 
             if (!groupedData[key]) {
-                // Buat wadah baru jika belum ada kartu untuk siswa di tanggal tersebut
                 groupedData[key] = { ...item };
-                groupedData[key]._filterDate = itemDate; // Simpan tanggal bersih untuk filter
+                groupedData[key]._filterDate = itemDate;
             } else {
-                // Jika sudah ada, gabungkan isian aktivitasnya (cicilan)
                 activityConfig.forEach(act => {
                     const statusSiswa = item[act.key] || item[act.key+'_Status'] || "";
                     if (String(statusSiswa).toLowerCase().includes('ya')) {
@@ -552,13 +522,11 @@ async function loadData() {
                     }
                 });
 
-                // Update ID baris ke yang terbaru agar saat dinilai masuk ke baris akhir
                 if (item.id || item.row) {
                     groupedData[key].id = item.id || item.row;
                     groupedData[key].row = item.id || item.row;
                 }
 
-                // Gabungkan catatan siswa
                 if(item.Catatan && item.Catatan !== "-" && String(item.Catatan).trim() !== "") {
                     if (!groupedData[key].Catatan || groupedData[key].Catatan === "-") {
                         groupedData[key].Catatan = item.Catatan;
@@ -567,17 +535,14 @@ async function loadData() {
                     }
                 }
 
-                // Cek jika di salah satu cicilan sudah dinilai pembimbing
                 if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
                     groupedData[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
                 }
             }
         });
 
-        // Ubah kembali dari Objek menjadi Array
         let mergedArray = Object.values(groupedData);
 
-        // --- 2. FILTER BERDASARKAN TANGGAL ---
         let myStudents = [];
         if(dateInput && mergedArray.length > 0) {
             myStudents = mergedArray.filter(item => item._filterDate === dateInput);
@@ -610,11 +575,9 @@ function updateCountChips(data) {
     document.getElementById("countPending").textContent = pending;
     document.getElementById("countDone").textContent = done;
 
-    // --- LOGIKA NOTIFIKASI PESAN PEMBIMBING ---
     const notifBox = document.getElementById("mentorNotification");
     if (!notifBox) return;
 
-    // Jika tidak ada data sama sekali di tanggal tersebut
     if (data.length === 0) {
         notifBox.style.display = "none";
         return;
@@ -623,8 +586,7 @@ function updateCountChips(data) {
     notifBox.style.display = "block";
     
     if (pending > 0) {
-        // TAMPILAN JIKA BELUM SELESAI MENILAI
-        notifBox.style.background = "rgba(251, 191, 36, 0.1)"; // Kuning transparan
+        notifBox.style.background = "rgba(251, 191, 36, 0.1)"; 
         notifBox.style.border = "1px solid var(--gold)";
         notifBox.style.color = "#fcd34d";
         notifBox.innerHTML = `
@@ -637,8 +599,7 @@ function updateCountChips(data) {
             </div>
         `;
     } else {
-        // TAMPILAN JIKA SUDAH SELESAI SEMUA
-        notifBox.style.background = "rgba(16, 185, 129, 0.1)"; // Hijau transparan
+        notifBox.style.background = "rgba(16, 185, 129, 0.1)"; 
         notifBox.style.border = "1px solid var(--primary)";
         notifBox.style.color = "#6ee7b7";
         notifBox.innerHTML = `
@@ -670,21 +631,16 @@ function renderList(data) {
     const tableBody = document.getElementById("summaryTableBody");
     
     list.innerHTML = "";
-    
-    // Cek apakah ada tabel (jika HTML tabel sudah dipasang)
     if (tableBody) tableBody.innerHTML = "";
 
-    // Ambil input pencarian
     const searchInput = document.getElementById("searchName");
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
 
     let displayData = data;
     
-    // 1. Filter by Tab
     if(currentFilterType === 'pending') displayData = data.filter(item => !hasGrade(item));
     else if(currentFilterType === 'done') displayData = data.filter(item => hasGrade(item));
 
-    // 2. Filter by Search (Nama)
     if(searchTerm) {
         displayData = displayData.filter(item => {
             const namaSiswa = item.Nama || item.nama || "";
@@ -692,7 +648,6 @@ function renderList(data) {
         });
     }
 
-    // 3. Urutkan berdasarkan Nama Siswa (Sesuai Abjad A-Z)
     displayData.sort((a,b) => {
         const nameA = (a.Nama || a.nama || "").toLowerCase();
         const nameB = (b.Nama || b.nama || "").toLowerCase();
@@ -708,7 +663,6 @@ function renderList(data) {
     if(tableWrapper) tableWrapper.style.display = "block";
 
     displayData.forEach((item, index) => {
-        // --- Render isi Tabel ---
         if (tableBody) {
             let doneCount = 0;
             activityConfig.forEach(act => {
@@ -732,7 +686,6 @@ function renderList(data) {
             tableBody.appendChild(tr);
         }
 
-        // --- Render Kartu ---
         list.appendChild(createCard(item));
     });
 }
@@ -748,7 +701,6 @@ function createCard(item) {
     const progressPct = Math.round((doneCount / totalActs) * 100);
     const isDone = hasGrade(item);
     
-    // Tampilan badge dengan Nilai Pembimbing
     const badgeHtml = isDone 
         ? `<span class="badge badge-done" style="background:var(--primary); color:white;">⭐ NILAI: ${item.Nilai_Pembimbing}</span>` 
         : `<span class="badge badge-pending">PERLU INSPEKSI</span>`;
@@ -758,7 +710,6 @@ function createCard(item) {
     const card = document.createElement("div");
     card.className = `student-card ${isDone ? 'done' : 'priority'}`;
     
-    // Tampilan Catatan jika ada
     const catatanHtml = (isDone && item.Catatan_Pembimbing && item.Catatan_Pembimbing !== "-") 
         ? `<div style="margin-top:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; font-size:11px; color:#cbd5e1; border-left:2px solid var(--primary);">💬 <i>${item.Catatan_Pembimbing}</i></div>`
         : ``;
@@ -784,9 +735,6 @@ function createCard(item) {
     return card;
 }
 
-// ==========================================
-// 4. INSPECTION MODE & MODAL
-// ==========================================
 function openInspectionMode(item) {
     selectedItem = item;
     validationState = {}; 
@@ -820,9 +768,6 @@ function switchTab(tabName) {
     document.getElementById(`tab-${tabName}`).classList.add('active');
 }
 
-// ==========================================
-// 5. VALIDATION LIST LOGIC
-// ==========================================
 function renderValidationList(item) {
     const container = document.getElementById("validationContainer");
     container.innerHTML = "";
@@ -831,11 +776,9 @@ function renderValidationList(item) {
         const status = item[act.key] || item[act.key+'_Status'] || "-";
         let rawWaktu = item[act.key+'_Waktu'] || item['Waktu_'+act.key] || "-";
         
-        // --- PERBAIKAN: Parsing Format Date Google Sheets (1899-12-30T05:13...) ---
         let waktu = rawWaktu;
         if (String(waktu).includes('T')) {
             try {
-                // Ambil string jam yang terletak setelah huruf 'T'
                 waktu = String(waktu).split('T')[1].substring(0, 5); 
             } catch(e) {
                 console.warn("Gagal mengekstrak waktu:", rawWaktu);
@@ -860,181 +803,160 @@ function renderValidationList(item) {
         const needsCheck = isYa; 
         const checkId = `chk_${act.key}`;
         
-        // Jika belum "ya" (belum dikerjakan/dicicil)
-        const isYaHtml = isYa ? `<span style="color:#10b981; font-weight:bold; font-size:11px;">✅ Selesai</span>` : `<span style="color:#64748b; font-size:11px;">❌ Belum/Tidak</span>`;
-        let checkBoxHtml = "";
+        const isYaHtml = isYa ? `<span style="color:#10b981; font-weight:bold; font-size:11px;">✅ Selesai</span>` : `<span style="color:#64748b; font-size:11px;">❌ Belum/Tidak</span>`;
+        let checkBoxHtml = "";
 
-        // Jika siswa menyatakan "ya", tampilkan checkbox validasi untuk pembimbing
-        if (needsCheck) {
-            checkBoxHtml = `
-            <div class="check-box-wrapper">
-                <input type="checkbox" id="${checkId}" class="check-input" onchange="handleValidationChange('${act.key}', this.checked)">
-                <label for="${checkId}" class="check-label">Valid</label>
-            </div>`;
-        } else {
-            checkBoxHtml = `<span style="font-size:11px; color:#64748b; padding: 6px 12px; background: #1e293b; border-radius: 20px;">Lewati</span>`;
-        }
+        if (needsCheck) {
+            checkBoxHtml = `
+            <div class="check-box-wrapper">
+                <input type="checkbox" id="${checkId}" class="check-input" onchange="handleValidationChange('${act.key}', this.checked)">
+                <label for="${checkId}" class="check-label">Valid</label>
+            </div>`;
+        } else {
+            checkBoxHtml = `<span style="font-size:11px; color:#64748b; padding: 6px 12px; background: #1e293b; border-radius: 20px;">Lewati</span>`;
+        }
 
-        const div = document.createElement("div");
-        div.className = "val-item";
-        div.innerHTML = `
-            <div class="val-info">
-                <span class="val-title">${act.label} ${isYaHtml}</span>
-                <span class="val-time" style="color:${timeColor}">⏰ Pukul: ${waktu} ${anomalyHtml}</span>
-            </div>
-            ${checkBoxHtml}
-        `;
-        container.appendChild(div);
-    });
+        const div = document.createElement("div");
+        div.className = "val-item";
+        div.innerHTML = `
+            <div class="val-info">
+                <span class="val-title">${act.label} ${isYaHtml}</span>
+                <span class="val-time" style="color:${timeColor}">⏰ Pukul: ${waktu} ${anomalyHtml}</span>
+            </div>
+            ${checkBoxHtml}
+        `;
+        container.appendChild(div);
+    });
 }
 
-// ==========================================
-// 6. VALIDATION LOGIC & ENABLE SAVE BUTTON
-// ==========================================
 function handleValidationChange(key, isChecked) {
-    validationState[key] = isChecked;
-    checkValidationCompletion();
+    validationState[key] = isChecked;
+    checkValidationCompletion();
 }
 
 function checkValidationCompletion() {
-    let requiredCount = 0;
-    let checkedCount = 0;
+    let requiredCount = 0;
+    let checkedCount = 0;
 
-    activityConfig.forEach(act => {
-        const status = selectedItem[act.key] || selectedItem[act.key+'_Status'] || "";
-        if (String(status).toLowerCase().includes("ya")) {
-            requiredCount++;
-            if (validationState[act.key]) checkedCount++;
-        }
-    });
+    activityConfig.forEach(act => {
+        const status = selectedItem[act.key] || selectedItem[act.key+'_Status'] || "";
+        if (String(status).toLowerCase().includes("ya")) {
+            requiredCount++;
+            if (validationState[act.key]) checkedCount++;
+        }
+    });
 
-    const btnSave = document.getElementById("btnSave");
-    // Jika semua yang perlu divalidasi sudah di-check
-    if (requiredCount === 0 || checkedCount === requiredCount) {
-        btnSave.disabled = false;
-        btnSave.innerHTML = "💾 SIMPAN & SELESAIKAN PENILAIAN";
-        btnSave.style.background = "var(--primary)";
-    } else {
-        btnSave.disabled = true;
-        btnSave.innerHTML = `🔒 SELESAIKAN VALIDASI DI TAB 1 (${checkedCount}/${requiredCount})`;
-        btnSave.style.background = "#64748b";
-    }
+    const btnSave = document.getElementById("btnSave");
+    if (requiredCount === 0 || checkedCount === requiredCount) {
+        btnSave.disabled = false;
+        btnSave.innerHTML = "💾 SIMPAN & SELESAIKAN PENILAIAN";
+        btnSave.style.background = "var(--primary)";
+    } else {
+        btnSave.disabled = true;
+        btnSave.innerHTML = `🔒 SELESAIKAN VALIDASI DI TAB 1 (${checkedCount}/${requiredCount})`;
+        btnSave.style.background = "#64748b";
+    }
 }
 
-// ==========================================
-// 7. RENDER PHOTO GALLERY
-// ==========================================
 function renderPhotoGallery(item) {
-    const container = document.getElementById("photoGalleryContainer");
-    container.innerHTML = "";
-    let hasPhoto = false;
+    const container = document.getElementById("photoGalleryContainer");
+    container.innerHTML = "";
+    let hasPhoto = false;
 
-    activityConfig.forEach(act => {
-        if (act.hasPhoto) {
-            const f1 = act.key + '_Foto'; 
+    activityConfig.forEach(act => {
+        if (act.hasPhoto) {
+            const f1 = act.key + '_Foto'; 
             const f2 = 'Foto_' + act.key;
-            let photoUrl = item[f1] || item[f2] || "";
-            
-            if (photoUrl && photoUrl !== "-" && photoUrl.includes("http")) {
-                hasPhoto = true;
-                const div = document.createElement("div");
-                div.className = "photo-item";
-                div.innerHTML = `
-                    <img src="${photoUrl}" alt="${act.label}" onclick="window.open('${photoUrl}', '_blank')">
-                    <div class="photo-label">${act.label}</div>
-                `;
-                container.appendChild(div);
-            }
-        }
-    });
+            let photoUrl = item[f1] || item[f2] || "";
+            
+            if (photoUrl && photoUrl !== "-" && photoUrl.includes("http")) {
+                hasPhoto = true;
+                const div = document.createElement("div");
+                div.className = "photo-item";
+                div.innerHTML = `
+                    <img src="${photoUrl}" alt="${act.label}" onclick="window.open('${photoUrl}', '_blank')">
+                    <div class="photo-label">${act.label}</div>
+                `;
+                container.appendChild(div);
+            }
+        }
+    });
 
-    if (!hasPhoto) {
-        container.innerHTML = `<div class="no-photo-alert">Siswa tidak melampirkan foto bukti atau link tidak valid.</div>`;
-    }
+    if (!hasPhoto) {
+        container.innerHTML = `<div class="no-photo-alert">Siswa tidak melampirkan foto bukti atau link tidak valid.</div>`;
+    }
 }
 
-// ==========================================
-// 8. GRADING & RUBRIC LOGIC
-// ==========================================
 function setupGrading(item) {
-    // Set default value slider
-    document.querySelectorAll('.rubric-range').forEach(el => el.value = 80);
-    updateRubric('R1', 80);
-    updateRubric('R2', 80);
-    updateRubric('R3', 80);
-    
-    // Load catatan jika sudah pernah ada
+    document.querySelectorAll('.rubric-range').forEach(el => el.value = 80);
+    updateRubric('R1', 80);
+    updateRubric('R2', 80);
+    updateRubric('R3', 80);
+    
     document.getElementById("inputCatatanPembimbing").value = item.Catatan_Pembimbing || "";
 }
 
 function updateRubric(id, val) {
-    document.getElementById(`val${id}`).textContent = val;
-    calculateFinalScore();
+    document.getElementById(`val${id}`).textContent = val;
+    calculateFinalScore();
 }
 
 function calculateFinalScore() {
-    const r1 = parseInt(document.getElementById("valR1").textContent) || 0; // Kedisiplinan 40%
-    const r2 = parseInt(document.getElementById("valR2").textContent) || 0; // Bukti 30%
-    const r3 = parseInt(document.getElementById("valR3").textContent) || 0; // Kejujuran 30%
-    
-    const totalScore = Math.round((r1 * 0.4) + (r2 * 0.3) + (r3 * 0.3));
-    document.getElementById("finalScoreDisplay").textContent = totalScore;
-    return totalScore;
+    const r1 = parseInt(document.getElementById("valR1").textContent) || 0; 
+    const r2 = parseInt(document.getElementById("valR2").textContent) || 0; 
+    const r3 = parseInt(document.getElementById("valR3").textContent) || 0; 
+    
+    const totalScore = Math.round((r1 * 0.4) + (r2 * 0.3) + (r3 * 0.3));
+    document.getElementById("finalScoreDisplay").textContent = totalScore;
+    return totalScore;
 }
 
-// ==========================================
-// 9. SAVE DATA TO GOOGLE SHEETS
-// ==========================================
 async function saveGrade() {
-    const btnSave = document.getElementById("btnSave");
-    const finalScore = calculateFinalScore();
-    const catatan = document.getElementById("inputCatatanPembimbing").value;
+    const btnSave = document.getElementById("btnSave");
+    const finalScore = calculateFinalScore();
+    const catatan = document.getElementById("inputCatatanPembimbing").value;
 
-    if (!selectedItem.row && !selectedItem.id) {
-        alert("Error: ID Baris (Row) tidak ditemukan.");
-        return;
-    }
+    if (!selectedItem.row && !selectedItem.id) {
+        alert("Error: ID Baris (Row) tidak ditemukan.");
+        return;
+    }
 
-    btnSave.disabled = true;
-    btnSave.innerHTML = `<div class="spinner" style="width:16px; height:16px; display:inline-block; margin:0 5px -3px 0;"></div> MENYIMPAN...`;
+    btnSave.disabled = true;
+    btnSave.innerHTML = `<div class="spinner" style="width:16px; height:16px; display:inline-block; margin:0 5px -3px 0;"></div> MENYIMPAN...`;
 
-    try {
-        // Kirim form data sesuai standar Google Apps Script doPost
-        const formData = new URLSearchParams();
-        formData.append("action", "nilaiPembimbing");
-        formData.append("row", selectedItem.row || selectedItem.id);
-        formData.append("nilai", finalScore);
-        formData.append("catatan", catatan);
+    try {
+        const formData = new URLSearchParams();
+        formData.append("action", "nilaiPembimbing");
+        formData.append("row", selectedItem.row || selectedItem.id);
+        formData.append("nilai", finalScore);
+        formData.append("catatan", catatan);
 
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.status === 'success' || result.sukses) {
-            alert("✅ Penilaian berhasil disimpan!");
-            closeModal();
-            loadData(); // Auto-refresh data agar pindah ke tab "Selesai"
-        } else {
-            alert("Gagal menyimpan data: " + (result.message || "Unknown error"));
-            btnSave.disabled = false;
-            btnSave.innerHTML = "💾 COBA LAGI";
-        }
-    } catch (e) {
-        console.error("Error saving grade:", e);
-        alert("⚠️ Terjadi kesalahan jaringan. Cek koneksi internetmu.");
-        btnSave.disabled = false;
-        btnSave.innerHTML = "💾 COBA LAGI";
-    }
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success' || result.sukses) {
+            alert("✅ Penilaian berhasil disimpan!");
+            closeModal();
+            loadData(); 
+        } else {
+            alert("Gagal menyimpan data: " + (result.message || "Unknown error"));
+            btnSave.disabled = false;
+            btnSave.innerHTML = "💾 COBA LAGI";
+        }
+    } catch (e) {
+        console.error("Error saving grade:", e);
+        alert("⚠️ Terjadi kesalahan jaringan. Cek koneksi internetmu.");
+        btnSave.disabled = false;
+        btnSave.innerHTML = "💾 COBA LAGI";
+    }
 }
 
-// ==========================================
-// 10. INISIALISASI AWAL
-// ==========================================
 window.onload = function() {
-    loadData();
+    loadData();
 };
 </script>
 </body>
