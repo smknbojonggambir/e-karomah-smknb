@@ -66,7 +66,7 @@
         .input-group { flex: 1; min-width: 200px; display: flex; gap: 8px; }
         .filter-row input { 
             width: 100%; background: var(--bg-base); border: 1px solid var(--border); 
-            color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-family: inherit; font-size: 14px;
+            color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-family: inherit; font-size: 14px; color-scheme: dark;
         }
         .filter-row input:focus { outline: none; border-color: var(--secondary); }
         .btn-refresh {
@@ -306,7 +306,7 @@
 </div>
 
 <script>
-// ================= SCRIPT LOGIC (Refined) =================
+// ================= SCRIPT LOGIC =================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec"; 
 
 const activityConfig = [
@@ -337,7 +337,13 @@ if(!user || user.role !== 'pembimbing'){
 
 document.getElementById('mName').textContent = user.nama || "Pembimbing Akademik";
 document.getElementById('mGroup').textContent = "Kelompok: " + (user.kelompok || "-");
-document.getElementById('dateFilter').valueAsDate = new Date();
+
+// (PERBAIKAN 1) Atur tanggal default ke hari ini secara lokal tanpa bug timezone UTC
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+document.getElementById('dateFilter').value = `${yyyy}-${mm}-${dd}`;
 
 function logout() {
     if(confirm("Apakah Anda yakin ingin keluar dari sesi ini?")) {
@@ -346,12 +352,49 @@ function logout() {
     }
 }
 
+// (PERBAIKAN 2) Fungsi parse tanggal yang super kuat (kebal berbagai format sheet)
+function normalizeDateStr(val) {
+    if (!val) return "";
+    let str = String(val).trim();
+    
+    // Jika ISO string, pecah ambil tangganya saja
+    if (str.includes("T")) str = str.split("T")[0]; 
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
+    // Jika format M/D/YYYY atau DD/MM/YYYY
+    const dateMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (dateMatch) {
+        let p1 = parseInt(dateMatch[1]);
+        let p2 = parseInt(dateMatch[2]);
+        let year = dateMatch[3];
+        let day, month;
+        
+        // Cek mana yang bulan dan tanggal
+        if (p1 > 12) { day = p1; month = p2; }
+        else if (p2 > 12) { month = p1; day = p2; }
+        else { day = p1; month = p2; } // Default Indo: DD/MM/YYYY
+        
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    // Jika terbaca Date Object
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    return str.substring(0, 10);
+}
+
+// (PERBAIKAN 3) Hindari pergeseran hari saat format ke Text Indonesia
 function formatTglIndo(isoDate) {
-    if(!isoDate) return "-";
-    const d = new Date(isoDate);
-    if(isNaN(d.getTime())) return isoDate; 
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return d.toLocaleDateString('id-ID', options);
+    if(!isoDate || isoDate === "-") return "-";
+    const parts = isoDate.split("-");
+    if (parts.length === 3) {
+        const d = new Date(parts[0], parts[1]-1, parts[2]); // Memaksa date ke zona waktu lokal
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return d.toLocaleDateString('id-ID', options);
+    }
+    return isoDate;
 }
 
 async function loadData() {
@@ -371,7 +414,8 @@ async function loadData() {
         
         data.forEach(item => {
             let namaSiswa = (item.Nama || item.nama || "").trim();
-            let itemDate = item.Tanggal ? (item.Tanggal.includes("T") ? item.Tanggal.substring(0,10) : item.Tanggal) : "";
+            // Terapkan normalisasi yang kebal format timezone disini
+            let itemDate = normalizeDateStr(item.Tanggal); 
             let key = `${namaSiswa}_${itemDate}`;
 
             if (!groupedData[key]) {
@@ -395,7 +439,7 @@ async function loadData() {
         updateCountChips(rawData);
 
         if(rawData.length === 0) {
-            loader.innerHTML = `Data tidak ditemukan untuk tanggal <b>${dateInput}</b>.`;
+            loader.innerHTML = `Tidak ada aktivitas siswa pada tanggal <b>${formatTglIndo(dateInput)}</b>.`;
             return;
         }
 
@@ -439,7 +483,7 @@ function updateCountChips(data) {
     }
 }
 
-function hasGrade(item) { return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2; }
+function hasGrade(item) { return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length >= 1; }
 
 function setFilter(type, el) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -614,17 +658,31 @@ function updateRubric(id, val) {
 
 async function saveGrade() {
     const btn = document.getElementById("btnSave");
-    if (!selectedItem.row) return alert("Sistem tidak mendeteksi baris database.");
+    if (!selectedItem.row && !selectedItem.id) return alert("Sistem tidak mendeteksi baris database.");
     
     btn.disabled = true; btn.textContent = "Memproses...";
     try {
-        const fd = new URLSearchParams({ action: "nilaiPembimbing", row: selectedItem.row, nilai: document.getElementById("finalScoreDisplay").textContent, catatan: document.getElementById("inputCatatanPembimbing").value });
+        const fd = new URLSearchParams({ 
+            action: "nilaiPembimbing", 
+            row: selectedItem.row || selectedItem.id, 
+            nilai: document.getElementById("finalScoreDisplay").textContent, 
+            catatan: document.getElementById("inputCatatanPembimbing").value 
+        });
         const res = await fetch(WEB_APP_URL, { method: 'POST', body: fd });
         const result = await res.json();
         
-        if (result.status === 'success' || result.sukses) { alert("Penilaian berhasil disimpan."); closeModal(); loadData(); } 
-        else { alert("Gagal menyimpan data."); btn.disabled = false; btn.textContent = "Coba Lagi"; }
-    } catch (e) { alert("Terjadi kesalahan koneksi."); btn.disabled = false; btn.textContent = "Coba Lagi"; }
+        if (result.status === 'success' || result.sukses) { 
+            alert("Penilaian berhasil disimpan."); 
+            closeModal(); 
+            loadData(); 
+        } else { 
+            alert("Gagal menyimpan data."); 
+            btn.disabled = false; btn.textContent = "Coba Lagi"; 
+        }
+    } catch (e) { 
+        alert("Terjadi kesalahan koneksi."); 
+        btn.disabled = false; btn.textContent = "Coba Lagi"; 
+    }
 }
 
 window.onload = loadData;
