@@ -684,204 +684,182 @@ function renderValidationList(item) {
         const needsCheck = isYa; 
         const checkId = `chk_${act.key}`;
         
-        // Jika belum "ya" (belum dikerjakan/dicicil), otomatis lolos validasi untuk poin ini
-        validationState[act.key] = !needsCheck; 
+        // Jika belum "ya" (belum dikerjakan/dicicil)
+        const isYaHtml = isYa ? `<span style="color:#10b981; font-weight:bold; font-size:11px;">✅ Selesai</span>` : `<span style="color:#64748b; font-size:11px;">❌ Belum/Tidak</span>`;
+        let checkBoxHtml = "";
 
-        // Teks disesuaikan agar cocok dengan sistem "cicil"
-        const checkHtml = needsCheck 
-            ? `<div class="check-box-wrapper">
-                <input type="checkbox" id="${checkId}" class="check-input" onchange="toggleValidation('${act.key}')">
-                <label for="${checkId}" class="check-label">Valid</label>
-               </div>`
-            : `<span style="font-size:10px; color:#64748b; padding:5px;">(Belum/Tidak)</span>`;
+        // Jika siswa menyatakan "ya", tampilkan checkbox validasi untuk pembimbing
+        if (needsCheck) {
+            checkBoxHtml = `
+            <div class="check-box-wrapper">
+                <input type="checkbox" id="${checkId}" class="check-input" onchange="handleValidationChange('${act.key}', this.checked)">
+                <label for="${checkId}" class="check-label">Valid</label>
+            </div>`;
+        } else {
+            checkBoxHtml = `<span style="font-size:11px; color:#64748b; padding: 6px 12px; background: #1e293b; border-radius: 20px;">Lewati</span>`;
+        }
 
-        const html = `
-        <div class="val-item">
-            <div class="val-info">
-                <span class="val-title" style="color:${isYa ? '#fff' : '#64748b'}">${act.label}</span>
-                <span class="val-time" style="color:${timeColor}">
-                    ${isYa ? '🕒 ' + waktu : '❌ Belum / Tidak melaksanakan'}
-                    ${anomalyHtml}
-                </span>
-            </div>
-            ${checkHtml}
-        </div>`;
-        container.insertAdjacentHTML('beforeend', html);
-    });
+        const div = document.createElement("div");
+        div.className = "val-item";
+        div.innerHTML = `
+            <div class="val-info">
+                <span class="val-title">${act.label} ${isYaHtml}</span>
+                <span class="val-time" style="color:${timeColor}">⏰ Pukul: ${waktu} ${anomalyHtml}</span>
+            </div>
+            ${checkBoxHtml}
+        `;
+        container.appendChild(div);
+    });
 }
 
-function toggleValidation(key) {
-    const cb = document.getElementById(`chk_${key}`);
-    validationState[key] = cb.checked;
-    checkValidationCompletion();
+// ==========================================
+// 6. VALIDATION LOGIC & ENABLE SAVE BUTTON
+// ==========================================
+function handleValidationChange(key, isChecked) {
+    validationState[key] = isChecked;
+    checkValidationCompletion();
 }
 
 function checkValidationCompletion() {
-    const btn = document.getElementById("btnSave");
-    let allValid = true;
-    
-    activityConfig.forEach(act => {
-        const status = selectedItem[act.key] || selectedItem[act.key+'_Status'] || "";
-        const isYa = String(status).toLowerCase().includes("ya");
-        if(isYa && !validationState[act.key]) {
-            allValid = false;
-        }
-    });
+    let requiredCount = 0;
+    let checkedCount = 0;
 
-    if(allValid) {
-        btn.disabled = false;
-        btn.textContent = "💾 SIMPAN NILAI & KOMENTAR";
-        btn.style.background = "var(--primary)";
-    } else {
-        btn.disabled = true;
-        btn.textContent = "🔒 SELESAIKAN VALIDASI DI TAB 1";
-        btn.style.background = "#64748b";
-    }
+    activityConfig.forEach(act => {
+        const status = selectedItem[act.key] || selectedItem[act.key+'_Status'] || "";
+        if (String(status).toLowerCase().includes("ya")) {
+            requiredCount++;
+            if (validationState[act.key]) checkedCount++;
+        }
+    });
+
+    const btnSave = document.getElementById("btnSave");
+    // Jika semua yang perlu divalidasi sudah di-check
+    if (requiredCount === 0 || checkedCount === requiredCount) {
+        btnSave.disabled = false;
+        btnSave.innerHTML = "💾 SIMPAN & SELESAIKAN PENILAIAN";
+        btnSave.style.background = "var(--primary)";
+    } else {
+        btnSave.disabled = true;
+        btnSave.innerHTML = `🔒 SELESAIKAN VALIDASI DI TAB 1 (${checkedCount}/${requiredCount})`;
+        btnSave.style.background = "#64748b";
+    }
 }
 
 // ==========================================
-// 6. GALLERY LOGIC
+// 7. RENDER PHOTO GALLERY
 // ==========================================
 function renderPhotoGallery(item) {
-    const container = document.getElementById("photoGalleryContainer");
-    container.innerHTML = "";
-    let count = 0;
+    const container = document.getElementById("photoGalleryContainer");
+    container.innerHTML = "";
+    let hasPhoto = false;
 
-    activityConfig.forEach(act => {
-        if(act.hasPhoto) {
-            let rawUrl = item[act.key+'_Foto'] || item['Foto_'+act.key] || "";
-            
-            if(rawUrl && rawUrl.length > 5) {
-                count++;
-                const displayUrl = convertDriveLink(rawUrl);
+    activityConfig.forEach(act => {
+        if (act.hasPhoto) {
+            const f1 = act.key + '_Foto'; 
+            const f2 = 'Foto_' + act.key;
+            let photoUrl = item[f1] || item[f2] || "";
+            
+            if (photoUrl && photoUrl !== "-" && photoUrl.includes("http")) {
+                hasPhoto = true;
+                const div = document.createElement("div");
+                div.className = "photo-item";
+                div.innerHTML = `
+                    <img src="${photoUrl}" alt="${act.label}" onclick="window.open('${photoUrl}', '_blank')">
+                    <div class="photo-label">${act.label}</div>
+                `;
+                container.appendChild(div);
+            }
+        }
+    });
 
-                const el = document.createElement('div');
-                el.className = 'photo-item';
-                
-                el.innerHTML = `
-                    <img src="${displayUrl}" 
-                         onclick="window.open('${rawUrl}', '_blank')" 
-                         loading="lazy" 
-                         alt="${act.label}"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    
-                    <div class="img-fallback" style="display:none;">
-                        <span>🚫 Gambar tidak tampil</span>
-                        <a href="${rawUrl}" target="_blank" style="color:#3b82f6; margin-top:5px; text-decoration:underline;">Buka Link Manual</a>
-                    </div>
-
-                    <div class="photo-label">${act.label}</div>
-                `;
-                container.appendChild(el);
-            }
-        }
-    });
-
-    if(count === 0) {
-        container.innerHTML = `<div class="no-photo-alert">🚫 Tidak ada bukti foto satupun yang diunggah siswa ini.</div>`;
-    }
-}
-
-function convertDriveLink(url) {
-    if (!url) return "";
-    if (url.includes("drive.google.com")) {
-        const idMatch = url.match(/\/d\/(.+?)(\/|$)/);
-        if (idMatch && idMatch[1]) {
-            return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`;
-        }
-    }
-    return url;
+    if (!hasPhoto) {
+        container.innerHTML = `<div class="no-photo-alert">Siswa tidak melampirkan foto bukti atau link tidak valid.</div>`;
+    }
 }
 
 // ==========================================
-// 7. GRADING & SAVING
+// 8. GRADING & RUBRIC LOGIC
 // ==========================================
 function setupGrading(item) {
-    updateRubric('R1', 80); updateRubric('R2', 80); updateRubric('R3', 80);
-    document.getElementById("inputCatatanPembimbing").value = "";
-
-    const val = item.Nilai_Pembimbing || "";
-    if(val.includes("[N:")) {
-        const matchTotal = val.match(/\[N:(\d+)\]/);
-        if(matchTotal) {
-            document.getElementById("finalScoreDisplay").textContent = matchTotal[1];
-        }
-        const parts = val.split("]");
-        if(parts.length > 0) {
-            document.getElementById("inputCatatanPembimbing").value = parts[parts.length-1].trim();
-        }
-    }
+    // Set default value slider
+    document.querySelectorAll('.rubric-range').forEach(el => el.value = 80);
+    updateRubric('R1', 80);
+    updateRubric('R2', 80);
+    updateRubric('R3', 80);
+    
+    // Load catatan jika sudah pernah ada
+    document.getElementById("inputCatatanPembimbing").value = item.Catatan_Pembimbing || "";
 }
 
 function updateRubric(id, val) {
-    document.getElementById(`val${id}`).textContent = val;
-    calculateFinalScore();
+    document.getElementById(`val${id}`).textContent = val;
+    calculateFinalScore();
 }
 
 function calculateFinalScore() {
-    const r1 = parseInt(document.getElementById("valR1").textContent) || 0;
-    const r2 = parseInt(document.getElementById("valR2").textContent) || 0;
-    const r3 = parseInt(document.getElementById("valR3").textContent) || 0;
-    
-    // Bobot: 40% + 30% + 30%
-    const final = (r1 * 0.4) + (r2 * 0.3) + (r3 * 0.3);
-    document.getElementById("finalScoreDisplay").textContent = Math.round(final);
+    const r1 = parseInt(document.getElementById("valR1").textContent) || 0; // Kedisiplinan 40%
+    const r2 = parseInt(document.getElementById("valR2").textContent) || 0; // Bukti 30%
+    const r3 = parseInt(document.getElementById("valR3").textContent) || 0; // Kejujuran 30%
+    
+    const totalScore = Math.round((r1 * 0.4) + (r2 * 0.3) + (r3 * 0.3));
+    document.getElementById("finalScoreDisplay").textContent = totalScore;
+    return totalScore;
 }
 
+// ==========================================
+// 9. SAVE DATA TO GOOGLE SHEETS
+// ==========================================
 async function saveGrade() {
-    const btn = document.getElementById("btnSave");
-    const originalText = btn.textContent;
-    
-    const score = document.getElementById("finalScoreDisplay").textContent;
-    const rawComment = document.getElementById("inputCatatanPembimbing").value;
-    const finalVal = `[N:${score}] ${rawComment}`;
-    
-    const idSiswa = selectedItem.id || selectedItem.row; 
+    const btnSave = document.getElementById("btnSave");
+    const finalScore = calculateFinalScore();
+    const catatan = document.getElementById("inputCatatanPembimbing").value;
 
-    if(!idSiswa) {
-        alert("⚠️ Error: ID Laporan (Baris) tidak ditemukan. Coba refresh halaman.");
-        return;
-    }
+    if (!selectedItem.row && !selectedItem.id) {
+        alert("Error: ID Baris (Row) tidak ditemukan.");
+        return;
+    }
 
-    btn.textContent = "⏳ Menyimpan...";
-    btn.disabled = true;
+    btnSave.disabled = true;
+    btnSave.innerHTML = `<div class="spinner" style="width:16px; height:16px; display:inline-block; margin:0 5px -3px 0;"></div> MENYIMPAN...`;
 
-    try {
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'simpanNilai',
-                id: idSiswa,           
-                nilai: finalVal
-            })
-        });
+    try {
+        // Kirim form data sesuai standar Google Apps Script doPost
+        const formData = new URLSearchParams();
+        formData.append("action", "nilaiPembimbing");
+        formData.append("row", selectedItem.row || selectedItem.id);
+        formData.append("nilai", finalScore);
+        formData.append("catatan", catatan);
 
-        const result = await response.json();
-
-        if(result.status === 'success' || result.status === 'ok'){
-            alert("✅ Penilaian Berhasil Disimpan!");
-            closeModal();
-            loadData(); 
-        } else {
-            throw new Error(result.message || "Gagal menyimpan");
-        }
-    } catch (error) {
-        console.error(error);
-        alert("❌ Gagal: " + error.message);
-        btn.textContent = originalText;
-        btn.disabled = false;
-    }
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success' || result.sukses) {
+            alert("✅ Penilaian berhasil disimpan!");
+            closeModal();
+            loadData(); // Auto-refresh data agar pindah ke tab "Selesai"
+        } else {
+            alert("Gagal menyimpan data: " + (result.message || "Unknown error"));
+            btnSave.disabled = false;
+            btnSave.innerHTML = "💾 COBA LAGI";
+        }
+    } catch (e) {
+        console.error("Error saving grade:", e);
+        alert("⚠️ Terjadi kesalahan jaringan. Cek koneksi internetmu.");
+        btnSave.disabled = false;
+        btnSave.innerHTML = "💾 COBA LAGI";
+    }
 }
-</script>
-<script src="chat.js" defer></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('SW Otomatis Siap!', reg.scope))
-        .catch(err => console.log('SW Gagal:', err));
-    });
-  }
+
+// ==========================================
+// 10. INISIALISASI AWAL
+// ==========================================
+window.onload = function() {
+    loadData();
+};
 </script>
 </body>
 </html>
