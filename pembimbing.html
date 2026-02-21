@@ -221,6 +221,57 @@
             padding: 10px 0; text-align: center; color: #94a3b8;
             font-size: 12px; z-index: 50;
         }
+
+/* --- Summary Table --- */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        .summary-table th {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px 15px;
+            font-weight: 600;
+            border-bottom: 1px solid #334155;
+            white-space: nowrap;
+        }
+        .summary-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+            white-space: nowrap;
+        }
+        .summary-table tbody tr {
+            transition: background 0.2s;
+        }
+        .summary-table tbody tr:hover {
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+        .summary-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-belum { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-sudah { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        
     </style>
 </head>
 <body>
@@ -238,6 +289,21 @@
         <div class="filter-row">
             <input type="date" id="dateFilter" onchange="loadData()">
             <button onclick="loadData()" style="background:#334155; border:1px solid #475569; color:white; border-radius:8px; padding:0 15px; cursor:pointer; font-size:18px;">🔄</button>
+        
+        <div id="summaryTableWrapper" class="table-responsive" style="display: none;">
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Siswa</th>
+                    <th>Isian Kegiatan</th>
+                    <th>Status Penilaian</th>
+                </tr>
+            </thead>
+            <tbody id="summaryTableBody"></tbody>
+        </table>
+    </div>
+        
         </div>
         <div class="filter-chips">
             <div class="chip active" onclick="setFilter('all', this)">Semua <span class="chip-count" id="countAll">0</span></div>
@@ -551,19 +617,73 @@ function setFilter(type, el) {
 
 function renderList(data) {
     const list = document.getElementById("studentList");
+    const tableWrapper = document.getElementById("summaryTableWrapper");
+    const tableBody = document.getElementById("summaryTableBody");
+    
     list.innerHTML = "";
+    
+    // Cek apakah ada tabel (jika HTML tabel sudah dipasang)
+    if (tableBody) tableBody.innerHTML = "";
+
+    // Ambil input pencarian
+    const searchInput = document.getElementById("searchName");
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
 
     let displayData = data;
+    
+    // 1. Filter by Tab
     if(currentFilterType === 'pending') displayData = data.filter(item => !hasGrade(item));
     else if(currentFilterType === 'done') displayData = data.filter(item => hasGrade(item));
 
+    // 2. Filter by Search (Nama)
+    if(searchTerm) {
+        displayData = displayData.filter(item => {
+            const namaSiswa = item.Nama || item.nama || "";
+            return namaSiswa.toLowerCase().includes(searchTerm);
+        });
+    }
+
+    // 3. Urutkan berdasarkan Nama Siswa (Sesuai Abjad A-Z)
     displayData.sort((a,b) => {
-        const aDone = hasGrade(a);
-        const bDone = hasGrade(b);
-        return aDone === bDone ? 0 : (aDone ? 1 : -1);
+        const nameA = (a.Nama || a.nama || "").toLowerCase();
+        const nameB = (b.Nama || b.nama || "").toLowerCase();
+        return nameA.localeCompare(nameB);
     });
 
-    displayData.forEach(item => {
+    if(displayData.length === 0) {
+        if(tableWrapper) tableWrapper.style.display = "none";
+        list.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Belum ada data laporan siswa / tidak ditemukan.</div>`;
+        return;
+    }
+
+    if(tableWrapper) tableWrapper.style.display = "block";
+
+    displayData.forEach((item, index) => {
+        // --- Render isi Tabel ---
+        if (tableBody) {
+            let doneCount = 0;
+            activityConfig.forEach(act => {
+                const val = item[act.key] || item[act.key+'_Status'] || "";
+                if(String(val).toLowerCase().includes('ya')) doneCount++;
+            });
+            
+            const isDone = hasGrade(item);
+            const statusHtml = isDone 
+                ? `<span class="status-badge status-sudah">Sudah Dinilai (⭐ ${item.Nilai_Pembimbing})</span>` 
+                : `<span class="status-badge status-belum">Belum Dinilai</span>`;
+                
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="font-weight: 600; color: white;">${item.Nama || item.nama}</td>
+                <td>${doneCount} / ${activityConfig.length} Terisi</td>
+                <td>${statusHtml}</td>
+            `;
+            tr.onclick = () => openInspectionMode(item);
+            tableBody.appendChild(tr);
+        }
+
+        // --- Render Kartu ---
         list.appendChild(createCard(item));
     });
 }
@@ -579,14 +699,20 @@ function createCard(item) {
     const progressPct = Math.round((doneCount / totalActs) * 100);
     const isDone = hasGrade(item);
     
-    const card = document.createElement("div");
-    card.className = `student-card ${isDone ? 'done' : 'priority'}`;
-    
+    // Tampilan badge dengan Nilai Pembimbing
     const badgeHtml = isDone 
-        ? `<span class="badge badge-done">SUDAH DINILAI</span>` 
+        ? `<span class="badge badge-done" style="background:var(--primary); color:white;">⭐ NILAI: ${item.Nilai_Pembimbing}</span>` 
         : `<span class="badge badge-pending">PERLU INSPEKSI</span>`;
 
     const progressColor = progressPct >= 80 ? '#34d399' : (progressPct >= 50 ? '#fbbf24' : '#ef4444');
+
+    const card = document.createElement("div");
+    card.className = `student-card ${isDone ? 'done' : 'priority'}`;
+    
+    // Tampilan Catatan jika ada
+    const catatanHtml = (isDone && item.Catatan_Pembimbing && item.Catatan_Pembimbing !== "-") 
+        ? `<div style="margin-top:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; font-size:11px; color:#cbd5e1; border-left:2px solid var(--primary);">💬 <i>${item.Catatan_Pembimbing}</i></div>`
+        : ``;
 
     card.innerHTML = `
         <div class="card-top">
@@ -603,6 +729,7 @@ function createCard(item) {
             </div>
             <span class="score-preview" style="color:${progressColor}">${progressPct}%</span>
         </div>
+        ${catatanHtml}
     `;
     card.onclick = () => openInspectionMode(item);
     return card;
