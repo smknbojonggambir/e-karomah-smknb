@@ -3,298 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Pembimbing Pro - E-KAROMAH (Strict Mode)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Dasbor Pembimbing - E-KAROMAH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #10b981;
-            --primary-dark: #059669;
-            --gold: #fbbf24;
-            --bg-dark: #0f172a; 
-            --card-bg: #1e293b;
-            --text: #f1f5f9;
-            --danger: #ef4444;
-            --blue: #3b82f6;
-            --warning-bg: rgba(251, 191, 36, 0.1);
+            --primary: #059669;
+            --primary-hover: #047857;
+            --secondary: #3b82f6;
+            --bg-base: #0f172a; 
+            --bg-surface: #1e293b;
+            --bg-surface-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #10b981;
+            --border: #334155;
         }
 
         body {
             margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #0f172a;
-            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 100px;
+            padding-bottom: 80px;
         }
 
         /* --- Header --- */
         header {
-            background: #1e293b;
-            padding: 15px 20px;
+            background: var(--bg-surface);
+            padding: 16px 24px;
             position: sticky; top: 0; z-index: 40;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .mentor-profile h2 { margin: 0; font-size: 16px; color: var(--gold); }
-        .mentor-profile span { font-size: 11px; color: #94a3b8; font-weight: 500; }
-        .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .mentor-profile h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main); }
+        .mentor-profile span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .btn-logout { 
+            background: transparent; border: 1px solid var(--danger); color: var(--danger); 
+            padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s;
+        }
         .btn-logout:hover { background: var(--danger); color: white; }
 
-        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        .container { max-width: 860px; margin: 24px auto; padding: 0 16px; }
 
-        /* --- Filter --- */
+        /* --- Notice Board --- */
+        .notice-board {
+            margin-bottom: 24px; padding: 16px; border-radius: 8px; font-size: 14px; line-height: 1.5;
+            border-left: 4px solid transparent; display: none;
+        }
+        .notice-title { font-weight: 600; margin-bottom: 4px; font-size: 15px; }
+        .notice-quote { font-style: italic; color: var(--text-muted); font-size: 13px; margin-bottom: 8px; display: block; }
+
+        /* --- Filter Area --- */
         .filter-container {
-            background: #1e293b; padding: 15px; border-radius: 12px;
-            margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);
+            background: var(--bg-surface); padding: 16px; border-radius: 8px;
+            margin-bottom: 24px; border: 1px solid var(--border);
         }
-        .filter-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .filter-row input { flex: 1; background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; font-family: inherit; }
+        .filter-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .input-group { flex: 1; min-width: 200px; display: flex; gap: 8px; }
+        .filter-row input { 
+            width: 100%; background: var(--bg-base); border: 1px solid var(--border); 
+            color: var(--text-main); padding: 10px 12px; border-radius: 6px; font-family: inherit; font-size: 14px;
+        }
+        .filter-row input:focus { outline: none; border-color: var(--secondary); }
+        .btn-refresh {
+            background: var(--bg-surface-hover); border: 1px solid var(--border); color: var(--text-main); 
+            border-radius: 6px; padding: 0 16px; cursor: pointer; font-weight: 500; font-size: 14px; transition: 0.2s;
+        }
+        .btn-refresh:hover { background: var(--border); }
         
-        .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+        .filter-chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
         .chip {
-            padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer;
-            background: #334155; color: #cbd5e1; border: 1px solid transparent; white-space: nowrap; transition: 0.2s;
+            padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; font-weight: 500;
+            background: var(--bg-base); color: var(--text-muted); border: 1px solid var(--border); white-space: nowrap; transition: 0.2s;
         }
-        .chip.active { background: rgba(16, 185, 129, 0.2); border-color: var(--primary); color: var(--primary); font-weight: 600; }
-        .chip-count { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px; }
+        .chip.active { background: rgba(5, 150, 105, 0.1); border-color: var(--primary); color: var(--success); }
+        .chip-count { background: var(--border); padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 6px; color: var(--text-main); }
+        .chip.active .chip-count { background: var(--primary); }
 
-        /* --- Summary Table --- */
+        /* --- Table & Cards --- */
         .table-responsive {
-            overflow-x: auto;
-            margin-bottom: 20px;
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; margin-bottom: 24px; background: var(--bg-surface);
+            border-radius: 8px; border: 1px solid var(--border);
         }
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            text-align: left;
-        }
-        .summary-table th {
-            background: #0f172a;
-            color: #94a3b8;
-            padding: 12px 15px;
-            font-weight: 600;
-            border-bottom: 1px solid #334155;
-            white-space: nowrap;
-        }
-        .summary-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #334155;
-            color: #e2e8f0;
-            white-space: nowrap;
-        }
-        .summary-table tbody tr {
-            transition: background 0.2s;
-        }
-        .summary-table tbody tr:hover {
-            background: rgba(255,255,255,0.05);
-            cursor: pointer;
-        }
-        .summary-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .status-belum { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .status-sudah { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .summary-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+        .summary-table th { background: var(--bg-base); color: var(--text-muted); padding: 14px 16px; font-weight: 600; border-bottom: 1px solid var(--border); }
+        .summary-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text-main); }
+        .summary-table tbody tr:hover { background: var(--bg-surface-hover); cursor: pointer; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-belum { background: rgba(220, 38, 38, 0.1); color: #f87171; }
+        .status-sudah { background: rgba(16, 185, 129, 0.1); color: #34d399; }
 
-        /* --- Cards --- */
         .card-list { display: flex; flex-direction: column; gap: 12px; }
         .student-card {
-            background: #1e293b; border: 1px solid #334155;
-            border-radius: 12px; padding: 16px; position: relative;
-            cursor: pointer; transition: 0.2s; overflow: hidden;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; cursor: pointer; transition: 0.2s;
         }
-        .student-card:active { transform: scale(0.98); }
-        .student-card.priority { border-left: 4px solid var(--danger); } 
+        .student-card:hover { border-color: var(--text-muted); }
+        .student-card.priority { border-left: 4px solid var(--warning); } 
         .student-card.done { border-left: 4px solid var(--primary); }
 
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .st-name { font-size: 15px; font-weight: 600; color: white; margin: 0; }
-        .st-date { font-size: 11px; color: #94a3b8; display: block; margin-top: 2px; }
+        .st-name { font-size: 16px; font-weight: 600; margin: 0; }
+        .st-date { font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
         
-        .badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 600; text-transform: uppercase; }
-        .badge-pending { background: rgba(251, 191, 36, 0.15); color: var(--gold); }
-        .badge-done { background: rgba(16, 185, 129, 0.15); color: var(--primary); }
-
         /* Progress Bar */
-        .progress-area { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #cbd5e1; }
-        .progress-track { flex: 1; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-        .score-preview { font-weight: bold; font-size: 12px; }
+        .progress-area { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); }
+        .progress-track { flex: 1; height: 6px; background: var(--bg-base); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 0.5s ease; }
 
-        /* --- Modal --- */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(8px); overflow-y: auto; }
+        /* --- Modal (Panel Verifikasi) --- */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); overflow-y: auto; }
         .modal-content {
-            background: #1e293b; margin: 20px auto; width: 95%; max-width: 700px;
-            border-radius: 16px; border: 1px solid #334155; padding-bottom: 20px; 
-            margin-bottom: 100px; animation: slideUp 0.3s ease-out; position: relative;
+            background: var(--bg-base); margin: 32px auto; width: 95%; max-width: 760px;
+            border-radius: 12px; border: 1px solid var(--border); padding-bottom: 24px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideIn 0.2s ease-out;
         }
-        @keyframes slideUp { from {transform: translateY(20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+        @keyframes slideIn { from {transform: translateY(10px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
         
-        /* Strict Mode Features CSS */
         .inspection-header {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            color: white; padding: 15px 20px; border-radius: 15px 15px 0 0;
-            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-surface); padding: 20px 24px; border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
         }
-        .inspection-label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap:5px; }
+        .inspection-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 
-        .tabs-container { display: flex; background: #0f172a; padding: 5px; margin: 15px; border-radius: 8px; }
-        .tab { flex: 1; text-align: center; padding: 10px; font-size: 12px; color: #94a3b8; cursor: pointer; border-radius: 6px; transition: 0.2s; }
-        .tab.active { background: #334155; color: white; font-weight: bold; }
+        .tabs-container { display: flex; background: var(--bg-surface); padding: 4px; margin: 20px 24px; border-radius: 6px; border: 1px solid var(--border); }
+        .tab { flex: 1; text-align: center; padding: 10px; font-size: 13px; color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: 0.2s; font-weight: 500; }
+        .tab.active { background: var(--bg-surface-hover); color: var(--text-main); }
 
-        .tab-content { display: none; padding: 0 15px; }
+        .tab-content { display: none; padding: 0 24px; }
         .tab-content.active { display: block; }
 
-        /* Photo Grid Inspection */
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .photo-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 1;
-            border: 1px solid #475569;
-            background: #0f172a;
-        }
-
-        .photo-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: 0.3s;
-            cursor: zoom-in;
-        }
-
-        .photo-item:hover img {
-            transform: scale(1.05);
-            opacity: 0.6;
-        }
-
-        .photo-label {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            font-size: 10px;
-            padding: 6px;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            z-index: 2;
-        }
-
-        .img-fallback {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            background: #1e293b; color: #94a3b8;
-            text-align: center; padding: 10px;
-            font-size: 10px;
-        }
-        
-        .no-photo-alert { grid-column: 1/-1; padding: 20px; text-align: center; background: rgba(239,68,68,0.1); border: 1px dashed var(--danger); color: var(--danger); font-size: 12px; border-radius: 8px; }
-
-        /* Anomaly & Validation List */
-        .validation-list { display: flex; flex-direction: column; gap: 8px; }
+        /* Validation List */
+        .validation-list { display: flex; flex-direction: column; gap: 10px; }
         .val-item { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; 
+            padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; 
         }
-        .val-info { display: flex; flex-direction: column; }
-        .val-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-        .val-time { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 5px; }
-        
-        .anomaly-badge { background: var(--danger); color: white; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
+        .val-title { font-size: 14px; font-weight: 500; }
+        .val-time { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 8px; }
+        .anomaly-badge { background: rgba(220, 38, 38, 0.1); color: #f87171; border: 1px solid #f87171; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
 
-        /* Custom Checkbox for Strict Checking */
         .check-box-wrapper { position: relative; }
         .check-input { display: none; }
         .check-label { 
-            display: flex; align-items: center; gap: 6px; padding: 6px 12px; 
-            background: #334155; border-radius: 20px; font-size: 11px; cursor: pointer; color: #cbd5e1; border: 1px solid #475569;
+            display: flex; align-items: center; gap: 6px; padding: 8px 16px; 
+            background: var(--bg-base); border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--text-muted); border: 1px solid var(--border); font-weight: 500; transition: 0.2s;
         }
-        .check-input:checked + .check-label { background: var(--primary); color: white; border-color: var(--primary); }
-        .check-input:checked + .check-label::before { content: '✓'; font-weight: bold; }
+        .check-input:checked + .check-label { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: var(--success); }
+
+        /* Photo Grid */
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 16px; }
+        .photo-item { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 1; border: 1px solid var(--border); background: var(--bg-surface); }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; cursor: zoom-in; }
+        .photo-item:hover img { opacity: 0.7; }
+        .photo-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(15, 23, 42, 0.9); padding: 8px; text-align: center; font-size: 11px; }
 
         /* Grading Rubric */
-        .rubric-container { background: #0f172a; border-radius: 12px; padding: 15px; border: 1px solid #334155; margin-top: 15px; }
-        .rubric-row { margin-bottom: 12px; }
-        .rubric-header { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
-        .rubric-range { width: 100%; accent-color: var(--blue); height: 4px; }
+        .rubric-container { background: var(--bg-surface); border-radius: 8px; padding: 20px; border: 1px solid var(--border); }
+        .rubric-row { margin-bottom: 20px; }
+        .rubric-row:last-child { margin-bottom: 0; }
+        .rubric-header { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+        .score-display { background: var(--bg-base); padding: 2px 10px; border-radius: 4px; color: var(--text-main); border: 1px solid var(--border); }
         
-        .final-score-box { 
-            text-align: center; padding: 15px; background: rgba(16, 185, 129, 0.1); 
-            border: 1px dashed var(--primary); border-radius: 12px; margin: 15px 0;
-        }
-        .fs-val { font-size: 28px; font-weight: 800; color: var(--primary); display: block; }
-        .fs-lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
-
-        textarea {
-            width: 100%; padding: 12px; background: #0f172a; border: 1px solid #475569;
-            color: white; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; margin-bottom: 10px; resize: vertical;
-        }
+        .rubric-range { width: 100%; accent-color: var(--secondary); height: 6px; cursor: pointer; }
         
-        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
-        .btn-save:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; background: #64748b; }
+        .final-score-box { text-align: center; padding: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; margin: 20px 0; }
+        .fs-val { font-size: 32px; font-weight: 700; color: var(--success); display: block; margin-top: 4px; }
 
-        .close-modal-btn { position: absolute; right: 15px; top: 15px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; z-index: 10; }
+        textarea { width: 100%; padding: 14px; background: var(--bg-base); border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 14px; margin-bottom: 16px; resize: vertical; outline: none; }
+        textarea:focus { border-color: var(--secondary); }
         
-        #loading { text-align: center; padding: 40px; color: #94a3b8; font-size: 13px; }
-        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
-        @keyframes spin { to {transform: rotate(360deg);} }
+        .btn-save { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-save:hover { background: var(--primary-hover); }
+        .btn-save:disabled { background: var(--bg-surface-hover); color: var(--text-muted); cursor: not-allowed; }
 
-        .footer-fixed {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #020617; border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 10px 0; text-align: center; color: #94a3b8;
-            font-size: 12px; z-index: 50;
-        }
+        .close-modal-btn { position: absolute; right: 24px; top: 24px; font-size: 24px; color: var(--text-muted); cursor: pointer; line-height: 1; transition: 0.2s; }
+        .close-modal-btn:hover { color: white; }
+        
+        #loading { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="mentor-profile">
-        <h2 id="mName">Pembimbing</h2>
-        <span id="mGroup">Memuat...</span>
+        <h2 id="mName">Memuat Nama...</h2>
+        <span id="mGroup">Kelompok: -</span>
     </div>
     <button class="btn-logout" onclick="logout()">Keluar</button>
 </header>
 
 <div class="container">
-    <div id="mentorNotification" style="display:none; margin-bottom: 20px; padding: 15px; border-radius: 10px; font-size: 13px; line-height: 1.5;"></div>
+    <div id="mentorNotification" class="notice-board"></div>
     
     <div class="filter-container">
         <div class="filter-row">
-            <input type="text" id="searchName" placeholder="🔍 Cari nama siswa..." oninput="renderList(rawData)" style="flex: 1.5;">
-            <input type="date" id="dateFilter" onchange="loadData()" style="flex: 1;">
-            <button onclick="loadData()" style="background:#334155; border:1px solid #475569; color:white; border-radius:8px; padding:0 15px; cursor:pointer; font-size:18px;">🔄</button>
+            <div class="input-group">
+                <input type="text" id="searchName" placeholder="Cari nama siswa..." oninput="renderList(rawData)">
+                <input type="date" id="dateFilter" onchange="loadData()">
+            </div>
+            <button class="btn-refresh" onclick="loadData()">Muat Ulang</button>
         </div>
         <div class="filter-chips">
             <div class="chip active" onclick="setFilter('all', this)">Semua <span class="chip-count" id="countAll">0</span></div>
-            <div class="chip" onclick="setFilter('pending', this)">Perlu Pemeriksaan <span class="chip-count" id="countPending" style="background:var(--danger); color:white">0</span></div>
-            <div class="chip" onclick="setFilter('done', this)">Selesai <span class="chip-count" id="countDone" style="background:var(--primary); color:white">0</span></div>
+            <div class="chip" onclick="setFilter('pending', this)">Perlu Verifikasi <span class="chip-count" id="countPending">0</span></div>
+            <div class="chip" onclick="setFilter('done', this)">Selesai <span class="chip-count" id="countDone">0</span></div>
         </div>
     </div>
 
@@ -304,15 +222,15 @@
                 <tr>
                     <th>No</th>
                     <th>Nama Siswa</th>
-                    <th>Isian Kegiatan</th>
-                    <th>Status Penilaian</th>
+                    <th>Aktivitas Terisi</th>
+                    <th>Status Verifikasi</th>
                 </tr>
             </thead>
             <tbody id="summaryTableBody"></tbody>
         </table>
     </div>
 
-    <div id="loading"><div class="spinner"></div>Mengambil data laporan siswa...</div>
+    <div id="loading">Memuat data laporan harian siswa...</div>
     <div id="studentList" class="card-list"></div>
 </div>
 
@@ -322,37 +240,30 @@
         
         <div class="inspection-header">
             <div>
-                <div class="inspection-label">🛡️ MODE INSPEKSI PEMBIMBING</div>
-                <h3 id="modalName" style="margin:5px 0 0; font-size:18px;">Nama Siswa</h3>
+                <div class="inspection-label">Panel Verifikasi Laporan</div>
+                <h3 id="modalName" style="margin:0; font-size:20px; font-weight:600;">Nama Siswa</h3>
             </div>
             <div style="text-align:right">
-                <small id="modalDate" style="opacity:0.8">Tanggal</small>
+                <span id="modalDate" style="color:var(--text-muted); font-size:13px;">Tanggal</span>
             </div>
         </div>
 
         <div class="tabs-container">
-            <div class="tab active" onclick="switchTab('check')">1. Validasi Kegiatan</div>
-            <div class="tab" onclick="switchTab('gallery')">2. Cek Foto Bukti</div>
-            <div class="tab" onclick="switchTab('grading')">3. Penilaian Akhir</div>
+            <div class="tab active" onclick="switchTab('check')">1. Validasi Waktu</div>
+            <div class="tab" onclick="switchTab('gallery')">2. Bukti Visual</div>
+            <div class="tab" onclick="switchTab('grading')">3. Evaluasi & Nilai</div>
         </div>
 
         <div id="tab-check" class="tab-content active">
-            <div style="margin-bottom:15px; background:rgba(59, 130, 246, 0.1); border:1px solid #3b82f6; padding:10px; border-radius:8px; font-size:12px; color:#93c5fd;">
-                ℹ️ <b>Instruksi:</b> Periksa jam pelaksanaan. Centang "Valid" jika waktu masuk akal. Sistem mendeteksi otomatis keterlambatan.
+            <div style="margin-bottom:20px; background:var(--bg-surface); padding:16px; border-radius:8px; border-left:3px solid var(--secondary);">
+                <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Catatan Pribadi Siswa:</span><br>
+                <span id="modalCatatanSiswa" style="color:var(--text-main); font-size:14px; margin-top:4px; display:block;">"-"</span>
             </div>
-            
-            <div style="background:#0f172a; padding:10px; border-radius:8px; margin-bottom:15px; font-style:italic; border-left:3px solid #cbd5e1;">
-                <span style="color:#64748b; font-size:10px;">Catatan Siswa:</span><br>
-                <span id="modalCatatanSiswa" style="color:#f1f5f9; font-size:13px;">"-"</span>
-            </div>
-
             <div class="validation-list" id="validationContainer"></div>
         </div>
 
         <div id="tab-gallery" class="tab-content">
-            <div style="margin-bottom:10px; font-size:12px; color:#94a3b8; text-align:center;">
-                Pastikan foto tidak gelap gulita, bukan foto karpet saja, dan bukan foto berulang.
-            </div>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Klik pada gambar untuk memperbesar resolusi.</p>
             <div id="photoGalleryContainer" class="photo-grid"></div>
         </div>
 
@@ -361,48 +272,41 @@
                 <div class="rubric-row">
                     <div class="rubric-header">
                         <span>Kedisiplinan Waktu (40%)</span>
-                        <span id="valR1">80</span>
+                        <span class="score-display" id="valR1">80</span>
                     </div>
-                    <input type="range" class="rubric-range" min="0" max="100" value="80" oninput="updateRubric('R1', this.value)">
+                    <input type="range" class="rubric-range" min="0" max="100" step="5" value="80" oninput="updateRubric('R1', this.value)">
                 </div>
                 <div class="rubric-row">
                     <div class="rubric-header">
                         <span>Kelengkapan Bukti (30%)</span>
-                        <span id="valR2">80</span>
+                        <span class="score-display" id="valR2">80</span>
                     </div>
-                    <input type="range" class="rubric-range" min="0" max="100" value="80" oninput="updateRubric('R2', this.value)">
+                    <input type="range" class="rubric-range" min="0" max="100" step="5" value="80" oninput="updateRubric('R2', this.value)">
                 </div>
                 <div class="rubric-row">
                     <div class="rubric-header">
-                        <span>Kualitas Ibadah/Kejujuran (30%)</span>
-                        <span id="valR3">80</span>
+                        <span>Kualitas Ibadah (30%)</span>
+                        <span class="score-display" id="valR3">80</span>
                     </div>
-                    <input type="range" class="rubric-range" min="0" max="100" value="80" oninput="updateRubric('R3', this.value)">
+                    <input type="range" class="rubric-range" min="0" max="100" step="5" value="80" oninput="updateRubric('R3', this.value)">
                 </div>
             </div>
 
             <div class="final-score-box">
-                <span class="fs-lbl">Nilai Akhir Terhitung</span>
+                <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Skor Akhir Sistem</span>
                 <span class="fs-val" id="finalScoreDisplay">80</span>
             </div>
 
-            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:5px;">Evaluasi / Komentar Pembimbing:</label>
-            <textarea id="inputCatatanPembimbing" rows="3" placeholder="Contoh: Sholat subuh terlalu siang, mohon diperbaiki besok..."></textarea>
+            <label style="font-size:13px; color:var(--text-main); font-weight:500; display:block; margin-bottom:8px;">Catatan & Evaluasi Pembimbing (Opsional):</label>
+            <textarea id="inputCatatanPembimbing" rows="3" placeholder="Berikan umpan balik atau motivasi untuk ananda..."></textarea>
             
-            <button id="btnSave" class="btn-save" onclick="saveGrade()" disabled>🔒 SELESAIKAN VALIDASI DULU</button>
-            <div style="text-align:center; font-size:10px; color:#64748b; margin-top:5px;">
-                *Tombol aktif setelah melakukan validasi di Tab 1
-            </div>
+            <button id="btnSave" class="btn-save" onclick="saveGrade()" disabled>Validasi Tab 1 Terlebih Dahulu</button>
         </div>
     </div>
 </div>
 
-<div class="footer-fixed">
-    &copy; 2026 E-KAROMAH App. Developer <a href="https://www.kangruli.web.id/" target="_blank">Kang Ruli</a>
-</div>
-
 <script>
-// ================= CONFIG & SETUP =================
+// ================= SCRIPT LOGIC (Refined) =================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec"; 
 
 const activityConfig = [
@@ -427,16 +331,16 @@ let validationState = {};
 
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user || user.role !== 'pembimbing'){
-    alert("⛔ Akses Ditolak. Silakan login sebagai Pembimbing."); 
+    alert("Akses Ditolak. Silakan login sebagai Pembimbing."); 
     window.location.href='index.html';
 }
 
-document.getElementById('mName').textContent = user.nama || "Pembimbing";
+document.getElementById('mName').textContent = user.nama || "Pembimbing Akademik";
 document.getElementById('mGroup').textContent = "Kelompok: " + (user.kelompok || "-");
 document.getElementById('dateFilter').valueAsDate = new Date();
 
 function logout() {
-    if(confirm("Yakin ingin keluar?")) {
+    if(confirm("Apakah Anda yakin ingin keluar dari sesi ini?")) {
         localStorage.removeItem("user");
         window.location.href = "index.html";
     }
@@ -451,13 +355,11 @@ function formatTglIndo(isoDate) {
 }
 
 async function loadData() {
-    const list = document.getElementById("studentList");
     const loader = document.getElementById("loading");
     const dateInput = document.getElementById("dateFilter").value;
-    const tableWrapper = document.getElementById("summaryTableWrapper");
     
-    list.innerHTML = "";
-    if (tableWrapper) tableWrapper.style.display = "none";
+    document.getElementById("studentList").innerHTML = "";
+    document.getElementById("summaryTableWrapper").style.display = "none";
     loader.style.display = "block";
 
     try {
@@ -469,38 +371,7 @@ async function loadData() {
         
         data.forEach(item => {
             let namaSiswa = (item.Nama || item.nama || "").trim();
-            let itemDate = "";
-
-            if (item.Tanggal) {
-                if (/^\d{4}-\d{2}-\d{2}/.test(item.Tanggal)) {
-                    let tglObj;
-                    if (item.Tanggal.includes("T")) {
-                        try {
-                            tglObj = new Date(item.Tanggal);
-                            let tglWIBDate = new Date(tglObj.getTime() + (7 * 60 * 60 * 1000));
-                            const year = tglWIBDate.getFullYear();
-                            const month = String(tglWIBDate.getMonth() + 1).padStart(2, '0');
-                            const day = String(tglWIBDate.getDate()).padStart(2, '0');
-                            itemDate = `${year}-${month}-${day}`; 
-                        } catch (e) {
-                            const d = new Date(item.Tanggal);
-                            const year = d.getFullYear();
-                            const month = String(d.getMonth() + 1).padStart(2, '0');
-                            const day = String(d.getDate()).padStart(2, '0');
-                            itemDate = `${year}-${month}-${day}`; 
-                        }
-                    } else {
-                        itemDate = item.Tanggal.substring(0,10);
-                    }
-                } else {
-                    const d = new Date(item.Tanggal);
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    itemDate = `${year}-${month}-${day}`; 
-                }
-            }
-            
+            let itemDate = item.Tanggal ? (item.Tanggal.includes("T") ? item.Tanggal.substring(0,10) : item.Tanggal) : "";
             let key = `${namaSiswa}_${itemDate}`;
 
             if (!groupedData[key]) {
@@ -511,50 +382,20 @@ async function loadData() {
                     const statusSiswa = item[act.key] || item[act.key+'_Status'] || "";
                     if (String(statusSiswa).toLowerCase().includes('ya')) {
                         groupedData[key][act.key] = statusSiswa;
-                        
-                        const w1 = act.key + '_Waktu'; const w2 = 'Waktu_' + act.key;
-                        if (item[w1] && item[w1] !== "-") groupedData[key][w1] = item[w1];
-                        if (item[w2] && item[w2] !== "-") groupedData[key][w2] = item[w2];
-                        
-                        const f1 = act.key + '_Foto'; const f2 = 'Foto_' + act.key;
-                        if (item[f1] && item[f1] !== "-") groupedData[key][f1] = item[f1];
-                        if (item[f2] && item[f2] !== "-") groupedData[key][f2] = item[f2];
+                        if (item[act.key+'_Waktu'] && item[act.key+'_Waktu'] !== "-") groupedData[key][act.key+'_Waktu'] = item[act.key+'_Waktu'];
+                        if (item[act.key+'_Foto'] && item[act.key+'_Foto'] !== "-") groupedData[key][act.key+'_Foto'] = item[act.key+'_Foto'];
                     }
                 });
-
-                if (item.id || item.row) {
-                    groupedData[key].id = item.id || item.row;
-                    groupedData[key].row = item.id || item.row;
-                }
-
-                if(item.Catatan && item.Catatan !== "-" && String(item.Catatan).trim() !== "") {
-                    if (!groupedData[key].Catatan || groupedData[key].Catatan === "-") {
-                        groupedData[key].Catatan = item.Catatan;
-                    } else if (!groupedData[key].Catatan.includes(item.Catatan)) {
-                        groupedData[key].Catatan += " | " + item.Catatan;
-                    }
-                }
-
-                if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
-                    groupedData[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
-                }
+                if(item.Catatan && item.Catatan !== "-") groupedData[key].Catatan = item.Catatan;
+                if(item.id || item.row) groupedData[key].row = item.id || item.row;
             }
         });
 
-        let mergedArray = Object.values(groupedData);
-
-        let myStudents = [];
-        if(dateInput && mergedArray.length > 0) {
-            myStudents = mergedArray.filter(item => item._filterDate === dateInput);
-        } else {
-            myStudents = mergedArray;
-        }
-
-        rawData = myStudents;
+        rawData = Object.values(groupedData).filter(item => item._filterDate === dateInput);
         updateCountChips(rawData);
 
-        if(myStudents.length === 0) {
-            loader.innerHTML = `<div style="padding:40px; text-align:center; color:#94a3b8">🍃 Tidak ada laporan pada tanggal <b>${dateInput}</b>.</div>`;
+        if(rawData.length === 0) {
+            loader.innerHTML = `Data tidak ditemukan untuk tanggal <b>${dateInput}</b>.`;
             return;
         }
 
@@ -562,8 +403,7 @@ async function loadData() {
         loader.style.display = "none";
 
     } catch(e) {
-        console.error(e);
-        loader.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">Gagal memuat data.<br>Cek koneksi internet atau coba refresh.</div>`;
+        loader.innerHTML = `<span style="color:var(--danger)">Gagal memuat data. Periksa koneksi internet Anda.</span>`;
     }
 }
 
@@ -576,47 +416,30 @@ function updateCountChips(data) {
     document.getElementById("countDone").textContent = done;
 
     const notifBox = document.getElementById("mentorNotification");
-    if (!notifBox) return;
-
-    if (data.length === 0) {
-        notifBox.style.display = "none";
-        return;
-    }
+    if (data.length === 0) return notifBox.style.display = "none";
 
     notifBox.style.display = "block";
     
     if (pending > 0) {
-        notifBox.style.background = "rgba(251, 191, 36, 0.1)"; 
-        notifBox.style.border = "1px solid var(--gold)";
-        notifBox.style.color = "#fcd34d";
+        notifBox.style.borderColor = "var(--warning)";
+        notifBox.style.background = "rgba(217, 119, 6, 0.1)";
         notifBox.innerHTML = `
-            <div style="font-weight:bold; margin-bottom:6px; font-size:14px; color:var(--gold);">
-                ⚠️ PENGINGAT AMANAH: Ada ${pending} Laporan Belum Diperiksa
-            </div>
-            <i style="opacity:0.9;">"Sesungguhnya Allah menyuruh kamu menyampaikan amanah kepada yang berhak menerimanya..." (QS. An-Nisa: 58).</i>
-            <div style="margin-top:6px; opacity:0.9;">
-                Bapak/ Ibu Pembimbing, mari luangkan waktu sejenak untuk menunaikan amanah mendampingi ananda. Penilaian dan evaluasi Anda sangat berharga bagi perkembangan ibadah mereka. Semangat!
-            </div>
+            <div class="notice-title" style="color: var(--warning)">Terdapat ${pending} Laporan Tertunda</div>
+            <span class="notice-quote">"Sesungguhnya Allah menyuruh kamu menyampaikan amanah kepada yang berhak menerimanya..." (QS. An-Nisa: 58)</span>
+            Mohon luangkan waktu untuk memverifikasi dan mengevaluasi laporan ibadah ananda hari ini.
         `;
     } else {
-        notifBox.style.background = "rgba(16, 185, 129, 0.1)"; 
-        notifBox.style.border = "1px solid var(--primary)";
-        notifBox.style.color = "#6ee7b7";
+        notifBox.style.borderColor = "var(--success)";
+        notifBox.style.background = "rgba(16, 185, 129, 0.1)";
         notifBox.innerHTML = `
-            <div style="font-weight:bold; margin-bottom:6px; font-size:14px; color:var(--primary);">
-                ✅ ALHAMDULILLAH, SEMUA TUGAS SELESAI!
-            </div>
-            <i style="opacity:0.9;">"Barangsiapa yang menunjuki kepada kebaikan maka dia akan mendapatkan pahala seperti pahala orang yang mengerjakannya." (HR. Muslim).</i>
-            <div style="margin-top:6px; opacity:0.9;">
-                Jazakumullah khairan atas kesabaran dan dedikasi Bapak/ Ibu Pembimbing hari ini. Lelahmu dalam mendidik insyaallah bernilai lillah dan menjadi amal jariyah. Selamat beristirahat!
-            </div>
+            <div class="notice-title" style="color: var(--success)">Semua Tugas Telah Diverifikasi</div>
+            <span class="notice-quote">"Barangsiapa yang menunjuki kepada kebaikan maka dia akan mendapatkan pahala..." (HR. Muslim)</span>
+            Terima kasih atas dedikasi Anda. Seluruh laporan hari ini telah berhasil dievaluasi.
         `;
     }
 }
 
-function hasGrade(item){ 
-    return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2; 
-}
+function hasGrade(item) { return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2; }
 
 function setFilter(type, el) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -627,121 +450,66 @@ function setFilter(type, el) {
 
 function renderList(data) {
     const list = document.getElementById("studentList");
-    const tableWrapper = document.getElementById("summaryTableWrapper");
     const tableBody = document.getElementById("summaryTableBody");
-    
+    const searchTerm = (document.getElementById("searchName").value || "").toLowerCase();
+
     list.innerHTML = "";
-    if (tableBody) tableBody.innerHTML = "";
+    tableBody.innerHTML = "";
 
-    const searchInput = document.getElementById("searchName");
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
-
-    let displayData = data;
-    
-    if(currentFilterType === 'pending') displayData = data.filter(item => !hasGrade(item));
-    else if(currentFilterType === 'done') displayData = data.filter(item => hasGrade(item));
-
-    if(searchTerm) {
-        displayData = displayData.filter(item => {
-            const namaSiswa = item.Nama || item.nama || "";
-            return namaSiswa.toLowerCase().includes(searchTerm);
-        });
-    }
-
-    displayData.sort((a,b) => {
-        const nameA = (a.Nama || a.nama || "").toLowerCase();
-        const nameB = (b.Nama || b.nama || "").toLowerCase();
-        return nameA.localeCompare(nameB);
-    });
+    let displayData = data.filter(item => {
+        const matchName = (item.Nama || item.nama || "").toLowerCase().includes(searchTerm);
+        if(currentFilterType === 'pending') return matchName && !hasGrade(item);
+        if(currentFilterType === 'done') return matchName && hasGrade(item);
+        return matchName;
+    }).sort((a,b) => (a.Nama || "").localeCompare(b.Nama || ""));
 
     if(displayData.length === 0) {
-        if(tableWrapper) tableWrapper.style.display = "none";
-        list.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Belum ada data laporan siswa / tidak ditemukan.</div>`;
+        document.getElementById("summaryTableWrapper").style.display = "none";
+        list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada data yang sesuai kriteria.</div>`;
         return;
     }
 
-    if(tableWrapper) tableWrapper.style.display = "block";
+    document.getElementById("summaryTableWrapper").style.display = "block";
 
     displayData.forEach((item, index) => {
-        if (tableBody) {
-            let doneCount = 0;
-            activityConfig.forEach(act => {
-                const val = item[act.key] || item[act.key+'_Status'] || "";
-                if(String(val).toLowerCase().includes('ya')) doneCount++;
-            });
+        let doneCount = activityConfig.filter(act => String(item[act.key] || "").toLowerCase().includes('ya')).length;
+        const statusHtml = hasGrade(item) 
+            ? `<span class="status-badge status-sudah">Dinilai (${item.Nilai_Pembimbing})</span>` 
+            : `<span class="status-badge status-belum">Menunggu</span>`;
             
-            const isDone = hasGrade(item);
-            const statusHtml = isDone 
-                ? `<span class="status-badge status-sudah">Sudah Dinilai (⭐ ${item.Nilai_Pembimbing})</span>` 
-                : `<span class="status-badge status-belum">Belum Dinilai</span>`;
-                
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td style="font-weight: 600; color: white;">${item.Nama || item.nama}</td>
-                <td>${doneCount} / ${activityConfig.length} Terisi</td>
-                <td>${statusHtml}</td>
-            `;
-            tr.onclick = () => openInspectionMode(item);
-            tableBody.appendChild(tr);
-        }
+        // Render Table Row
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${index + 1}</td><td style="font-weight:500;">${item.Nama || item.nama}</td><td>${doneCount}/${activityConfig.length}</td><td>${statusHtml}</td>`;
+        tr.onclick = () => openInspectionMode(item);
+        tableBody.appendChild(tr);
 
-        list.appendChild(createCard(item));
-    });
-}
-
-function createCard(item) {
-    let doneCount = 0;
-    activityConfig.forEach(act => {
-        const val = item[act.key] || item[act.key+'_Status'] || "";
-        if(String(val).toLowerCase().includes('ya')) doneCount++;
-    });
-    
-    const totalActs = activityConfig.length;
-    const progressPct = Math.round((doneCount / totalActs) * 100);
-    const isDone = hasGrade(item);
-    
-    const badgeHtml = isDone 
-        ? `<span class="badge badge-done" style="background:var(--primary); color:white;">⭐ NILAI: ${item.Nilai_Pembimbing}</span>` 
-        : `<span class="badge badge-pending">PERLU INSPEKSI</span>`;
-
-    const progressColor = progressPct >= 80 ? '#34d399' : (progressPct >= 50 ? '#fbbf24' : '#ef4444');
-
-    const card = document.createElement("div");
-    card.className = `student-card ${isDone ? 'done' : 'priority'}`;
-    
-    const catatanHtml = (isDone && item.Catatan_Pembimbing && item.Catatan_Pembimbing !== "-") 
-        ? `<div style="margin-top:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; font-size:11px; color:#cbd5e1; border-left:2px solid var(--primary);">💬 <i>${item.Catatan_Pembimbing}</i></div>`
-        : ``;
-
-    card.innerHTML = `
-        <div class="card-top">
-            <div>
-                <h3 class="st-name">${item.Nama || item.nama}</h3>
-                <span class="st-date">📅 ${formatTglIndo(item._filterDate || item.Tanggal)}</span>
+        // Render Card (Mobile Friendly)
+        const pct = Math.round((doneCount / activityConfig.length) * 100);
+        const color = pct >= 80 ? 'var(--success)' : (pct >= 50 ? 'var(--warning)' : 'var(--danger)');
+        const card = document.createElement("div");
+        card.className = `student-card ${hasGrade(item) ? 'done' : 'priority'}`;
+        card.innerHTML = `
+            <div class="card-top">
+                <div><h3 class="st-name">${item.Nama || item.nama}</h3><span class="st-date">${formatTglIndo(item._filterDate)}</span></div>
+                ${statusHtml}
             </div>
-            ${badgeHtml}
-        </div>
-        <div class="progress-area">
-            <span>Isian: ${doneCount}/${totalActs}</span>
-            <div class="progress-track">
-                <div class="progress-fill" style="width: ${progressPct}%; background:${progressColor}"></div>
+            <div class="progress-area">
+                <span>Progress: ${doneCount}/${activityConfig.length}</span>
+                <div class="progress-track"><div class="progress-fill" style="width: ${pct}%; background:${color}"></div></div>
+                <span style="color:${color}; font-weight:600;">${pct}%</span>
             </div>
-            <span class="score-preview" style="color:${progressColor}">${progressPct}%</span>
-        </div>
-        ${catatanHtml}
-    `;
-    card.onclick = () => openInspectionMode(item);
-    return card;
+        `;
+        card.onclick = () => openInspectionMode(item);
+        list.appendChild(card);
+    });
 }
 
 function openInspectionMode(item) {
     selectedItem = item;
     validationState = {}; 
-
     document.getElementById("modalName").textContent = item.Nama || item.nama;
-    document.getElementById("modalDate").textContent = formatTglIndo(item._filterDate || item.Tanggal);
-    document.getElementById("modalCatatanSiswa").textContent = item.Catatan ? `"${item.Catatan}"` : "-";
+    document.getElementById("modalDate").textContent = formatTglIndo(item._filterDate);
+    document.getElementById("modalCatatanSiswa").textContent = item.Catatan ? `"${item.Catatan}"` : "Tidak ada catatan.";
 
     renderValidationList(item);
     renderPhotoGallery(item);
@@ -752,19 +520,12 @@ function openInspectionMode(item) {
     document.getElementById("detailModal").style.display = "block";
 }
 
-function closeModal() {
-    document.getElementById("detailModal").style.display = "none";
-}
+function closeModal() { document.getElementById("detailModal").style.display = "none"; }
 
 function switchTab(tabName) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    const tabs = document.querySelectorAll('.tab');
-    if(tabName === 'check') tabs[0].classList.add('active');
-    if(tabName === 'gallery') tabs[1].classList.add('active');
-    if(tabName === 'grading') tabs[2].classList.add('active');
-
+    document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
 }
 
@@ -773,59 +534,31 @@ function renderValidationList(item) {
     container.innerHTML = "";
 
     activityConfig.forEach(act => {
-        const status = item[act.key] || item[act.key+'_Status'] || "-";
-        let rawWaktu = item[act.key+'_Waktu'] || item['Waktu_'+act.key] || "-";
-        
-        let waktu = rawWaktu;
-        if (String(waktu).includes('T')) {
-            try {
-                waktu = String(waktu).split('T')[1].substring(0, 5); 
-            } catch(e) {
-                console.warn("Gagal mengekstrak waktu:", rawWaktu);
-            }
-        }
-        
+        const status = item[act.key] || item[act.key+'_Status'] || "";
         const isYa = String(status).toLowerCase().includes("ya");
+        let waktu = item[act.key+'_Waktu'] || item['Waktu_'+act.key] || "-";
+        if (waktu.includes('T')) waktu = waktu.split('T')[1].substring(0, 5); 
 
-        let anomalyHtml = "";
-        let timeColor = "#94a3b8";
-
-        if(isYa && act.max && waktu !== "-") {
-            const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-            if(timePattern.test(waktu)) {
-                if(waktu > act.max) {
-                    anomalyHtml = `<span class="anomaly-badge">⚠️ Terlambat (Batas: ${act.max})</span>`;
-                    timeColor = "#ef4444";
-                }
-            }
+        let anomalyHtml = "", timeColor = "var(--text-muted)";
+        if(isYa && act.max && waktu !== "-" && waktu > act.max) {
+            anomalyHtml = `<span class="anomaly-badge">Terlambat (Batas: ${act.max})</span>`;
+            timeColor = "var(--danger)";
         }
 
-        const needsCheck = isYa; 
-        const checkId = `chk_${act.key}`;
-        
-        const isYaHtml = isYa ? `<span style="color:#10b981; font-weight:bold; font-size:11px;">✅ Selesai</span>` : `<span style="color:#64748b; font-size:11px;">❌ Belum/Tidak</span>`;
-        let checkBoxHtml = "";
+        const chkId = `chk_${act.key}`;
+        const actionHtml = isYa 
+            ? `<div class="check-box-wrapper"><input type="checkbox" id="${chkId}" class="check-input" onchange="handleValidationChange('${act.key}', this.checked)"><label for="${chkId}" class="check-label">Validasi</label></div>`
+            : `<span style="font-size:12px; color:var(--text-muted); background:var(--bg-base); padding:6px 12px; border-radius:6px; border:1px solid var(--border);">Abaikan</span>`;
 
-        if (needsCheck) {
-            checkBoxHtml = `
-            <div class="check-box-wrapper">
-                <input type="checkbox" id="${checkId}" class="check-input" onchange="handleValidationChange('${act.key}', this.checked)">
-                <label for="${checkId}" class="check-label">Valid</label>
-            </div>`;
-        } else {
-            checkBoxHtml = `<span style="font-size:11px; color:#64748b; padding: 6px 12px; background: #1e293b; border-radius: 20px;">Lewati</span>`;
-        }
-
-        const div = document.createElement("div");
-        div.className = "val-item";
-        div.innerHTML = `
-            <div class="val-info">
-                <span class="val-title">${act.label} ${isYaHtml}</span>
-                <span class="val-time" style="color:${timeColor}">⏰ Pukul: ${waktu} ${anomalyHtml}</span>
+        container.insertAdjacentHTML('beforeend', `
+            <div class="val-item">
+                <div>
+                    <div class="val-title" style="color:${isYa ? 'var(--text-main)' : 'var(--text-muted)'}">${act.label} ${isYa ? '✓' : ''}</div>
+                    <div class="val-time" style="color:${timeColor}">Pukul: ${waktu} ${anomalyHtml}</div>
+                </div>
+                ${actionHtml}
             </div>
-            ${checkBoxHtml}
-        `;
-        container.appendChild(div);
+        `);
     });
 }
 
@@ -835,129 +568,66 @@ function handleValidationChange(key, isChecked) {
 }
 
 function checkValidationCompletion() {
-    let requiredCount = 0;
-    let checkedCount = 0;
-
+    let req = 0, chk = 0;
     activityConfig.forEach(act => {
-        const status = selectedItem[act.key] || selectedItem[act.key+'_Status'] || "";
-        if (String(status).toLowerCase().includes("ya")) {
-            requiredCount++;
-            if (validationState[act.key]) checkedCount++;
+        if (String(selectedItem[act.key] || "").toLowerCase().includes("ya")) {
+            req++; if (validationState[act.key]) chk++;
         }
     });
 
-    const btnSave = document.getElementById("btnSave");
-    if (requiredCount === 0 || checkedCount === requiredCount) {
-        btnSave.disabled = false;
-        btnSave.innerHTML = "💾 SIMPAN & SELESAIKAN PENILAIAN";
-        btnSave.style.background = "var(--primary)";
+    const btn = document.getElementById("btnSave");
+    if (req === 0 || chk === req) {
+        btn.disabled = false; btn.innerHTML = "Simpan Evaluasi & Nilai Akhir";
     } else {
-        btnSave.disabled = true;
-        btnSave.innerHTML = `🔒 SELESAIKAN VALIDASI DI TAB 1 (${checkedCount}/${requiredCount})`;
-        btnSave.style.background = "#64748b";
+        btn.disabled = true; btn.innerHTML = `Selesaikan Validasi di Tab 1 (${chk}/${req})`;
     }
 }
 
 function renderPhotoGallery(item) {
     const container = document.getElementById("photoGalleryContainer");
-    container.innerHTML = "";
-    let hasPhoto = false;
+    container.innerHTML = ""; let hasPhoto = false;
 
     activityConfig.forEach(act => {
         if (act.hasPhoto) {
-            const f1 = act.key + '_Foto'; 
-            const f2 = 'Foto_' + act.key;
-            let photoUrl = item[f1] || item[f2] || "";
-            
-            if (photoUrl && photoUrl !== "-" && photoUrl.includes("http")) {
+            let url = item[act.key + '_Foto'] || item['Foto_' + act.key];
+            if (url && url.includes("http")) {
                 hasPhoto = true;
-                const div = document.createElement("div");
-                div.className = "photo-item";
-                div.innerHTML = `
-                    <img src="${photoUrl}" alt="${act.label}" onclick="window.open('${photoUrl}', '_blank')">
-                    <div class="photo-label">${act.label}</div>
-                `;
-                container.appendChild(div);
+                container.insertAdjacentHTML('beforeend', `<div class="photo-item"><img src="${url}" onclick="window.open('${url}', '_blank')"><div class="photo-label">${act.label}</div></div>`);
             }
         }
     });
-
-    if (!hasPhoto) {
-        container.innerHTML = `<div class="no-photo-alert">Siswa tidak melampirkan foto bukti atau link tidak valid.</div>`;
-    }
+    if (!hasPhoto) container.innerHTML = `<div style="grid-column:1/-1; padding:20px; text-align:center; background:var(--bg-surface-hover); color:var(--text-muted); border-radius:8px;">Belum ada lampiran visual.</div>`;
 }
 
 function setupGrading(item) {
-    document.querySelectorAll('.rubric-range').forEach(el => el.value = 80);
-    updateRubric('R1', 80);
-    updateRubric('R2', 80);
-    updateRubric('R3', 80);
-    
+    ['R1','R2','R3'].forEach(id => { document.querySelector(`input[oninput*="${id}"]`).value = 80; updateRubric(id, 80); });
     document.getElementById("inputCatatanPembimbing").value = item.Catatan_Pembimbing || "";
 }
 
 function updateRubric(id, val) {
     document.getElementById(`val${id}`).textContent = val;
-    calculateFinalScore();
-}
-
-function calculateFinalScore() {
     const r1 = parseInt(document.getElementById("valR1").textContent) || 0; 
     const r2 = parseInt(document.getElementById("valR2").textContent) || 0; 
     const r3 = parseInt(document.getElementById("valR3").textContent) || 0; 
-    
-    const totalScore = Math.round((r1 * 0.4) + (r2 * 0.3) + (r3 * 0.3));
-    document.getElementById("finalScoreDisplay").textContent = totalScore;
-    return totalScore;
+    document.getElementById("finalScoreDisplay").textContent = Math.round((r1*0.4) + (r2*0.3) + (r3*0.3));
 }
 
 async function saveGrade() {
-    const btnSave = document.getElementById("btnSave");
-    const finalScore = calculateFinalScore();
-    const catatan = document.getElementById("inputCatatanPembimbing").value;
-
-    if (!selectedItem.row && !selectedItem.id) {
-        alert("Error: ID Baris (Row) tidak ditemukan.");
-        return;
-    }
-
-    btnSave.disabled = true;
-    btnSave.innerHTML = `<div class="spinner" style="width:16px; height:16px; display:inline-block; margin:0 5px -3px 0;"></div> MENYIMPAN...`;
-
+    const btn = document.getElementById("btnSave");
+    if (!selectedItem.row) return alert("Sistem tidak mendeteksi baris database.");
+    
+    btn.disabled = true; btn.textContent = "Memproses...";
     try {
-        const formData = new URLSearchParams();
-        formData.append("action", "nilaiPembimbing");
-        formData.append("row", selectedItem.row || selectedItem.id);
-        formData.append("nilai", finalScore);
-        formData.append("catatan", catatan);
-
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: formData
-        });
+        const fd = new URLSearchParams({ action: "nilaiPembimbing", row: selectedItem.row, nilai: document.getElementById("finalScoreDisplay").textContent, catatan: document.getElementById("inputCatatanPembimbing").value });
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: fd });
+        const result = await res.json();
         
-        const result = await response.json();
-        
-        if (result.status === 'success' || result.sukses) {
-            alert("✅ Penilaian berhasil disimpan!");
-            closeModal();
-            loadData(); 
-        } else {
-            alert("Gagal menyimpan data: " + (result.message || "Unknown error"));
-            btnSave.disabled = false;
-            btnSave.innerHTML = "💾 COBA LAGI";
-        }
-    } catch (e) {
-        console.error("Error saving grade:", e);
-        alert("⚠️ Terjadi kesalahan jaringan. Cek koneksi internetmu.");
-        btnSave.disabled = false;
-        btnSave.innerHTML = "💾 COBA LAGI";
-    }
+        if (result.status === 'success' || result.sukses) { alert("Penilaian berhasil disimpan."); closeModal(); loadData(); } 
+        else { alert("Gagal menyimpan data."); btn.disabled = false; btn.textContent = "Coba Lagi"; }
+    } catch (e) { alert("Terjadi kesalahan koneksi."); btn.disabled = false; btn.textContent = "Coba Lagi"; }
 }
 
-window.onload = function() {
-    loadData();
-};
+window.onload = loadData;
 </script>
 </body>
 </html>
