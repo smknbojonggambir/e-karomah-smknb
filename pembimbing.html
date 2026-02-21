@@ -285,6 +285,12 @@
 </header>
 
 <div class="container">
+
+
+    <div class="container">
+    <div id="mentorNotification" style="display:none; margin-bottom: 20px; padding: 15px; border-radius: 10px; font-size: 13px; line-height: 1.5;"></div>
+    
+    <div class="filter-container">
     <div class="filter-container">
         <div class="filter-row">
             <input type="date" id="dateFilter" onchange="loadData()">
@@ -599,9 +605,52 @@ async function loadData() {
 function updateCountChips(data) {
     const pending = data.filter(item => !hasGrade(item)).length;
     const done = data.filter(item => hasGrade(item)).length;
+    
     document.getElementById("countAll").textContent = data.length;
     document.getElementById("countPending").textContent = pending;
     document.getElementById("countDone").textContent = done;
+
+    // --- LOGIKA NOTIFIKASI PESAN PEMBIMBING ---
+    const notifBox = document.getElementById("mentorNotification");
+    if (!notifBox) return;
+
+    // Jika tidak ada data sama sekali di tanggal tersebut
+    if (data.length === 0) {
+        notifBox.style.display = "none";
+        return;
+    }
+
+    notifBox.style.display = "block";
+    
+    if (pending > 0) {
+        // TAMPILAN JIKA BELUM SELESAI MENILAI
+        notifBox.style.background = "rgba(251, 191, 36, 0.1)"; // Kuning transparan
+        notifBox.style.border = "1px solid var(--gold)";
+        notifBox.style.color = "#fcd34d";
+        notifBox.innerHTML = `
+            <div style="font-weight:bold; margin-bottom:6px; font-size:14px; color:var(--gold);">
+                ⚠️ PENGINGAT AMANAH: Ada ${pending} Laporan Belum Diperiksa
+            </div>
+            <i style="opacity:0.9;">"Sesungguhnya Allah menyuruh kamu menyampaikan amanah kepada yang berhak menerimanya..." (QS. An-Nisa: 58).</i>
+            <div style="margin-top:6px; opacity:0.9;">
+                Ustadz/Ustadzah, mari luangkan waktu sejenak untuk menunaikan amanah mendampingi ananda. Penilaian dan evaluasi Anda sangat berharga bagi perkembangan ibadah mereka. Semangat!
+            </div>
+        `;
+    } else {
+        // TAMPILAN JIKA SUDAH SELESAI SEMUA
+        notifBox.style.background = "rgba(16, 185, 129, 0.1)"; // Hijau transparan
+        notifBox.style.border = "1px solid var(--primary)";
+        notifBox.style.color = "#6ee7b7";
+        notifBox.innerHTML = `
+            <div style="font-weight:bold; margin-bottom:6px; font-size:14px; color:var(--primary);">
+                ✅ ALHAMDULILLAH, SEMUA TUGAS SELESAI!
+            </div>
+            <i style="opacity:0.9;">"Barangsiapa yang menunjuki kepada kebaikan maka dia akan mendapatkan pahala seperti pahala orang yang mengerjakannya." (HR. Muslim).</i>
+            <div style="margin-top:6px; opacity:0.9;">
+                Jazakumullah khairan atas kesabaran dan dedikasi Ustadz/Ustadzah hari ini. Lelahmu dalam mendidik insyaallah bernilai lillah dan menjadi amal jariyah. Selamat beristirahat!
+            </div>
+        `;
+    }
 }
 
 function hasGrade(item){ 
