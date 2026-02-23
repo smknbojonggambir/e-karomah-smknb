@@ -494,10 +494,20 @@ async function loadData(){
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
   try { 
-    const res = await fetch(SCRIPT_URL); 
+    // ✅ PERBAIKAN: Menambahkan action=rekapAdmin dan menambahkan time parameter (mencegah cache)
+    const url = `${SCRIPT_URL}?action=rekapAdmin&t=${new Date().getTime()}`;
+    const res = await fetch(url); 
     if (!res.ok) throw new Error("Gagal terhubung"); 
     
-    const raw = await res.json(); 
+    // ✅ PERBAIKAN: Membaca teks terlebih dahulu mencegah aplikasi crash jika GAS error
+    const textResponse = await res.text();
+    let raw;
+    try {
+        raw = JSON.parse(textResponse);
+    } catch (e) {
+        console.error("Respons dari server bukan JSON:", textResponse);
+        throw new Error("Format respons dari server tidak valid.");
+    }
     
     if (raw.status === "success") { 
       dataMaster.laporan = raw.laporan || []; 
@@ -516,7 +526,7 @@ async function loadData(){
     mainContent.classList.remove("hidden"); 
   } catch (error) { 
     console.error("Error:", error); 
-    document.getElementById("loading-text").innerText = "Gagal memuat data. Pastikan link Google Script benar."; 
+    document.getElementById("loading-text").innerText = "Gagal memuat data. Cek Console (F12) untuk melihat error."; 
     document.querySelector(".spinner").style.display = "none"; 
   } 
 } 
