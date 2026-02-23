@@ -953,25 +953,39 @@ async function saveGrade() {
         formData.append("nilai", finalScore);
         formData.append("catatan", catatan);
 
+        // [PERBAIKAN 1]: Tambahkan header eksplisit dan ubah payload ke bentuk string
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString() 
         });
         
-        const result = await response.json();
+        // [PERBAIKAN 2]: Baca sebagai text dulu untuk mencegah aplikasi crash jika GAS error
+        const responseText = await response.text();
+        
+        let result;
+        try {
+            // Coba jadikan JSON
+            result = JSON.parse(responseText);
+        } catch (jsonErr) {
+            console.error("Respons dari server bukan JSON:", responseText);
+            throw new Error("Server gagal memproses. Kemungkinan script GAS error atau doPost tidak ada.");
+        }
         
         if (result.status === 'success' || result.sukses) {
             alert("✅ Penilaian berhasil disimpan!");
             closeModal();
             loadData(); 
         } else {
-            alert("Gagal menyimpan data: " + (result.message || "Unknown error"));
+            alert("Gagal menyimpan data: " + (result.message || "Unknown error dari server"));
             btnSave.disabled = false;
             btnSave.innerHTML = "💾 COBA LAGI";
         }
     } catch (e) {
         console.error("Error saving grade:", e);
-        alert("⚠️ Terjadi kesalahan jaringan. Cek koneksi internetmu.");
+        alert("⚠️ Gagal terhubung ke server. Silakan buka Console (F12) untuk melihat detail error-nya.");
         btnSave.disabled = false;
         btnSave.innerHTML = "💾 COBA LAGI";
     }
