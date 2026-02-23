@@ -602,4 +602,220 @@ function renderTableLaporan(){
 // --- RENDER TABEL SISWA ---
 function renderTableSiswa() { 
   const tbody = document.querySelector("#tableSiswa tbody"); 
-  const siswaSaja = dataMaster.siswa.
+  const siswaSaja = dataMaster.siswa.filter(u => u.role !== 'admin' && u.role !== 'pembimbing'); 
+  
+  if (siswaSaja.length === 0) { tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data siswa.</td></tr>"; return; } 
+  
+  tbody.innerHTML = siswaSaja.map(row => `
+    <tr>
+      <td>${row.username || '-'}</td>
+      <td>${row.nama || '-'}</td>
+      <td>-</td>
+      <td>${row.kelompok || '-'}</td>
+      <td><span class="badge badge-active">Aktif</span></td>
+      <td class="action-buttons">
+          <button class="btn btn-info"><i class='bx bx-edit'></i></button>
+          <button class="btn btn-danger"><i class='bx bx-trash'></i></button>
+      </td>
+    </tr>
+  `).join(""); 
+} 
+
+// --- RENDER TABEL KELOMPOK ---
+function renderTableKelompok() {
+  const thead = document.querySelector("#tableKelompok thead");
+  const tbody = document.querySelector("#tableKelompok tbody");
+  const data = dataMaster.kelompok;
+  
+  if (data.length === 0) { tbody.innerHTML = "<tr><td colspan='100%' style='text-align:center;'>Belum ada data kelompok.</td></tr>"; return; }
+  
+  const headers = Object.keys(data[0]).filter(h => h !== 'id_baris'); 
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`).join("") + "</tr>"; 
+  tbody.innerHTML = data.map(row => "<tr>" + headers.map(h => `<td>${row[h] || '-'}</td>`).join("") + "</tr>").join(""); 
+}
+
+// --- RENDER TABEL PEMBIMBING & KINERJA KELOMPOK ---
+function renderTablePembimbing() {
+  const tbodyProgres = document.querySelector("#tablePembimbing tbody");
+  const tbodyPenilaian = document.querySelector("#tablePenilaianPembimbing tbody");
+  
+  // Ambil nilai filter tanggal
+  const filterTanggalEl = document.getElementById("filterTanggalPenilaian");
+  const filterTanggal = filterTanggalEl ? filterTanggalEl.value : "";
+  
+  const kelompokMaster = dataMaster.kelompok || [];
+  const siswaList = (dataMaster.siswa || []).filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
+  const laporanList = dataMaster.laporan || [];
+
+  if (kelompokMaster.length === 0) {
+      tbodyProgres.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada master data kelompok terdaftar.</td></tr>";
+      tbodyPenilaian.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada master data kelompok terdaftar.</td></tr>";
+      return;
+  }
+
+  let htmlProgres = "";
+  let htmlKinerja = "";
+
+  kelompokMaster.forEach(k => {
+      // Ambil Nama Kelompok dan Pembimbing
+      const namaKelompok = k.kelompok || k.Kelompok || "-";
+      const namaPembimbing = k.pembimbing || k.Pembimbing || k.UsernamePembimbing || "Belum Ditentukan";
+      
+      // Hitung jumlah siswa di kelompok tersebut
+      const jumlahSiswa = siswaList.filter(s => 
+          (s.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
+      ).length;
+      
+      // --- UNTUK TABEL 1: PROGRES KESELURUHAN (Tanpa Filter Tanggal) ---
+      const laporanKelompokAll = laporanList.filter(lap => 
+          (lap.kelompok || lap.Kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
+      );
+      const totalMasukAll = laporanKelompokAll.length;
+
+      let badgeProgres = `<span class="badge badge-danger">Rendah</span>`;
+      if (totalMasukAll > (jumlahSiswa * 7)) badgeProgres = `<span class="badge badge-warning">Sedang</span>`; 
+      if (totalMasukAll > (jumlahSiswa * 15)) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
+      if (jumlahSiswa === 0) badgeProgres = `<span class="badge" style="background:#334155;">N/A</span>`;
+
+      htmlProgres += `
+        <tr>
+            <td><strong>${namaKelompok.toUpperCase()}</strong></td>
+            <td>${namaPembimbing}</td>
+            <td>${jumlahSiswa} Orang</td>
+            <td>${totalMasukAll} Laporan</td>
+            <td>${badgeProgres}</td>
+        </tr>
+      `;
+
+      // --- UNTUK TABEL 2: PENILAIAN HARIAN (Menerapkan Filter Tanggal) ---
+      let laporanHarian = laporanKelompokAll;
+      
+      if (filterTanggal) {
+          laporanHarian = laporanHarian.filter(lap => {
+              // Deteksi nama kolom tanggal
+              const tglRecord = lap.tanggal || lap.Tanggal || lap.waktu || lap.timestamp || lap.Timestamp;
+              if (!tglRecord) return false;
+              
+              try {
+                  const dateObj = new Date(tglRecord);
+                  if (isNaN(dateObj.getTime())) return false;
+                  
+                  const yyyy = dateObj.getFullYear();
+                  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                  const dd = String(dateObj.getDate()).padStart(2, '0');
+                  const formattedDate = `${yyyy}-${mm}-${dd}`;
+                  
+                  return formattedDate === filterTanggal;
+              } catch(e) {
+                  return false;
+              }
+          });
+      }
+
+      const totalMasukHarian = laporanHarian.length;
+      
+      const sudahDinilaiHarian = laporanHarian.filter(lap => {
+          const nilai = lap.nilai_pembimbing || lap.Nilai_Pembimbing; 
+          return parseNilai(nilai).isDinilai;
+      }).length;
+      
+      const belumDinilaiHarian = totalMasukHarian - sudahDinilaiHarian;
+      const persen = totalMasukHarian > 0 ? Math.round((sudahDinilaiHarian / totalMasukHarian) * 100) : 0;
+
+      let badgeKinerja = "badge-danger";
+      if (persen >= 50) badgeKinerja = "badge-warning";
+      if (persen >= 90) badgeKinerja = "badge-active"; 
+
+      const colorBelumDinilai = belumDinilaiHarian > 0 ? "#ef4444" : "#22c55e";
+
+      htmlKinerja += `
+        <tr>
+            <td>
+                <strong>${namaPembimbing}</strong>
+                <br><small style="color:var(--text-muted)">(${namaKelompok.toUpperCase()})</small>
+            </td>
+            <td>${totalMasukHarian}</td>
+            <td style="color: ${colorBelumDinilai}; font-weight: bold;">${belumDinilaiHarian}</td>
+            <td><span class="badge ${totalMasukHarian === 0 ? '' : badgeKinerja}">${totalMasukHarian === 0 ? '0%' : persen + '%'} Dinilai</span></td>
+        </tr>
+      `;
+  });
+
+  tbodyProgres.innerHTML = htmlProgres;
+  tbodyPenilaian.innerHTML = htmlKinerja;
+}
+
+// --- RENDER TABEL PENILAIAN & SERTIFIKAT ---
+function renderPenilaianDanSertifikat() {
+  const tbodyPenilaian = document.querySelector("#tablePenilaian tbody");
+  const tbodySertifikat = document.querySelector("#tableSertifikat tbody");
+  
+  const siswaList = dataMaster.siswa.filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
+  const laporanList = dataMaster.laporan;
+
+  if (siswaList.length === 0) {
+      tbodyPenilaian.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Tidak ada data siswa.</td></tr>";
+      tbodySertifikat.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Tidak ada data siswa.</td></tr>";
+      return;
+  }
+
+  let htmlPenilaian = "";
+  let htmlSertifikat = "";
+
+  siswaList.forEach(siswa => {
+      const namaSiswa = siswa.nama || siswa.username;
+      
+      const laporanSiswa = laporanList.filter(lap => 
+          (lap.nama === namaSiswa) || (lap.nama_siswa === namaSiswa) || (lap.username === siswa.username)
+      );
+
+      const totalLaporan = laporanSiswa.length;
+      
+      let akumulasiNilai = 0;
+      let countDinilai = 0;
+      
+      laporanSiswa.forEach(lap => {
+          const evalNilai = parseNilai(lap.nilai_pembimbing || lap.Nilai_Pembimbing);
+          if (evalNilai.isDinilai) {
+              akumulasiNilai += evalNilai.value;
+              countDinilai++;
+          }
+      });
+
+      const rataRata = countDinilai > 0 ? (akumulasiNilai / countDinilai).toFixed(1) : 0;
+      
+      const isLulus = (totalLaporan >= 10 && rataRata >= 70);
+      const badgeLulus = isLulus ? `<span class="badge badge-active">Lulus</span>` : `<span class="badge badge-warning">Belum Lulus</span>`;
+
+      htmlPenilaian += `
+        <tr>
+            <td>${siswa.username || '-'}</td>
+            <td>${namaSiswa}</td>
+            <td>${siswa.kelompok || '-'}</td>
+            <td>${totalLaporan}</td>
+            <td>${rataRata}</td>
+            <td>${badgeLulus}</td>
+        </tr>
+      `;
+
+      if (isLulus) {
+          htmlSertifikat += `
+            <tr>
+                <td><strong>${namaSiswa}</strong></td>
+                <td>${siswa.kelompok || '-'}</td>
+                <td>${rataRata}</td>
+                <td><span class="badge badge-active">Memenuhi Syarat</span></td>
+                <td>
+                    <button class="btn btn-primary"><i class='bx bx-printer'></i> Cetak</button>
+                </td>
+            </tr>
+          `;
+      }
+  });
+
+  tbodyPenilaian.innerHTML = htmlPenilaian;
+  tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
+}
+</script>
+</body>
+</html>
