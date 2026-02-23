@@ -446,7 +446,7 @@ function logout() {
 // ==========================================
 
 // --- KONFIGURASI SCRIPT URL ---
-// ⚠️ GANTI LINK DI BAWAH DENGAN URL WEB APP DEPLOYMENT BARU KAMU:
+// ⚠️ PASTIKAN URL WEB APP INI SUDAH YANG TERBARU (DEPOLOYMENT BARU)
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBy_-AmeZquA9pF2WhlDFOW5JBLgdoEkL0rDFpEFXhObTm-aJ0qGbDL_F2xtBRcl2I_A/exec"; 
 
 let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
@@ -495,19 +495,19 @@ async function loadData(){
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
   try { 
-    // ✅ PERBAIKAN: Menambahkan action=rekapAdmin dan menambahkan time parameter (mencegah cache)
+    // ✅ Menambahkan action=rekapAdmin dan waktu (mencegah cache browser nyangkut)
     const url = `${SCRIPT_URL}?action=rekapAdmin&t=${new Date().getTime()}`;
     const res = await fetch(url); 
     if (!res.ok) throw new Error("Gagal terhubung"); 
     
-    // ✅ PERBAIKAN: Membaca teks terlebih dahulu mencegah aplikasi crash jika GAS error
+    // ✅ Membaca sebagai teks dulu untuk mencegah crash parsing JSON
     const textResponse = await res.text();
     let raw;
     try {
         raw = JSON.parse(textResponse);
     } catch (e) {
         console.error("Respons dari server bukan JSON:", textResponse);
-        throw new Error("Format respons dari server tidak valid.");
+        throw new Error("Format respons dari server tidak valid. Pastikan Code.gs menggunakan fungsi rekapAdminLanjutan().");
     }
     
     if (raw.status === "success") { 
@@ -527,7 +527,7 @@ async function loadData(){
     mainContent.classList.remove("hidden"); 
   } catch (error) { 
     console.error("Error:", error); 
-    document.getElementById("loading-text").innerText = "Gagal memuat data. Pastikan link Google Script benar dan sudah di Deploy Ulang."; 
+    document.getElementById("loading-text").innerText = "Gagal memuat data. Cek Console (F12) untuk melihat pesan error."; 
     document.querySelector(".spinner").style.display = "none"; 
   } 
 } 
@@ -639,7 +639,6 @@ function renderTablePembimbing() {
   const tbodyProgres = document.querySelector("#tablePembimbing tbody");
   const tbodyPenilaian = document.querySelector("#tablePenilaianPembimbing tbody");
   
-  // Ambil nilai filter tanggal
   const filterTanggalEl = document.getElementById("filterTanggalPenilaian");
   const filterTanggal = filterTanggalEl ? filterTanggalEl.value : "";
   
@@ -657,16 +656,14 @@ function renderTablePembimbing() {
   let htmlKinerja = "";
 
   kelompokMaster.forEach(k => {
-      // Ambil Nama Kelompok dan Pembimbing
       const namaKelompok = k.kelompok || k.Kelompok || "-";
       const namaPembimbing = k.pembimbing || k.Pembimbing || k.UsernamePembimbing || "Belum Ditentukan";
       
-      // Hitung jumlah siswa di kelompok tersebut
       const jumlahSiswa = siswaList.filter(s => 
           (s.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       ).length;
       
-      // --- UNTUK TABEL 1: PROGRES KESELURUHAN (Tanpa Filter Tanggal) ---
+      // --- TABEL 1: PROGRES KESELURUHAN ---
       const laporanKelompokAll = laporanList.filter(lap => 
           (lap.kelompok || lap.Kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       );
@@ -687,12 +684,11 @@ function renderTablePembimbing() {
         </tr>
       `;
 
-      // --- UNTUK TABEL 2: PENILAIAN HARIAN (Menerapkan Filter Tanggal) ---
+      // --- TABEL 2: PENILAIAN HARIAN ---
       let laporanHarian = laporanKelompokAll;
       
       if (filterTanggal) {
           laporanHarian = laporanHarian.filter(lap => {
-              // Deteksi nama kolom tanggal
               const tglRecord = lap.tanggal || lap.Tanggal || lap.waktu || lap.timestamp || lap.Timestamp;
               if (!tglRecord) return false;
               
