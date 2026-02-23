@@ -171,10 +171,18 @@ tbody tr:hover { background: #273549; }
         <h2 class="page-title">Data Laporan Harian</h2>
         <div class="card">
           <div class="table-controls">
-            <div class="search-bar"><i class='bx bx-search'></i><input type="text" id="searchLaporan" onkeyup="searchTable('tableLaporan', 'searchLaporan')" placeholder="Cari laporan (nama/kegiatan)..."></div>
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" id="searchLaporan" onkeyup="searchTable('tableLaporan', 'searchLaporan')" placeholder="Cari laporan (nama/kegiatan)...">
+            </div>
             <button class="btn btn-success"><i class='bx bx-export'></i> Export Excel</button>
           </div>
-          <div class="table-wrapper"><table id="tableLaporan"><thead></thead><tbody></tbody></table></div>
+          <div class="table-wrapper">
+            <table id="tableLaporan">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -184,9 +192,22 @@ tbody tr:hover { background: #273549; }
             <h3>Pengaturan Program Ramadan</h3>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Atur konfigurasi dasar untuk aplikasi ini.</p>
             <div class="grid-3">
-                <div class="form-group"><label>Tahun Hijriah</label><input type="text" class="form-control" value="1447 H"></div>
-                <div class="form-group"><label>Status Program</label><select class="form-control"><option>Aktif</option><option>Persiapan</option><option>Selesai</option></select></div>
-                <div class="form-group"><label>Target Laporan Minimal</label><input type="number" class="form-control" value="20"></div>
+                <div class="form-group">
+                    <label>Tahun Hijriah</label>
+                    <input type="text" class="form-control" value="1447 H">
+                </div>
+                <div class="form-group">
+                    <label>Status Program</label>
+                    <select class="form-control">
+                        <option>Aktif</option>
+                        <option>Persiapan</option>
+                        <option>Selesai</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Laporan Minimal</label>
+                    <input type="number" class="form-control" value="20">
+                </div>
             </div>
             <button class="btn btn-primary" style="margin-top: 10px;"><i class='bx bx-save'></i> Simpan Pengaturan</button>
         </div>
@@ -196,26 +217,70 @@ tbody tr:hover { background: #273549; }
         <h2 class="page-title">Data Siswa</h2>
         <div class="card">
           <div class="table-controls">
-            <div class="search-bar"><i class='bx bx-search'></i><input type="text" id="searchSiswa" onkeyup="searchTable('tableSiswa', 'searchSiswa')" placeholder="Cari nama atau NIS..."></div>
+            <div class="search-bar">
+              <i class='bx bx-search'></i>
+              <input type="text" id="searchSiswa" onkeyup="searchTable('tableSiswa', 'searchSiswa')" placeholder="Cari nama atau NIS...">
+            </div>
             <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Siswa</button>
           </div>
-          <div class="table-wrapper"><table id="tableSiswa"><thead><tr><th>NIS / Username</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+          <div class="table-wrapper">
+            <table id="tableSiswa">
+              <thead>
+                  <tr><th>NIS / Username</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Status</th><th>Aksi</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <div id="pembimbing" class="page hidden">
         <h2 class="page-title">Performa Pembimbing & Kelompok</h2>
+        
         <div class="card">
-            <div class="card-header"><h3>Merekap Progres Laporan Kelompok</h3></div>
-            <div class="table-controls" style="margin-bottom: 10px;">
-              <div class="search-bar"><i class='bx bx-search'></i><input type="text" id="searchPembimbing" onkeyup="searchTable('tablePembimbing', 'searchPembimbing')" placeholder="Cari kelompok/pembimbing..."></div>
+            <div class="card-header">
+                <h3>Merekap Progres Laporan Kelompok</h3>
             </div>
-            <div class="table-wrapper"><table id="tablePembimbing"><thead><tr><th>Kelompok</th><th>Nama Pembimbing</th><th>Jml Siswa</th><th>Total Laporan Masuk</th><th>Progres Kelompok</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-controls" style="margin-bottom: 10px;">
+              <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchPembimbing" onkeyup="searchTable('tablePembimbing', 'searchPembimbing')" placeholder="Cari kelompok/pembimbing...">
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table id="tablePembimbing">
+                <thead>
+                    <tr>
+                        <th>Kelompok</th>
+                        <th>Nama Pembimbing</th>
+                        <th>Jml Siswa</th>
+                        <th>Total Laporan Masuk</th>
+                        <th>Progres Kelompok</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
         </div>
+
         <div class="card">
-            <div class="card-header"><h3>Pengerjaan Penilaian Harian</h3></div>
+            <div class="card-header">
+                <h3>Pengerjaan Penilaian Harian</h3>
+            </div>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Memantau sisa laporan yang belum divalidasi/dinilai oleh pembimbing.</p>
-            <div class="table-wrapper"><table id="tablePenilaianPembimbing"><thead><tr><th>Nama Pembimbing</th><th>Laporan Masuk</th><th>Belum Dinilai</th><th>Persentase Kinerja</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-wrapper">
+              <table id="tablePenilaianPembimbing">
+                <thead>
+                    <tr>
+                        <th>Nama Pembimbing</th>
+                        <th>Laporan Masuk</th>
+                        <th>Belum Dinilai</th>
+                        <th>Persentase Kinerja</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
         </div>
       </div>
 
@@ -223,9 +288,17 @@ tbody tr:hover { background: #273549; }
         <h2 class="page-title">Master Data Kelompok</h2>
         <div class="card">
             <div class="table-controls">
-              <div class="search-bar"><i class='bx bx-search'></i><input type="text" id="searchKelompok" onkeyup="searchTable('tableKelompok', 'searchKelompok')" placeholder="Cari nama kelompok..."></div>
+              <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchKelompok" onkeyup="searchTable('tableKelompok', 'searchKelompok')" placeholder="Cari nama kelompok...">
+              </div>
             </div>
-            <div class="table-wrapper"><table id="tableKelompok"><thead></thead><tbody></tbody></table></div>
+            <div class="table-wrapper">
+              <table id="tableKelompok">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
         </div>
       </div>
 
@@ -235,16 +308,29 @@ tbody tr:hover { background: #273549; }
             <div class="card">
                 <h3><i class='bx bx-broadcast'></i> Broadcast Pengumuman</h3>
                 <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Kirim pesan pengumuman ke dashboard semua siswa.</p>
-                <div class="form-group"><label>Judul Pengumuman</label><input type="text" class="form-control" placeholder="Cth: Jadwal Bukber Angkatan"></div>
-                <div class="form-group"><label>Isi Pesan</label><textarea class="form-control" rows="4" placeholder="Ketik isi pengumuman di sini..."></textarea></div>
+                <div class="form-group">
+                    <label>Judul Pengumuman</label>
+                    <input type="text" class="form-control" placeholder="Cth: Jadwal Bukber Angkatan">
+                </div>
+                <div class="form-group">
+                    <label>Isi Pesan</label>
+                    <textarea class="form-control" rows="4" placeholder="Ketik isi pengumuman di sini..."></textarea>
+                </div>
                 <button class="btn btn-primary"><i class='bx bx-send'></i> Kirim Broadcast</button>
             </div>
+            
             <div class="card">
                 <h3><i class='bx bx-task'></i> Log Aktivitas Admin</h3>
                 <ul style="list-style: none; padding: 0; margin-top: 15px; font-size: 13px;">
-                    <li style="padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-muted);"><strong style="color: var(--text-main);">Hari ini, 08:30</strong> - Admin Budi memperbarui pengaturan tahun Hijriah.</li>
-                    <li style="padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-muted);"><strong style="color: var(--text-main);">Kemarin, 14:15</strong> - Admin mengunggah data kelompok angkatan 3.</li>
-                    <li style="padding: 10px; color: var(--text-muted);"><strong style="color: var(--text-main);">Kemarin, 10:00</strong> - Sistem melakukan backup database mingguan.</li>
+                    <li style="padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
+                        <strong style="color: var(--text-main);">Hari ini, 08:30</strong> - Admin Budi memperbarui pengaturan tahun Hijriah.
+                    </li>
+                    <li style="padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
+                        <strong style="color: var(--text-main);">Kemarin, 14:15</strong> - Admin mengunggah data kelompok angkatan 3.
+                    </li>
+                    <li style="padding: 10px; color: var(--text-muted);">
+                        <strong style="color: var(--text-main);">Kemarin, 10:00</strong> - Sistem melakukan backup database mingguan.
+                    </li>
                 </ul>
             </div>
         </div>
@@ -254,10 +340,27 @@ tbody tr:hover { background: #273549; }
         <h2 class="page-title">Rekap Penilaian Akhir</h2>
         <div class="card">
             <div class="table-controls">
-              <div class="search-bar"><i class='bx bx-search'></i><input type="text" id="searchPenilaian" onkeyup="searchTable('tablePenilaian', 'searchPenilaian')" placeholder="Cari nama siswa..."></div>
+              <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchPenilaian" onkeyup="searchTable('tablePenilaian', 'searchPenilaian')" placeholder="Cari nama siswa...">
+              </div>
               <button class="btn btn-success"><i class='bx bx-printer'></i> Cetak Rekap Kelas</button>
             </div>
-            <div class="table-wrapper"><table id="tablePenilaian"><thead><tr><th>NIS / Username</th><th>Nama Siswa</th><th>Kelompok</th><th>Total Laporan</th><th>Rata-rata Nilai</th><th>Status Mutaba'ah</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-wrapper">
+              <table id="tablePenilaian">
+                <thead>
+                    <tr>
+                        <th>NIS / Username</th>
+                        <th>Nama Siswa</th>
+                        <th>Kelompok</th>
+                        <th>Total Laporan</th>
+                        <th>Rata-rata Nilai</th>
+                        <th>Status Mutaba'ah</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
         </div>
       </div>
 
@@ -266,9 +369,25 @@ tbody tr:hover { background: #273549; }
         <div class="card">
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Daftar siswa yang telah menyelesaikan program dan berhak mendapatkan sertifikat.</p>
             <div class="table-controls">
-              <div class="search-bar"><i class='bx bx-search'></i><input type="text" id="searchSertifikat" onkeyup="searchTable('tableSertifikat', 'searchSertifikat')" placeholder="Cari siswa penerima..."></div>
+              <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchSertifikat" onkeyup="searchTable('tableSertifikat', 'searchSertifikat')" placeholder="Cari siswa penerima...">
+              </div>
             </div>
-            <div class="table-wrapper"><table id="tableSertifikat"><thead><tr><th>Nama Siswa</th><th>Kelompok</th><th>Nilai Akhir</th><th>Kelayakan</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-wrapper">
+              <table id="tableSertifikat">
+                <thead>
+                    <tr>
+                        <th>Nama Siswa</th>
+                        <th>Kelompok</th>
+                        <th>Nilai Akhir</th>
+                        <th>Kelayakan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
         </div>
       </div>
 
@@ -277,13 +396,14 @@ tbody tr:hover { background: #273549; }
 </div>
 
 <script>
+// --- KONFIGURASI SCRIPT URL ---
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq-CZX7ploDor-n5DmG0j987kYglYjmQnk0D4yy039pK00K2RVtL1N4wuYWhfi_ctNzg/exec?action=rekapAdmin"; 
 
 let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
 let chartInstance = null; 
 
-// --- FUNGSI BARU: Parsing Nilai dari Teks ---
-// Mengubah input seperti "Sesuai (Lengkap)" menjadi 100, atau "[N:80]" menjadi 80
+// --- FUNGSI PARSING NILAI ---
+// Mengubah input teks dari pembimbing menjadi angka matematis yang bisa dihitung rata-ratanya
 function parseNilai(str) {
     if (!str || str.toString().trim() === "") return { isDinilai: false, value: 0 };
     let s = str.toString().trim();
@@ -292,21 +412,22 @@ function parseNilai(str) {
     let match = s.match(/\[N:\s*(\d+)\]/i);
     if (match) return { isDinilai: true, value: parseInt(match[1]) };
     
-    // Jika formatnya deskriptif (misal: "Sesuai (Lengkap)")
+    // Jika formatnya deskriptif 
     if (s.toLowerCase().includes("sesuai") || s.toLowerCase().includes("lengkap")) return { isDinilai: true, value: 100 };
     if (s.toLowerCase().includes("sebagian")) return { isDinilai: true, value: 50 };
     
-    // Jika angka biasa
+    // Jika angka murni
     let num = parseFloat(s);
     if (!isNaN(num)) return { isDinilai: true, value: num };
     
-    // Default jika string lain yang tidak dikenali tapi tetap dianggap "sudah dinilai"
+    // Default jika string ada tapi tidak dikenali di atas, anggap dinilai dgn nilai 75
     return { isDinilai: true, value: 75 }; 
 }
 
+// --- FUNGSI NAVIGASI HALAMAN ---
 function showPage(pageId, element){ 
   const targetPage = document.getElementById(pageId);
-  if (!targetPage) return;
+  if (!targetPage) { alert("Halaman belum siap!"); return; }
 
   document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden")); 
   targetPage.classList.remove("hidden"); 
@@ -317,6 +438,7 @@ function showPage(pageId, element){
   } 
 } 
 
+// --- FUNGSI PENCARIAN TABEL ---
 function searchTable(tableId, inputId) { 
   const input = document.getElementById(inputId).value.toLowerCase(); 
   const rows = document.querySelectorAll(`#${tableId} tbody tr`); 
@@ -325,6 +447,7 @@ function searchTable(tableId, inputId) {
   }); 
 } 
 
+// --- FUNGSI MEMUAT DATA DARI SERVER ---
 async function loadData(){ 
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
@@ -340,6 +463,7 @@ async function loadData(){
       dataMaster.kelompok = raw.kelompok || []; 
     } 
     
+    // Render semua UI
     renderDashboard(); 
     renderTableLaporan(); 
     renderTableSiswa(); 
@@ -356,6 +480,7 @@ async function loadData(){
   } 
 } 
 
+// --- RENDER HALAMAN DASHBOARD ---
 function renderDashboard(){ 
   const laporan = dataMaster.laporan; 
   let totalNilai = 0, countNilai = 0; 
@@ -363,9 +488,7 @@ function renderDashboard(){
   
   laporan.forEach(item => { 
     const nama = item.nama || item.nama_siswa || item.username; 
-    
-    // Menggunakan fungsi parse Nilai
-    const evalNilai = parseNilai(item.nilai_pembimbing);
+    const evalNilai = parseNilai(item.nilai_pembimbing || item.Nilai_Pembimbing);
     
     if (nama && evalNilai.isDinilai) { 
       if(!ranking[nama]) ranking[nama] = 0; 
@@ -388,6 +511,7 @@ function renderDashboard(){
   renderChart(topData.map(d => d[0]), topData.map(d => d[1])); 
 } 
 
+// --- RENDER GRAFIK CHART.JS ---
 function renderChart(labels, data) { 
   const ctx = document.getElementById('rankingChart').getContext('2d'); 
   if(chartInstance) chartInstance.destroy(); 
@@ -401,6 +525,7 @@ function renderChart(labels, data) {
   }); 
 } 
 
+// --- RENDER TABEL LAPORAN ---
 function renderTableLaporan(){ 
   const thead = document.querySelector("#tableLaporan thead"); 
   const tbody = document.querySelector("#tableLaporan tbody"); 
@@ -422,6 +547,7 @@ function renderTableLaporan(){
   ).join(""); 
 } 
 
+// --- RENDER TABEL SISWA ---
 function renderTableSiswa() { 
   const tbody = document.querySelector("#tableSiswa tbody"); 
   const siswaSaja = dataMaster.siswa.filter(u => u.role !== 'admin' && u.role !== 'pembimbing'); 
@@ -443,6 +569,7 @@ function renderTableSiswa() {
   `).join(""); 
 } 
 
+// --- RENDER TABEL KELOMPOK ---
 function renderTableKelompok() {
   const thead = document.querySelector("#tableKelompok thead");
   const tbody = document.querySelector("#tableKelompok tbody");
@@ -455,67 +582,82 @@ function renderTableKelompok() {
   tbody.innerHTML = data.map(row => "<tr>" + headers.map(h => `<td>${row[h] || '-'}</td>`).join("") + "</tr>").join(""); 
 }
 
+// --- RENDER TABEL PEMBIMBING & KINERJA KELOMPOK ---
 function renderTablePembimbing() {
   const tbodyProgres = document.querySelector("#tablePembimbing tbody");
   const tbodyPenilaian = document.querySelector("#tablePenilaianPembimbing tbody");
   
-  const pembimbingList = dataMaster.siswa.filter(u => u.role === 'pembimbing');
-  const siswaList = dataMaster.siswa.filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
-  const laporanList = dataMaster.laporan;
+  const kelompokMaster = dataMaster.kelompok || [];
+  const siswaList = (dataMaster.siswa || []).filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
+  const laporanList = dataMaster.laporan || [];
 
-  if (pembimbingList.length === 0) {
-      tbodyProgres.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pembimbing terdaftar.</td></tr>";
-      tbodyPenilaian.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada data pembimbing terdaftar.</td></tr>";
+  if (kelompokMaster.length === 0) {
+      tbodyProgres.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada master data kelompok terdaftar.</td></tr>";
+      tbodyPenilaian.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada master data kelompok terdaftar.</td></tr>";
       return;
   }
 
   let htmlProgres = "";
   let htmlKinerja = "";
 
-  pembimbingList.forEach(pem => {
-      const kelompokNama = pem.kelompok || "Tidak ada kelompok";
-      const siswaDiKelompok = siswaList.filter(s => s.kelompok === kelompokNama);
-      const jumlahSiswa = siswaDiKelompok.length;
+  kelompokMaster.forEach(k => {
+      // Ambil Nama Kelompok dan Pembimbing (Akurasi Tinggi dari Data Master)
+      const namaKelompok = k.kelompok || k.Kelompok || "-";
+      const namaPembimbing = k.pembimbing || k.Pembimbing || k.UsernamePembimbing || "Belum Ditentukan";
       
-      const namaSiswaDiKelompok = siswaDiKelompok.map(s => s.nama || s.username);
+      // Hitung jumlah siswa di kelompok tersebut
+      const jumlahSiswa = siswaList.filter(s => 
+          (s.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
+      ).length;
       
-      const laporanKelompok = laporanList.filter(lap => {
-          const namaPembuatLap = lap.nama || lap.nama_siswa || lap.username;
-          return namaSiswaDiKelompok.includes(namaPembuatLap);
-      });
+      // Filter laporan langsung dari identifier 'kelompok' di Tabel Laporan
+      const laporanKelompok = laporanList.filter(lap => 
+          (lap.kelompok || lap.Kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
+      );
 
       const totalMasuk = laporanKelompok.length;
       
-      // Update Logika: Gunakan parseNilai untuk mengecek apakah laporan sudah diisi penilaiannya
-      const sudahDinilai = laporanKelompok.filter(lap => parseNilai(lap.nilai_pembimbing).isDinilai).length;
+      // Cek yang sudah dinilai menggunakan parseNilai
+      const sudahDinilai = laporanKelompok.filter(lap => {
+          const nilai = lap.nilai_pembimbing || lap.Nilai_Pembimbing; 
+          return parseNilai(nilai).isDinilai;
+      }).length;
+      
       const belumDinilai = totalMasuk - sudahDinilai;
       const persen = totalMasuk > 0 ? Math.round((sudahDinilai / totalMasuk) * 100) : 0;
 
+      // Render Tabel 1: Progres Kelompok
       let badgeProgres = `<span class="badge badge-danger">Rendah</span>`;
-      if (totalMasuk > jumlahSiswa * 5) badgeProgres = `<span class="badge badge-warning">Sedang</span>`;
-      if (totalMasuk > jumlahSiswa * 15) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
+      if (totalMasuk > (jumlahSiswa * 7)) badgeProgres = `<span class="badge badge-warning">Sedang</span>`; 
+      if (totalMasuk > (jumlahSiswa * 15)) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
       if (jumlahSiswa === 0) badgeProgres = `<span class="badge" style="background:#334155;">N/A</span>`;
 
       htmlProgres += `
         <tr>
-            <td><strong>${kelompokNama}</strong></td>
-            <td>${pem.nama || pem.username}</td>
+            <td><strong>${namaKelompok.toUpperCase()}</strong></td>
+            <td>${namaPembimbing}</td>
             <td>${jumlahSiswa} Orang</td>
             <td>${totalMasuk} Laporan</td>
             <td>${badgeProgres}</td>
         </tr>
       `;
 
+      // Render Tabel 2: Kinerja Pembimbing
       let badgeKinerja = "badge-danger";
       if (persen >= 50) badgeKinerja = "badge-warning";
-      if (persen >= 80) badgeKinerja = "badge-active";
+      if (persen >= 90) badgeKinerja = "badge-active"; 
+
+      const colorBelumDinilai = belumDinilai > 0 ? "#ef4444" : "#22c55e";
 
       htmlKinerja += `
         <tr>
-            <td><strong>${pem.nama || pem.username}</strong></td>
+            <td>
+                <strong>${namaPembimbing}</strong>
+                <br><small style="color:var(--text-muted)">(${namaKelompok.toUpperCase()})</small>
+            </td>
             <td>${totalMasuk}</td>
-            <td style="color: #ef4444; font-weight: bold;">${belumDinilai}</td>
-            <td><span class="badge ${totalMasuk === 0 ? '' : badgeKinerja}">${totalMasuk === 0 ? '0%' : persen + '%'} Selesai</span></td>
+            <td style="color: ${colorBelumDinilai}; font-weight: bold;">${belumDinilai}</td>
+            <td><span class="badge ${totalMasuk === 0 ? '' : badgeKinerja}">${totalMasuk === 0 ? '0%' : persen + '%'} Dinilai</span></td>
         </tr>
       `;
   });
@@ -524,6 +666,7 @@ function renderTablePembimbing() {
   tbodyPenilaian.innerHTML = htmlKinerja;
 }
 
+// --- RENDER TABEL PENILAIAN & SERTIFIKAT ---
 function renderPenilaianDanSertifikat() {
   const tbodyPenilaian = document.querySelector("#tablePenilaian tbody");
   const tbodySertifikat = document.querySelector("#tableSertifikat tbody");
@@ -552,9 +695,9 @@ function renderPenilaianDanSertifikat() {
       let akumulasiNilai = 0;
       let countDinilai = 0;
       
-      // Update Logika perhitungan rata-rata menggunakan fungsi parseNilai()
+      // Kalkulasi rata-rata menggunakan fungsi parseNilai
       laporanSiswa.forEach(lap => {
-          const evalNilai = parseNilai(lap.nilai_pembimbing);
+          const evalNilai = parseNilai(lap.nilai_pembimbing || lap.Nilai_Pembimbing);
           if (evalNilai.isDinilai) {
               akumulasiNilai += evalNilai.value;
               countDinilai++;
@@ -596,6 +739,7 @@ function renderPenilaianDanSertifikat() {
   tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
 }
 
+// Menjalankan fungsi memuat data ketika halaman HTML pertama kali terbuka
 document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
