@@ -411,7 +411,7 @@ tbody tr:hover { background: #273549; }
 // Jika item 'isLoggedIn' tidak ada di sessionStorage, jangan tampilkan aplikasi
 if (!sessionStorage.getItem('isLoggedIn')) {
     alert("Anda tidak memiliki akses atau belum login. Mengalihkan...");
-    window.location.href = 'login.html'; // Ganti 'login.html' sesuai file login Anda
+    window.location.href = 'index.html'; // Ganti 'login.html' sesuai file login Anda
 } else {
     // Tampilkan aplikasi jika sudah login
     document.getElementById("app-wrapper").style.display = "flex";
