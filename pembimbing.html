@@ -512,8 +512,9 @@ async function loadData() {
     if (tableWrapper) tableWrapper.style.display = "none";
     loader.style.display = "block";
 
-    try {
-        const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}`;
+   try {
+        // Tambahkan parameter waktu (&t=...) agar browser selalu mengambil data terbaru
+        const url = `${WEB_APP_URL}?action=rekapPembimbing&kelompok=${encodeURIComponent(user.kelompok)}&t=${new Date().getTime()}`;
         const res = await fetch(url);
         const data = await res.json();
         
