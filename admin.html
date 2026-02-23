@@ -1,419 +1,15 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel Ramadan</title>
-
-<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-/* CSS Reset & Variables */
-:root {
-  --bg-main: #0f172a;
-  --bg-sidebar: #1e293b;
-  --bg-card: #1e293b;
-  --bg-hover: #334155;
-  --accent: #facc15;
-  --accent-hover: #eab308;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: #334155;
-}
-
-body { margin: 0; font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-main); color: var(--text-main); }
-.wrapper { display: flex; min-height: 100vh; }
-
-/* --- SIDEBAR STYLING --- */
-.sidebar { width: 250px; background: var(--bg-sidebar); padding: 20px; flex-shrink: 0; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
-.sidebar-header { display: flex; flex-direction: column; gap: 5px; color: var(--accent); margin-bottom: 30px; }
-.sidebar-header .brand { display: flex; align-items: center; gap: 10px; }
-.sidebar-header .brand i { font-size: 28px; }
-.sidebar-header .brand h2 { margin: 0; font-size: 20px; }
-.sidebar-header .admin-info { font-size: 12px; color: var(--text-muted); margin-top: 5px; padding-left: 38px; }
-
-.sidebar ul { list-style: none; padding: 0; margin: 0; }
-.sidebar li { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-muted); transition: all 0.3s ease; }
-.sidebar li i { font-size: 20px; }
-.sidebar li:hover { background: var(--bg-hover); color: var(--text-main); }
-.sidebar li.active { background: var(--accent); color: #0f172a; font-weight: 600; }
-
-/* --- CONTENT & CARDS --- */
-.content { flex: 1; padding: 30px; overflow-x: hidden; }
-.page-title { font-size: 24px; margin-bottom: 20px; font-weight: 600; }
-.card { background: var(--bg-card); padding: 20px 25px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.card h3 { margin: 0; color: var(--text-main); font-size: 16px; font-weight: 600; }
-.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-.stat-box { display: flex; align-items: center; gap: 15px; background: var(--bg-hover); padding: 20px; border-radius: 10px; }
-.stat-icon { width: 50px; height: 50px; background: rgba(250, 204, 21, 0.1); color: var(--accent); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
-.stat-info span { font-size: 12px; color: var(--text-muted); }
-.stat-info .stat { font-size: 24px; font-weight: bold; color: var(--text-main); margin-top: 5px; }
-
-/* --- BUTTONS --- */
-.btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; font-size: 13px; transition: 0.2s; }
-.btn-primary { background: var(--accent); color: #0f172a; }
-.btn-primary:hover { background: var(--accent-hover); }
-.btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 6px 10px; }
-.btn-danger:hover { background: #ef4444; color: white; }
-.btn-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 6px 10px; }
-.btn-info:hover { background: #3b82f6; color: white; }
-.btn-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 6px 10px; }
-.btn-success:hover { background: #22c55e; color: white; }
-.action-buttons { display: flex; gap: 8px; }
-
-/* --- TABLE & SEARCH --- */
-.table-controls { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-.search-bar { display: flex; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 15px; width: 100%; max-width: 300px; }
-.search-bar i { color: var(--text-muted); margin-right: 10px; }
-.search-bar input { background: transparent; border: none; color: var(--text-main); outline: none; width: 100%; font-family: inherit; font-size: 13px; }
-.table-wrapper { overflow-x: auto; max-height: 500px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; }
-th, td { border-bottom: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
-th { background: var(--bg-hover); color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; position: sticky; top: 0; z-index: 10; white-space: nowrap; }
-tbody tr { transition: background 0.2s; }
-tbody tr:hover { background: #273549; }
-
-/* Status Badges */
-.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-.badge-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
-.badge-warning { background: rgba(250, 204, 21, 0.1); color: #facc15; }
-.badge-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
-/* --- FORM ELEMENTS --- */
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
-.form-control { width: 100%; padding: 10px; border-radius: 5px; background: var(--bg-main); border: 1px solid var(--border-color); color: white; box-sizing: border-box; font-family: inherit; color-scheme: dark;}
-
-/* --- UTILITIES & LOADING --- */
-.hidden { display: none !important; }
-.loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; gap: 15px; }
-.spinner { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.chart-container { position: relative; height: 300px; width: 100%; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  .wrapper { flex-direction: column; }
-  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); padding: 15px; box-sizing: border-box; }
-  .sidebar ul { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
-  .sidebar li { white-space: nowrap; margin-bottom: 0; }
-  .content { padding: 15px; }
-}
-</style>
-</head>
-
-<body>
-
-<div class="wrapper" id="app-wrapper" style="display: none;">
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand">
-          <i class='bx bx-moon'></i>
-          <h2>Panel Admin</h2>
-      </div>
-      <div class="admin-info" id="adminNameDisplay">Administrator</div>
-    </div>
-    <ul id="menuList">
-      <li onclick="showPage('dashboard', this)" class="active"><i class='bx bx-grid-alt'></i> Dashboard</li>
-      <li onclick="showPage('laporan', this)"><i class='bx bx-file'></i> Laporan</li>
-      <li onclick="showPage('manajemen', this)"><i class='bx bx-cog'></i> Manajemen</li>
-      <li onclick="showPage('siswa', this)"><i class='bx bx-user'></i> Data Siswa</li>
-      <li onclick="showPage('pembimbing', this)"><i class='bx bx-group'></i> Pembimbing</li>
-      <li onclick="showPage('kelompok', this)"><i class='bx bx-sitemap'></i> Kelompok</li>
-      <li onclick="showPage('operasional', this)"><i class='bx bx-briefcase'></i> Operasional</li>
-      <li onclick="showPage('penilaian', this)"><i class='bx bx-star'></i> Penilaian</li>
-      <li onclick="showPage('sertifikat', this)"><i class='bx bx-certification'></i> Sertifikat</li>
-      <li onclick="logout()" style="margin-top: auto; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);"><i class='bx bx-log-out'></i> Keluar</li>
-    </ul>
-  </div>
-
-  <div class="content">
-    
-    <div id="loading-indicator" class="loader-container">
-      <div class="spinner"></div>
-      <span id="loading-text" style="color: var(--text-muted); font-size: 13px;">Memuat data dari server...</span>
-    </div>
-
-    <div id="main-content" class="hidden">
-      
-      <div id="dashboard" class="page">
-        <h2 class="page-title">Dashboard Overview</h2>
-        <div class="grid-3">
-          <div class="stat-box">
-            <div class="stat-icon"><i class='bx bx-user'></i></div>
-            <div class="stat-info">
-              <span>Total Siswa Aktif</span>
-              <div class="stat" id="totalSiswa">0</div>
-            </div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon"><i class='bx bx-file'></i></div>
-            <div class="stat-info">
-              <span>Total Laporan Masuk</span>
-              <div class="stat" id="totalLaporan">0</div>
-            </div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon"><i class='bx bx-line-chart'></i></div>
-            <div class="stat-info">
-              <span>Rata-rata Nilai Keseluruhan</span>
-              <div class="stat" id="rataNilai">0</div>
-            </div>
-          </div>
-        </div>
-        <div class="card" style="margin-top: 20px;">
-          <div class="card-header">
-            <h3>Top 5 Siswa (Berdasarkan Total Nilai)</h3>
-          </div>
-          <div class="chart-container">
-            <canvas id="rankingChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div id="laporan" class="page hidden">
-        <h2 class="page-title">Data Laporan Harian</h2>
-        <div class="card">
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchLaporan" onkeyup="searchTable('tableLaporan', 'searchLaporan')" placeholder="Cari laporan (nama/kegiatan)...">
-            </div>
-            <button class="btn btn-success"><i class='bx bx-export'></i> Export Excel</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tableLaporan">
-              <thead></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="manajemen" class="page hidden">
-        <h2 class="page-title">Manajemen Sistem</h2>
-        <div class="card">
-            <h3>Pengaturan Program Ramadan</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Atur konfigurasi dasar untuk aplikasi ini.</p>
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Tahun Hijriah</label>
-                    <input type="text" class="form-control" value="1447 H">
-                </div>
-                <div class="form-group">
-                    <label>Status Program</label>
-                    <select class="form-control">
-                        <option>Aktif</option>
-                        <option>Persiapan</option>
-                        <option>Selesai</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Target Laporan Minimal</label>
-                    <input type="number" class="form-control" value="20">
-                </div>
-            </div>
-            <button class="btn btn-primary" style="margin-top: 10px;"><i class='bx bx-save'></i> Simpan Pengaturan</button>
-        </div>
-      </div>
-
-      <div id="siswa" class="page hidden">
-        <h2 class="page-title">Data Siswa</h2>
-        <div class="card">
-          <div class="table-controls">
-            <div class="search-bar">
-              <i class='bx bx-search'></i>
-              <input type="text" id="searchSiswa" onkeyup="searchTable('tableSiswa', 'searchSiswa')" placeholder="Cari nama atau NIS...">
-            </div>
-            <button class="btn btn-primary"><i class='bx bx-plus'></i> Tambah Siswa</button>
-          </div>
-          <div class="table-wrapper">
-            <table id="tableSiswa">
-              <thead>
-                  <tr><th>NIS / Username</th><th>Nama Siswa</th><th>Kelas</th><th>Kelompok</th><th>Status</th><th>Aksi</th></tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="pembimbing" class="page hidden">
-        <h2 class="page-title">Performa Pembimbing & Kelompok</h2>
-        
-        <div class="card">
-            <div class="card-header">
-                <h3>Merekap Progres Laporan Kelompok</h3>
-            </div>
-            <div class="table-controls" style="margin-bottom: 10px;">
-              <div class="search-bar">
-                <i class='bx bx-search'></i>
-                <input type="text" id="searchPembimbing" onkeyup="searchTable('tablePembimbing', 'searchPembimbing')" placeholder="Cari kelompok/pembimbing...">
-              </div>
-            </div>
-            <div class="table-wrapper">
-              <table id="tablePembimbing">
-                <thead>
-                    <tr>
-                        <th>Kelompok</th>
-                        <th>Nama Pembimbing</th>
-                        <th>Jml Siswa</th>
-                        <th>Total Laporan Masuk</th>
-                        <th>Progres Kelompok</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3>Pengerjaan Penilaian Harian</h3>
-            </div>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Memantau sisa laporan yang belum divalidasi/dinilai oleh pembimbing berdasarkan tanggal tertentu.</p>
-            
-            <div class="table-controls" style="margin-bottom: 15px; background: var(--bg-hover); padding: 10px; border-radius: 8px; width: max-content;">
-                <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; gap: 10px;">
-                    <label for="filterTanggalPenilaian" style="margin-bottom: 0; font-weight: 600; color: white;">Filter Tanggal:</label>
-                    <input type="date" id="filterTanggalPenilaian" class="form-control" style="width: auto; padding: 6px 10px;" onchange="renderTablePembimbing()">
-                    <button class="btn btn-danger" onclick="document.getElementById('filterTanggalPenilaian').value=''; renderTablePembimbing();" style="padding: 6px 10px;" title="Reset Tanggal"><i class='bx bx-x'></i> Reset</button>
-                </div>
-            </div>
-
-            <div class="table-wrapper">
-              <table id="tablePenilaianPembimbing">
-                <thead>
-                    <tr>
-                        <th>Nama Pembimbing</th>
-                        <th>Laporan Masuk</th>
-                        <th>Belum Dinilai</th>
-                        <th>Persentase Kinerja</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-        </div>
-      </div>
-
-      <div id="kelompok" class="page hidden">
-        <h2 class="page-title">Master Data Kelompok</h2>
-        <div class="card">
-            <div class="table-controls">
-              <div class="search-bar">
-                <i class='bx bx-search'></i>
-                <input type="text" id="searchKelompok" onkeyup="searchTable('tableKelompok', 'searchKelompok')" placeholder="Cari nama kelompok...">
-              </div>
-            </div>
-            <div class="table-wrapper">
-              <table id="tableKelompok">
-                <thead></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-        </div>
-      </div>
-
-      <div id="operasional" class="page hidden">
-        <h2 class="page-title">Operasional & Informasi</h2>
-        <div class="grid-2">
-            <div class="card">
-                <h3><i class='bx bx-broadcast'></i> Broadcast Pengumuman</h3>
-                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Kirim pesan pengumuman ke dashboard semua siswa.</p>
-                <div class="form-group">
-                    <label>Judul Pengumuman</label>
-                    <input type="text" class="form-control" placeholder="Cth: Jadwal Bukber Angkatan">
-                </div>
-                <div class="form-group">
-                    <label>Isi Pesan</label>
-                    <textarea class="form-control" rows="4" placeholder="Ketik isi pengumuman di sini..."></textarea>
-                </div>
-                <button class="btn btn-primary"><i class='bx bx-send'></i> Kirim Broadcast</button>
-            </div>
-            
-            <div class="card">
-                <h3><i class='bx bx-task'></i> Log Aktivitas Admin</h3>
-                <ul style="list-style: none; padding: 0; margin-top: 15px; font-size: 13px;">
-                    <li style="padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
-                        <strong style="color: var(--text-main);">Hari ini, 08:30</strong> - Admin Budi memperbarui pengaturan tahun Hijriah.
-                    </li>
-                    <li style="padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
-                        <strong style="color: var(--text-main);">Kemarin, 14:15</strong> - Admin mengunggah data kelompok angkatan 3.
-                    </li>
-                    <li style="padding: 10px; color: var(--text-muted);">
-                        <strong style="color: var(--text-main);">Kemarin, 10:00</strong> - Sistem melakukan backup database mingguan.
-                    </li>
-                </ul>
-            </div>
-        </div>
-      </div>
-
-      <div id="penilaian" class="page hidden">
-        <h2 class="page-title">Rekap Penilaian Akhir</h2>
-        <div class="card">
-            <div class="table-controls">
-              <div class="search-bar">
-                <i class='bx bx-search'></i>
-                <input type="text" id="searchPenilaian" onkeyup="searchTable('tablePenilaian', 'searchPenilaian')" placeholder="Cari nama siswa...">
-              </div>
-              <button class="btn btn-success"><i class='bx bx-printer'></i> Cetak Rekap Kelas</button>
-            </div>
-            <div class="table-wrapper">
-              <table id="tablePenilaian">
-                <thead>
-                    <tr>
-                        <th>NIS / Username</th>
-                        <th>Nama Siswa</th>
-                        <th>Kelompok</th>
-                        <th>Total Laporan</th>
-                        <th>Rata-rata Nilai</th>
-                        <th>Status Mutaba'ah</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-        </div>
-      </div>
-
-      <div id="sertifikat" class="page hidden">
-        <h2 class="page-title">Penerbitan Sertifikat</h2>
-        <div class="card">
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Daftar siswa yang telah menyelesaikan program dan berhak mendapatkan sertifikat.</p>
-            <div class="table-controls">
-              <div class="search-bar">
-                <i class='bx bx-search'></i>
-                <input type="text" id="searchSertifikat" onkeyup="searchTable('tableSertifikat', 'searchSertifikat')" placeholder="Cari siswa penerima...">
-              </div>
-            </div>
-            <div class="table-wrapper">
-              <table id="tableSertifikat">
-                <thead>
-                    <tr>
-                        <th>Nama Siswa</th>
-                        <th>Kelompok</th>
-                        <th>Nilai Akhir</th>
-                        <th>Kelayakan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 <script>
 // ==========================================
-// PENGECEKAN LOGIN MENGGUNAKAN LOCALSTORAGE
+// 1. KONFIGURASI SCRIPT URL (PINDAH KE PALING ATAS)
+// ==========================================
+// ⚠️ PASTIKAN URL WEB APP INI SUDAH YANG TERBARU (DEPLOYMENT BARU)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBy_-AmeZquA9pF2WhlDFOW5JBLgdoEkL0rDFpEFXhObTm-aJ0qGbDL_F2xtBRcl2I_A/exec"; 
+
+let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
+let chartInstance = null; 
+
+// ==========================================
+// 2. PENGECEKAN LOGIN MENGGUNAKAN LOCALSTORAGE
 // ==========================================
 let userObj = null;
 try {
@@ -432,7 +28,7 @@ if (!userObj || userObj.role !== 'admin') {
     // Tampilkan nama admin di sidebar
     document.getElementById("adminNameDisplay").innerText = userObj.nama || "Administrator";
     
-    // Mulai memuat data dari server
+    // Mulai memuat data dari server (Sekarang SCRIPT_URL sudah dikenali)
     loadData();
 }
 
@@ -443,14 +39,6 @@ function logout() {
         window.location.href = 'index.html';
     }
 }
-// ==========================================
-
-// --- KONFIGURASI SCRIPT URL ---
-// ⚠️ PASTIKAN URL WEB APP INI SUDAH YANG TERBARU (DEPOLOYMENT BARU)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBy_-AmeZquA9pF2WhlDFOW5JBLgdoEkL0rDFpEFXhObTm-aJ0qGbDL_F2xtBRcl2I_A/exec"; 
-
-let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
-let chartInstance = null; 
 
 // --- FUNGSI PARSING NILAI ---
 function parseNilai(str) {
@@ -495,12 +83,12 @@ async function loadData(){
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
   try { 
-    // ✅ Menambahkan action=rekapAdmin dan waktu (mencegah cache browser nyangkut)
+    // Menambahkan action=rekapAdmin dan waktu (mencegah cache browser nyangkut)
     const url = `${SCRIPT_URL}?action=rekapAdmin&t=${new Date().getTime()}`;
     const res = await fetch(url); 
     if (!res.ok) throw new Error("Gagal terhubung"); 
     
-    // ✅ Membaca sebagai teks dulu untuk mencegah crash parsing JSON
+    // Membaca sebagai teks dulu untuk mencegah crash parsing JSON
     const textResponse = await res.text();
     let raw;
     try {
@@ -813,5 +401,3 @@ function renderPenilaianDanSertifikat() {
   tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
 }
 </script>
-</body>
-</html>
