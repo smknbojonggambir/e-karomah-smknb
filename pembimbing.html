@@ -558,7 +558,8 @@ async function loadData() {
                     }
                 }
 
-                if (item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2) {
+                // ✅ PERBAIKAN: Ubah ".length > 2" menjadi ".length > 0" agar nilai seperti 80 (2 digit) bisa dibaca
+                if (item.Nilai_Pembimbing !== undefined && String(item.Nilai_Pembimbing).trim().length > 0) {
                     groupedData[key].Nilai_Pembimbing = item.Nilai_Pembimbing;
                 }
             }
@@ -637,8 +638,9 @@ function updateCountChips(data) {
     }
 }
 
+// ✅ PERBAIKAN: Ubah "> 2" menjadi "> 0" dan periksa validitas undefined agar terhitung "Sudah Dinilai"
 function hasGrade(item){ 
-    return item.Nilai_Pembimbing && String(item.Nilai_Pembimbing).length > 2; 
+    return item.Nilai_Pembimbing !== undefined && String(item.Nilai_Pembimbing).trim().length > 0; 
 }
 
 function setFilter(type, el) {
