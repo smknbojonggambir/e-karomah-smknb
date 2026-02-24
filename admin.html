@@ -30,11 +30,15 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .sidebar-header { display: flex; align-items: center; gap: 10px; color: var(--accent); margin-bottom: 30px; }
 .sidebar-header i { font-size: 28px; }
 .sidebar-header h2 { margin: 0; font-size: 20px; }
-.sidebar ul { list-style: none; padding: 0; margin: 0; }
+.sidebar ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
 .sidebar li { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text-muted); transition: all 0.3s ease; }
 .sidebar li i { font-size: 20px; }
 .sidebar li:hover { background: var(--bg-hover); color: var(--text-main); }
 .sidebar li.active { background: var(--accent); color: #0f172a; font-weight: 600; }
+
+/* Tombol Logout Khusus */
+.logout-btn { margin-top: auto; color: #ef4444 !important; }
+.logout-btn:hover { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; }
 
 /* --- CONTENT & CARDS --- */
 .content { flex: 1; padding: 30px; overflow-x: hidden; }
@@ -96,8 +100,9 @@ tbody tr:hover { background: #273549; }
 @media (max-width: 768px) {
   .wrapper { flex-direction: column; }
   .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); padding: 15px; }
-  .sidebar ul { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
+  .sidebar ul { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; height: auto; }
   .sidebar li { white-space: nowrap; margin-bottom: 0; }
+  .logout-btn { margin-top: 0; }
   .content { padding: 15px; }
 }
 </style>
@@ -121,6 +126,8 @@ tbody tr:hover { background: #273549; }
       <li onclick="showPage('operasional', this)"><i class='bx bx-briefcase'></i> Operasional</li>
       <li onclick="showPage('penilaian', this)"><i class='bx bx-star'></i> Penilaian</li>
       <li onclick="showPage('sertifikat', this)"><i class='bx bx-certification'></i> Sertifikat</li>
+      
+      <li onclick="logout()" class="logout-btn"><i class='bx bx-log-out'></i> Keluar</li>
     </ul>
   </div>
 
@@ -398,7 +405,6 @@ tbody tr:hover { background: #273549; }
 
 <script>
 // --- KONFIGURASI SCRIPT URL ---
-// PASTIKAN URL INI ADALAH URL WEB APP DEPLOYMENT YANG TERBARU DARI GOOGLE SCRIPT ANDA
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBANif6CnJjLRowaPcN6fjVeJEmEK8WWKAnEI_MuqXTrcMDdt-IBRhMPJ0ayr3-EUfVQ/exec"; 
 
 let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
@@ -424,7 +430,7 @@ function parseNilai(str) {
 // --- FUNGSI NAVIGASI HALAMAN ---
 function showPage(pageId, element){ 
   const targetPage = document.getElementById(pageId);
-  if (!targetPage) return; 
+  if (!targetPage) { alert("Halaman belum siap!"); return; }
 
   document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden")); 
   targetPage.classList.remove("hidden"); 
@@ -435,6 +441,7 @@ function showPage(pageId, element){
   } 
 } 
 
+// --- FUNGSI PENCARIAN TABEL ---
 function searchTable(tableId, inputId) { 
   const input = document.getElementById(inputId).value.toLowerCase(); 
   const rows = document.querySelectorAll(`#${tableId} tbody tr`); 
@@ -443,22 +450,34 @@ function searchTable(tableId, inputId) {
   }); 
 } 
 
+// --- FUNGSI LOGOUT ---
+function logout() {
+    if (confirm("Apakah Anda yakin ingin keluar dari Panel Admin?")) {
+        // Hapus data login dari browser (sesuaikan key jika Anda menggunakan localStorage/sessionStorage)
+        localStorage.removeItem("userLogin"); 
+        sessionStorage.removeItem("userLogin");
+        
+        // Arahkan kembali ke halaman index/login
+        // Ganti 'index.html' dengan nama file login Anda yang sebenarnya jika berbeda
+        window.location.href = "index.html"; 
+    }
+}
+
 // --- FUNGSI MEMUAT DATA DARI SERVER ---
+// DITAMBAHKAN: 'async function' agar await fetch bisa berjalan
 async function loadData() {
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
   const loadingText = document.getElementById("loading-text");
   
   try { 
-    // PERBAIKAN UTAMA: Tambahkan '?action=rekapAdminLanjutan' agar sesuai dengan kode GAS
+    // DITAMBAHKAN: ?action=rekapAdminLanjutan agar Backend merespon
     const res = await fetch(SCRIPT_URL + "?action=rekapAdminLanjutan"); 
-    if (!res.ok) throw new Error("Gagal terhubung ke Google Script"); 
+    if (!res.ok) throw new Error("Gagal terhubung ke server"); 
     
     const raw = await res.json(); 
     
-    // Mengecek apakah respons dari GAS adalah success
     if (raw.status === "success") { 
-      // Kode GAS mengubah header menjadi huruf kecil dengan underscore (contoh: nilai_pembimbing, nama_siswa)
       dataMaster.laporan = raw.laporan || []; 
       dataMaster.siswa = raw.siswa || []; 
       dataMaster.kelompok = raw.kelompok || []; 
@@ -473,12 +492,11 @@ async function loadData() {
       loadingDiv.classList.add("hidden"); 
       mainContent.classList.remove("hidden"); 
     } else {
-      // Jika error dari backend (misal salah action)
-      throw new Error(raw.message || "Aksi ditolak oleh server.");
+        throw new Error(raw.message || "Aksi ditolak oleh server.");
     }
   } catch (error) { 
-    console.error("Fetch Error:", error); 
-    loadingText.innerHTML = `<div class="error-message"><b>Gagal Memuat Data.</b><br>${error.message}<br>Pastikan link SCRIPT_URL sudah benar dan sudah di-Deploy sebagai Web App "Anyone".</div>`; 
+    console.error("Error:", error); 
+    loadingText.innerHTML = `<div class="error-message"><b>Gagal Memuat Data.</b><br>${error.message}</div>`; 
     document.querySelector(".spinner").style.display = "none"; 
   } 
 } 
@@ -491,7 +509,7 @@ function renderDashboard(){
   
   laporan.forEach(item => { 
     const nama = item.nama || item.nama_siswa || item.username; 
-    const evalNilai = parseNilai(item.nilai_pembimbing); // disesuaikan dengan lowercase dari GAS
+    const evalNilai = parseNilai(item.nilai_pembimbing || item.Nilai_Pembimbing);
     
     if (nama && evalNilai.isDinilai) { 
       if(!ranking[nama]) ranking[nama] = 0; 
@@ -514,6 +532,7 @@ function renderDashboard(){
   renderChart(topData.map(d => d[0]), topData.map(d => d[1])); 
 } 
 
+// --- RENDER GRAFIK CHART.JS ---
 function renderChart(labels, data) { 
   const ctx = document.getElementById('rankingChart').getContext('2d'); 
   if(chartInstance) chartInstance.destroy(); 
@@ -584,7 +603,7 @@ function renderTableKelompok() {
   tbody.innerHTML = data.map(row => "<tr>" + headers.map(h => `<td>${row[h] || '-'}</td>`).join("") + "</tr>").join(""); 
 }
 
-// --- RENDER TABEL PEMBIMBING ---
+// --- RENDER TABEL PEMBIMBING & KINERJA KELOMPOK ---
 function renderTablePembimbing() {
   const tbodyProgres = document.querySelector("#tablePembimbing tbody");
   const tbodyPenilaian = document.querySelector("#tablePenilaianPembimbing tbody");
@@ -603,26 +622,32 @@ function renderTablePembimbing() {
   let htmlKinerja = "";
 
   kelompokMaster.forEach(k => {
-      const namaKelompok = k.kelompok || "-";
-      const namaPembimbing = k.pembimbing || "Belum Ditentukan";
+      // Ambil Nama Kelompok dan Pembimbing (Akurasi Tinggi dari Data Master)
+      const namaKelompok = k.kelompok || k.Kelompok || "-";
+      const namaPembimbing = k.pembimbing || k.Pembimbing || k.UsernamePembimbing || "Belum Ditentukan";
       
+      // Hitung jumlah siswa di kelompok tersebut
       const jumlahSiswa = siswaList.filter(s => 
           (s.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       ).length;
       
+      // Filter laporan langsung dari identifier 'kelompok' di Tabel Laporan
       const laporanKelompok = laporanList.filter(lap => 
-          (lap.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
+          (lap.kelompok || lap.Kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       );
 
       const totalMasuk = laporanKelompok.length;
       
+      // Cek yang sudah dinilai menggunakan parseNilai
       const sudahDinilai = laporanKelompok.filter(lap => {
-          return parseNilai(lap.nilai_pembimbing).isDinilai;
+          const nilai = lap.nilai_pembimbing || lap.Nilai_Pembimbing; 
+          return parseNilai(nilai).isDinilai;
       }).length;
       
       const belumDinilai = totalMasuk - sudahDinilai;
       const persen = totalMasuk > 0 ? Math.round((sudahDinilai / totalMasuk) * 100) : 0;
 
+      // Render Tabel 1: Progres Kelompok
       let badgeProgres = `<span class="badge badge-danger">Rendah</span>`;
       if (totalMasuk > (jumlahSiswa * 7)) badgeProgres = `<span class="badge badge-warning">Sedang</span>`; 
       if (totalMasuk > (jumlahSiswa * 15)) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
@@ -638,6 +663,7 @@ function renderTablePembimbing() {
         </tr>
       `;
 
+      // Render Tabel 2: Kinerja Pembimbing
       let badgeKinerja = "badge-danger";
       if (persen >= 50) badgeKinerja = "badge-warning";
       if (persen >= 90) badgeKinerja = "badge-active"; 
@@ -690,8 +716,9 @@ function renderPenilaianDanSertifikat() {
       let akumulasiNilai = 0;
       let countDinilai = 0;
       
+      // Kalkulasi rata-rata menggunakan fungsi parseNilai
       laporanSiswa.forEach(lap => {
-          const evalNilai = parseNilai(lap.nilai_pembimbing);
+          const evalNilai = parseNilai(lap.nilai_pembimbing || lap.Nilai_Pembimbing);
           if (evalNilai.isDinilai) {
               akumulasiNilai += evalNilai.value;
               countDinilai++;
@@ -733,6 +760,7 @@ function renderPenilaianDanSertifikat() {
   tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
 }
 
+// Menjalankan fungsi memuat data ketika halaman HTML pertama kali termuat
 document.addEventListener("DOMContentLoaded", () => {
     loadData();
 });
