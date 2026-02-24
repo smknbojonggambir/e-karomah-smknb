@@ -739,9 +739,9 @@ function renderPenilaianDanSertifikat() {
   tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
 }
 
-// Menjalankan fungsi memuat data ketika halaman HTML pertama kali terbuka
-document.addEventListener("DOMContentLoaded", loadData);
-</script>
+// Menjalankan fungsi memuat data ketika halaman HTML pertama kali termuat
+window.onload = loadData;
 
+</script>
 </body>
 </html>
