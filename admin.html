@@ -448,7 +448,10 @@ function searchTable(tableId, inputId) {
 } 
 
 // --- FUNGSI MEMUAT DATA DARI SERVER ---
-async function loadData(){ 
+// Memanggil fungsi loadData saat seluruh halaman selesai dimuat
+document.addEventListener("DOMContentLoaded", () => {
+    loadData();
+});
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
   try { 
