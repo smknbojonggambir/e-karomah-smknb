@@ -282,7 +282,11 @@ const activities = [
 ];
 
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
-
+<div style="margin-top: 20px; text-align: center;">
+    <button class="btn btn-success" onclick="cobaDownloadSertifikat()" style="padding: 10px 20px; font-size: 15px;">
+        <i class='bx bx-download'></i> Download Sertifikat Kelulusan E-KAROMAH
+    </button>
+</div>
 // === DATA HADIS DENGAN ARAB ===
 const haditsCollection = [
     { 
@@ -638,5 +642,17 @@ function logout() {
     });
   }
 </script>
+    <script>
+        function cobaDownloadSertifikat() {
+    // Pesan utama sesuai permintaan Anda
+    const pesanUtama = "Maaf, sertifikat belum bisa diunduh saat ini.";
+    
+    // Kalimat tambahan yang relevan agar peserta paham alasannya
+    const kalimatPenjelasan = "Sertifikat Kelulusan E-KAROMAH baru akan diterbitkan dan dapat diunduh setelah seluruh rangkaian program selesai serta penilaian akhir telah divalidasi oleh pembimbing.\n\nSilakan cek kembali halaman ini secara berkala.";
+
+    // Menampilkan notifikasi popup bawaan browser
+    alert(pesanUtama + "\n\n" + kalimatPenjelasan);
+}
+    </script>
 </body>
 </html>
