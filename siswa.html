@@ -164,6 +164,8 @@
             color: #022c22; border: none; border-radius: 16px; font-weight: 700; font-size: 16px;
             box-shadow: 0 4px 20px var(--gold-glow); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
+        .btn-success { background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-success:hover { background: #059669; }
 
         #loaderOverlay {
             display: none; position: fixed; top:0; left:0; width:100%; height:100%;
@@ -210,6 +212,7 @@
             <p class="hadits-text" id="haditsIndo">"Memuat hadis..."</p>
             <div class="hadits-footer" id="haditsRiwayat">-</div>
         </div>
+        
         <div class="progress-container">
             <div class="progress-label">
                 <span>Progress Amalan Hari Ini</span>
@@ -240,6 +243,12 @@
                 <div class="activity-body open" style="padding-top:0; border:none;">
                     <input type="text" id="inputCatatan" placeholder="Tulis catatan jika ada...">
                 </div>
+            </div>
+            
+            <div style="margin-top: 20px; margin-bottom: 20px; text-align: center;">
+                <button class="btn btn-success" onclick="cobaDownloadSertifikat()" style="padding: 10px 20px; font-size: 15px; width: 100%;">
+                    <i class='bx bx-download'></i> Download Sertifikat Kelulusan E-KAROMAH
+                </button>
             </div>
 
             <div class="fab-container">
@@ -282,60 +291,56 @@ const activities = [
 ];
 
 const noPhotoList = ["Subuh", "Dzuhur", "Ashar", "Magrib", "Isya", "Tarawih", "Tidur"];
-<div style="margin-top: 20px; text-align: center;">
-    <button class="btn btn-success" onclick="cobaDownloadSertifikat()" style="padding: 10px 20px; font-size: 15px;">
-        <i class='bx bx-download'></i> Download Sertifikat Kelulusan E-KAROMAH
-    </button>
-</div>
+
 // === DATA HADIS DENGAN ARAB ===
 const haditsCollection = [
     { 
-        arab: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ",
+        arab: "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ",
         text: "Senyummu di hadapan saudaramu adalah sedekah.", 
         riwayat: "HR. Tirmidzi" 
     },
     { 
-        arab: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ",
+        arab: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ",
         text: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", 
         riwayat: "HR. Ahmad" 
     },
     { 
-        arab: "وَمَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ",
+        arab: "وَمَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ",
         text: "Barangsiapa yang menempuh jalan untuk menuntut ilmu, Allah akan mudahkan baginya jalan menuju surga.", 
         riwayat: "HR. Muslim" 
     },
     { 
-        arab: "الطُّهُورُ شَطْرُ الْإِيمَانِ",
+        arab: "الطُّهُورُ شَطْرُ الْإِيمَانِ",
         text: "Kebersihan itu sebagian dari iman.", 
         riwayat: "HR. Muslim" 
     },
     { 
-        arab: "لَا تَغْضَبْ وَلَكَ الْجَنَّةُ",
+        arab: "لَا تَغْضَبْ وَلَكَ الْجَنَّةُ",
         text: "Janganlah engkau marah, maka bagimu surga.", 
         riwayat: "HR. Thabrani" 
     },
     { 
-        arab: "الْيَدُ الْعُلْيَا خَيْرٌ مِنَ الْيَدِ السُّفْلَى",
+        arab: "الْيَدُ الْعُلْيَا خَيْرٌ مِنَ الْيَدِ السُّفْلَى",
         text: "Tangan di atas (memberi) lebih baik daripada tangan di bawah (meminta).", 
         riwayat: "HR. Bukhari & Muslim" 
     },
     { 
-        arab: "صَلَاةُ الْجَمَاعَةِ تَفْضُلُ صَلَاةَ الْفَذِّ بِسَبْعٍ وَعِشْرِينَ دَرَجَةً",
+        arab: "صَلَاةُ الْجَمَاعَةِ تَفْضُلُ صَلَاةَ الْفَذِّ بِسَبْعٍ وَعِشْرِينَ دَرَجَةً",
         text: "Sholat berjamaah itu lebih utama 27 derajat daripada sholat sendirian.", 
         riwayat: "HR. Bukhari & Muslim" 
     },
     { 
-        arab: "مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ",
+        arab: "مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ",
         text: "Barangsiapa berpuasa Ramadhan karena iman dan mengharap pahala, niscaya diampuni dosa-dosanya yang telah lalu.", 
         riwayat: "HR. Bukhari & Muslim" 
     },
     { 
-        arab: "تَسَحَّرُوا فَإِنَّ فِي السَّحُورِ بَرَكَةً",
+        arab: "تَسَحَّرُوا فَإِنَّ فِي السَّحُورِ بَرَكَةً",
         text: "Makan sahurlah kalian, karena sesungguhnya dalam sahur itu terdapat keberkahan.", 
         riwayat: "HR. Bukhari & Muslim" 
     },
     { 
-        arab: "الصِّيَامُ نِصْفُ الصَّبْرِ",
+        arab: "الصِّيَامُ نِصْفُ الصَّبْرِ",
         text: "Puasanya orang yang sabar adalah setengah dari iman.", 
         riwayat: "HR. Ibnu Majah" 
     }
@@ -628,21 +633,8 @@ function logout() {
     localStorage.clear();
     location.href = "index.html";
 }
-</script>
-     <script src="chat.js" defer></script>
 
-
-
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('SW Otomatis Siap!', reg.scope))
-        .catch(err => console.log('SW Gagal:', err));
-    });
-  }
-
-        function cobaDownloadSertifikat() {
+function cobaDownloadSertifikat() {
     // Pesan utama sesuai permintaan Anda
     const pesanUtama = "Maaf, sertifikat belum bisa diunduh saat ini.";
     
@@ -652,6 +644,17 @@ function logout() {
     // Menampilkan notifikasi popup bawaan browser
     alert(pesanUtama + "\n\n" + kalimatPenjelasan);
 }
-    </script>
+</script>
+    <script src="chat.js" defer></script>
+
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW Otomatis Siap!', reg.scope))
+        .catch(err => console.log('SW Gagal:', err));
+    });
+  }
+</script>
 </body>
 </html>
