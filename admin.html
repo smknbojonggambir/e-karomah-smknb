@@ -22,19 +22,16 @@
   --border-color: #334155;
 }
 
-body { margin: 0; font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-main); color: var(--text-main); }
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-main); color: var(--text-main); }
 .wrapper { display: flex; min-height: 100vh; }
 
 /* --- SIDEBAR STYLING --- */
 .sidebar { width: 250px; background: var(--bg-sidebar); padding: 20px; flex-shrink: 0; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
-.sidebar-header { display: flex; flex-direction: column; gap: 5px; color: var(--accent); margin-bottom: 30px; }
-.sidebar-header .brand { display: flex; align-items: center; gap: 10px; }
-.sidebar-header .brand i { font-size: 28px; }
-.sidebar-header .brand h2 { margin: 0; font-size: 20px; }
-.sidebar-header .admin-info { font-size: 12px; color: var(--text-muted); margin-top: 5px; padding-left: 38px; }
-
+.sidebar-header { display: flex; align-items: center; gap: 10px; color: var(--accent); margin-bottom: 30px; }
+.sidebar-header i { font-size: 28px; }
+.sidebar-header h2 { margin: 0; font-size: 20px; }
 .sidebar ul { list-style: none; padding: 0; margin: 0; }
-.sidebar li { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-muted); transition: all 0.3s ease; }
+.sidebar li { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text-muted); transition: all 0.3s ease; }
 .sidebar li i { font-size: 20px; }
 .sidebar li:hover { background: var(--bg-hover); color: var(--text-main); }
 .sidebar li.active { background: var(--accent); color: #0f172a; font-weight: 600; }
@@ -49,7 +46,7 @@ body { margin: 0; font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, s
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
 .stat-box { display: flex; align-items: center; gap: 15px; background: var(--bg-hover); padding: 20px; border-radius: 10px; }
 .stat-icon { width: 50px; height: 50px; background: rgba(250, 204, 21, 0.1); color: var(--accent); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
-.stat-info span { font-size: 12px; color: var(--text-muted); }
+.stat-info span { font-size: 13px; color: var(--text-muted); }
 .stat-info .stat { font-size: 24px; font-weight: bold; color: var(--text-main); margin-top: 5px; }
 
 /* --- BUTTONS --- */
@@ -68,11 +65,11 @@ body { margin: 0; font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, s
 .table-controls { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 .search-bar { display: flex; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 15px; width: 100%; max-width: 300px; }
 .search-bar i { color: var(--text-muted); margin-right: 10px; }
-.search-bar input { background: transparent; border: none; color: var(--text-main); outline: none; width: 100%; font-family: inherit; font-size: 13px; }
+.search-bar input { background: transparent; border: none; color: var(--text-main); outline: none; width: 100%; }
 .table-wrapper { overflow-x: auto; max-height: 500px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; }
 th, td { border-bottom: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
-th { background: var(--bg-hover); color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; position: sticky; top: 0; z-index: 10; white-space: nowrap; }
+th { background: var(--bg-hover); color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; position: sticky; top: 0; z-index: 10; }
 tbody tr { transition: background 0.2s; }
 tbody tr:hover { background: #273549; }
 
@@ -85,7 +82,7 @@ tbody tr:hover { background: #273549; }
 /* --- FORM ELEMENTS --- */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
-.form-control { width: 100%; padding: 10px; border-radius: 5px; background: var(--bg-main); border: 1px solid var(--border-color); color: white; box-sizing: border-box; font-family: inherit; color-scheme: dark;}
+.form-control { width: 100%; padding: 10px; border-radius: 5px; background: var(--bg-main); border: 1px solid var(--border-color); color: white; box-sizing: border-box; }
 
 /* --- UTILITIES & LOADING --- */
 .hidden { display: none !important; }
@@ -97,7 +94,7 @@ tbody tr:hover { background: #273549; }
 /* Responsive */
 @media (max-width: 768px) {
   .wrapper { flex-direction: column; }
-  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); padding: 15px; box-sizing: border-box; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); padding: 15px; }
   .sidebar ul { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
   .sidebar li { white-space: nowrap; margin-bottom: 0; }
   .content { padding: 15px; }
@@ -107,14 +104,11 @@ tbody tr:hover { background: #273549; }
 
 <body>
 
-<div class="wrapper" id="app-wrapper" style="display: none;">
+<div class="wrapper">
   <div class="sidebar">
     <div class="sidebar-header">
-      <div class="brand">
-          <i class='bx bx-moon'></i>
-          <h2>Panel Admin</h2>
-      </div>
-      <div class="admin-info" id="adminNameDisplay">Administrator</div>
+      <i class='bx bx-moon'></i>
+      <h2>Ramadan Panel</h2>
     </div>
     <ul id="menuList">
       <li onclick="showPage('dashboard', this)" class="active"><i class='bx bx-grid-alt'></i> Dashboard</li>
@@ -126,7 +120,6 @@ tbody tr:hover { background: #273549; }
       <li onclick="showPage('operasional', this)"><i class='bx bx-briefcase'></i> Operasional</li>
       <li onclick="showPage('penilaian', this)"><i class='bx bx-star'></i> Penilaian</li>
       <li onclick="showPage('sertifikat', this)"><i class='bx bx-certification'></i> Sertifikat</li>
-      <li onclick="logout()" style="margin-top: auto; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);"><i class='bx bx-log-out'></i> Keluar</li>
     </ul>
   </div>
 
@@ -134,7 +127,7 @@ tbody tr:hover { background: #273549; }
     
     <div id="loading-indicator" class="loader-container">
       <div class="spinner"></div>
-      <span id="loading-text" style="color: var(--text-muted); font-size: 13px;">Memuat data dari server...</span>
+      <span id="loading-text" style="color: var(--text-muted);">Memuat data dari server...</span>
     </div>
 
     <div id="main-content" class="hidden">
@@ -197,7 +190,7 @@ tbody tr:hover { background: #273549; }
         <h2 class="page-title">Manajemen Sistem</h2>
         <div class="card">
             <h3>Pengaturan Program Ramadan</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Atur konfigurasi dasar untuk aplikasi ini.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Atur konfigurasi dasar untuk aplikasi ini.</p>
             <div class="grid-3">
                 <div class="form-group">
                     <label>Tahun Hijriah</label>
@@ -274,16 +267,7 @@ tbody tr:hover { background: #273549; }
             <div class="card-header">
                 <h3>Pengerjaan Penilaian Harian</h3>
             </div>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Memantau sisa laporan yang belum divalidasi/dinilai oleh pembimbing berdasarkan tanggal tertentu.</p>
-            
-            <div class="table-controls" style="margin-bottom: 15px; background: var(--bg-hover); padding: 10px; border-radius: 8px; width: max-content;">
-                <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; gap: 10px;">
-                    <label for="filterTanggalPenilaian" style="margin-bottom: 0; font-weight: 600; color: white;">Filter Tanggal:</label>
-                    <input type="date" id="filterTanggalPenilaian" class="form-control" style="width: auto; padding: 6px 10px;" onchange="renderTablePembimbing()">
-                    <button class="btn btn-danger" onclick="document.getElementById('filterTanggalPenilaian').value=''; renderTablePembimbing();" style="padding: 6px 10px;" title="Reset Tanggal"><i class='bx bx-x'></i> Reset</button>
-                </div>
-            </div>
-
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Memantau sisa laporan yang belum divalidasi/dinilai oleh pembimbing.</p>
             <div class="table-wrapper">
               <table id="tablePenilaianPembimbing">
                 <thead>
@@ -383,7 +367,7 @@ tbody tr:hover { background: #273549; }
       <div id="sertifikat" class="page hidden">
         <h2 class="page-title">Penerbitan Sertifikat</h2>
         <div class="card">
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Daftar siswa yang telah menyelesaikan program dan berhak mendapatkan sertifikat.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Daftar siswa yang telah menyelesaikan program dan berhak mendapatkan sertifikat.</p>
             <div class="table-controls">
               <div class="search-bar">
                 <i class='bx bx-search'></i>
@@ -412,57 +396,31 @@ tbody tr:hover { background: #273549; }
 </div>
 
 <script>
-// ==========================================
-// PENGECEKAN LOGIN MENGGUNAKAN LOCALSTORAGE
-// ==========================================
-let userObj = null;
-try {
-    userObj = JSON.parse(localStorage.getItem("user"));
-} catch(e) {
-    console.error("Gagal membaca data user dari localStorage");
-}
-
-if (!userObj || userObj.role !== 'admin') {
-    alert("⛔ Akses Ditolak. Anda tidak memiliki akses atau belum login sebagai Admin.");
-    window.location.href = 'index.html'; // Arahkan kembali ke halaman login utama
-} else {
-    // Tampilkan aplikasi jika sudah login sebagai admin
-    document.getElementById("app-wrapper").style.display = "flex";
-    
-    // Tampilkan nama admin di sidebar
-    document.getElementById("adminNameDisplay").innerText = userObj.nama || "Administrator";
-    
-    // Mulai memuat data dari server
-    loadData();
-}
-
-// Fungsi Logout
-function logout() {
-    if(confirm("Yakin ingin keluar dari panel Admin?")) {
-        localStorage.removeItem("user");
-        window.location.href = 'index.html';
-    }
-}
-// ==========================================
-
 // --- KONFIGURASI SCRIPT URL ---
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_feYza58DUJTtqE4R2R4eWw5kV5UdoD12EQYWntAnYFgKImOTF7cYNSHexhps62ue5Q/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBANif6CnJjLRowaPcN6fjVeJEmEK8WWKAnEI_MuqXTrcMDdt-IBRhMPJ0ayr3-EUfVQ/exec"; 
 
 let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
 let chartInstance = null; 
 
 // --- FUNGSI PARSING NILAI ---
+// Mengubah input teks dari pembimbing menjadi angka matematis yang bisa dihitung rata-ratanya
 function parseNilai(str) {
     if (!str || str.toString().trim() === "") return { isDinilai: false, value: 0 };
     let s = str.toString().trim();
     
-    if (match = s.match(/\[N:\s*(\d+)\]/i)) return { isDinilai: true, value: parseInt(match[1]) };
+    // Jika format angkanya [N:80]
+    let match = s.match(/\[N:\s*(\d+)\]/i);
+    if (match) return { isDinilai: true, value: parseInt(match[1]) };
+    
+    // Jika formatnya deskriptif 
     if (s.toLowerCase().includes("sesuai") || s.toLowerCase().includes("lengkap")) return { isDinilai: true, value: 100 };
     if (s.toLowerCase().includes("sebagian")) return { isDinilai: true, value: 50 };
     
+    // Jika angka murni
     let num = parseFloat(s);
     if (!isNaN(num)) return { isDinilai: true, value: num };
     
+    // Default jika string ada tapi tidak dikenali di atas, anggap dinilai dgn nilai 75
     return { isDinilai: true, value: 75 }; 
 }
 
@@ -490,7 +448,8 @@ function searchTable(tableId, inputId) {
 } 
 
 // --- FUNGSI MEMUAT DATA DARI SERVER ---
-async function loadData(){ 
+// Fungsi ini sebelumnya tidak dideklarasikan (hanya isinya saja), ini yang menyebabkan error
+async function loadData() {
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
   try { 
@@ -505,6 +464,7 @@ async function loadData(){
       dataMaster.kelompok = raw.kelompok || []; 
     } 
     
+    // Render semua UI
     renderDashboard(); 
     renderTableLaporan(); 
     renderTableSiswa(); 
@@ -628,10 +588,6 @@ function renderTablePembimbing() {
   const tbodyProgres = document.querySelector("#tablePembimbing tbody");
   const tbodyPenilaian = document.querySelector("#tablePenilaianPembimbing tbody");
   
-  // Ambil nilai filter tanggal
-  const filterTanggalEl = document.getElementById("filterTanggalPenilaian");
-  const filterTanggal = filterTanggalEl ? filterTanggalEl.value : "";
-  
   const kelompokMaster = dataMaster.kelompok || [];
   const siswaList = (dataMaster.siswa || []).filter(u => u.role !== 'admin' && u.role !== 'pembimbing');
   const laporanList = dataMaster.laporan || [];
@@ -646,7 +602,7 @@ function renderTablePembimbing() {
   let htmlKinerja = "";
 
   kelompokMaster.forEach(k => {
-      // Ambil Nama Kelompok dan Pembimbing
+      // Ambil Nama Kelompok dan Pembimbing (Akurasi Tinggi dari Data Master)
       const namaKelompok = k.kelompok || k.Kelompok || "-";
       const namaPembimbing = k.pembimbing || k.Pembimbing || k.UsernamePembimbing || "Belum Ditentukan";
       
@@ -655,15 +611,26 @@ function renderTablePembimbing() {
           (s.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       ).length;
       
-      // --- UNTUK TABEL 1: PROGRES KESELURUHAN (Tanpa Filter Tanggal) ---
-      const laporanKelompokAll = laporanList.filter(lap => 
+      // Filter laporan langsung dari identifier 'kelompok' di Tabel Laporan
+      const laporanKelompok = laporanList.filter(lap => 
           (lap.kelompok || lap.Kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       );
-      const totalMasukAll = laporanKelompokAll.length;
 
+      const totalMasuk = laporanKelompok.length;
+      
+      // Cek yang sudah dinilai menggunakan parseNilai
+      const sudahDinilai = laporanKelompok.filter(lap => {
+          const nilai = lap.nilai_pembimbing || lap.Nilai_Pembimbing; 
+          return parseNilai(nilai).isDinilai;
+      }).length;
+      
+      const belumDinilai = totalMasuk - sudahDinilai;
+      const persen = totalMasuk > 0 ? Math.round((sudahDinilai / totalMasuk) * 100) : 0;
+
+      // Render Tabel 1: Progres Kelompok
       let badgeProgres = `<span class="badge badge-danger">Rendah</span>`;
-      if (totalMasukAll > (jumlahSiswa * 7)) badgeProgres = `<span class="badge badge-warning">Sedang</span>`; 
-      if (totalMasukAll > (jumlahSiswa * 15)) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
+      if (totalMasuk > (jumlahSiswa * 7)) badgeProgres = `<span class="badge badge-warning">Sedang</span>`; 
+      if (totalMasuk > (jumlahSiswa * 15)) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
       if (jumlahSiswa === 0) badgeProgres = `<span class="badge" style="background:#334155;">N/A</span>`;
 
       htmlProgres += `
@@ -671,51 +638,17 @@ function renderTablePembimbing() {
             <td><strong>${namaKelompok.toUpperCase()}</strong></td>
             <td>${namaPembimbing}</td>
             <td>${jumlahSiswa} Orang</td>
-            <td>${totalMasukAll} Laporan</td>
+            <td>${totalMasuk} Laporan</td>
             <td>${badgeProgres}</td>
         </tr>
       `;
 
-      // --- UNTUK TABEL 2: PENILAIAN HARIAN (Menerapkan Filter Tanggal) ---
-      let laporanHarian = laporanKelompokAll;
-      
-      if (filterTanggal) {
-          laporanHarian = laporanHarian.filter(lap => {
-              // Deteksi nama kolom tanggal
-              const tglRecord = lap.tanggal || lap.Tanggal || lap.waktu || lap.timestamp || lap.Timestamp;
-              if (!tglRecord) return false;
-              
-              try {
-                  const dateObj = new Date(tglRecord);
-                  if (isNaN(dateObj.getTime())) return false;
-                  
-                  const yyyy = dateObj.getFullYear();
-                  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                  const dd = String(dateObj.getDate()).padStart(2, '0');
-                  const formattedDate = `${yyyy}-${mm}-${dd}`;
-                  
-                  return formattedDate === filterTanggal;
-              } catch(e) {
-                  return false;
-              }
-          });
-      }
-
-      const totalMasukHarian = laporanHarian.length;
-      
-      const sudahDinilaiHarian = laporanHarian.filter(lap => {
-          const nilai = lap.nilai_pembimbing || lap.Nilai_Pembimbing; 
-          return parseNilai(nilai).isDinilai;
-      }).length;
-      
-      const belumDinilaiHarian = totalMasukHarian - sudahDinilaiHarian;
-      const persen = totalMasukHarian > 0 ? Math.round((sudahDinilaiHarian / totalMasukHarian) * 100) : 0;
-
+      // Render Tabel 2: Kinerja Pembimbing
       let badgeKinerja = "badge-danger";
       if (persen >= 50) badgeKinerja = "badge-warning";
       if (persen >= 90) badgeKinerja = "badge-active"; 
 
-      const colorBelumDinilai = belumDinilaiHarian > 0 ? "#ef4444" : "#22c55e";
+      const colorBelumDinilai = belumDinilai > 0 ? "#ef4444" : "#22c55e";
 
       htmlKinerja += `
         <tr>
@@ -723,9 +656,9 @@ function renderTablePembimbing() {
                 <strong>${namaPembimbing}</strong>
                 <br><small style="color:var(--text-muted)">(${namaKelompok.toUpperCase()})</small>
             </td>
-            <td>${totalMasukHarian}</td>
-            <td style="color: ${colorBelumDinilai}; font-weight: bold;">${belumDinilaiHarian}</td>
-            <td><span class="badge ${totalMasukHarian === 0 ? '' : badgeKinerja}">${totalMasukHarian === 0 ? '0%' : persen + '%'} Dinilai</span></td>
+            <td>${totalMasuk}</td>
+            <td style="color: ${colorBelumDinilai}; font-weight: bold;">${belumDinilai}</td>
+            <td><span class="badge ${totalMasuk === 0 ? '' : badgeKinerja}">${totalMasuk === 0 ? '0%' : persen + '%'} Dinilai</span></td>
         </tr>
       `;
   });
@@ -763,6 +696,7 @@ function renderPenilaianDanSertifikat() {
       let akumulasiNilai = 0;
       let countDinilai = 0;
       
+      // Kalkulasi rata-rata menggunakan fungsi parseNilai
       laporanSiswa.forEach(lap => {
           const evalNilai = parseNilai(lap.nilai_pembimbing || lap.Nilai_Pembimbing);
           if (evalNilai.isDinilai) {
@@ -805,6 +739,12 @@ function renderPenilaianDanSertifikat() {
   tbodyPenilaian.innerHTML = htmlPenilaian;
   tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
 }
+
+// Menjalankan fungsi memuat data ketika halaman HTML pertama kali termuat
+document.addEventListener("DOMContentLoaded", () => {
+    loadData();
+});
+
 </script>
 </body>
 </html>
