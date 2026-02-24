@@ -90,6 +90,7 @@ tbody tr:hover { background: #273549; }
 .spinner { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .chart-container { position: relative; height: 300px; width: 100%; }
+.error-message { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; margin-top: 10px; text-align: center; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -397,37 +398,33 @@ tbody tr:hover { background: #273549; }
 
 <script>
 // --- KONFIGURASI SCRIPT URL ---
+// PASTIKAN URL INI ADALAH URL WEB APP DEPLOYMENT YANG TERBARU DARI GOOGLE SCRIPT ANDA
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBANif6CnJjLRowaPcN6fjVeJEmEK8WWKAnEI_MuqXTrcMDdt-IBRhMPJ0ayr3-EUfVQ/exec"; 
 
 let dataMaster = { laporan: [], siswa: [], kelompok: [] }; 
 let chartInstance = null; 
 
 // --- FUNGSI PARSING NILAI ---
-// Mengubah input teks dari pembimbing menjadi angka matematis yang bisa dihitung rata-ratanya
 function parseNilai(str) {
     if (!str || str.toString().trim() === "") return { isDinilai: false, value: 0 };
     let s = str.toString().trim();
     
-    // Jika format angkanya [N:80]
     let match = s.match(/\[N:\s*(\d+)\]/i);
     if (match) return { isDinilai: true, value: parseInt(match[1]) };
     
-    // Jika formatnya deskriptif 
     if (s.toLowerCase().includes("sesuai") || s.toLowerCase().includes("lengkap")) return { isDinilai: true, value: 100 };
     if (s.toLowerCase().includes("sebagian")) return { isDinilai: true, value: 50 };
     
-    // Jika angka murni
     let num = parseFloat(s);
     if (!isNaN(num)) return { isDinilai: true, value: num };
     
-    // Default jika string ada tapi tidak dikenali di atas, anggap dinilai dgn nilai 75
     return { isDinilai: true, value: 75 }; 
 }
 
 // --- FUNGSI NAVIGASI HALAMAN ---
 function showPage(pageId, element){ 
   const targetPage = document.getElementById(pageId);
-  if (!targetPage) { alert("Halaman belum siap!"); return; }
+  if (!targetPage) return; 
 
   document.querySelectorAll(".content .page").forEach(p => p.classList.add("hidden")); 
   targetPage.classList.remove("hidden"); 
@@ -438,7 +435,6 @@ function showPage(pageId, element){
   } 
 } 
 
-// --- FUNGSI PENCARIAN TABEL ---
 function searchTable(tableId, inputId) { 
   const input = document.getElementById(inputId).value.toLowerCase(); 
   const rows = document.querySelectorAll(`#${tableId} tbody tr`); 
@@ -448,35 +444,41 @@ function searchTable(tableId, inputId) {
 } 
 
 // --- FUNGSI MEMUAT DATA DARI SERVER ---
-// Fungsi ini sebelumnya tidak dideklarasikan (hanya isinya saja), ini yang menyebabkan error
 async function loadData() {
   const loadingDiv = document.getElementById("loading-indicator"); 
   const mainContent = document.getElementById("main-content"); 
+  const loadingText = document.getElementById("loading-text");
+  
   try { 
-    const res = await fetch(SCRIPT_URL); 
-    if (!res.ok) throw new Error("Gagal terhubung"); 
+    // PERBAIKAN UTAMA: Tambahkan '?action=rekapAdminLanjutan' agar sesuai dengan kode GAS
+    const res = await fetch(SCRIPT_URL + "?action=rekapAdminLanjutan"); 
+    if (!res.ok) throw new Error("Gagal terhubung ke Google Script"); 
     
     const raw = await res.json(); 
     
+    // Mengecek apakah respons dari GAS adalah success
     if (raw.status === "success") { 
+      // Kode GAS mengubah header menjadi huruf kecil dengan underscore (contoh: nilai_pembimbing, nama_siswa)
       dataMaster.laporan = raw.laporan || []; 
       dataMaster.siswa = raw.siswa || []; 
       dataMaster.kelompok = raw.kelompok || []; 
-    } 
-    
-    // Render semua UI
-    renderDashboard(); 
-    renderTableLaporan(); 
-    renderTableSiswa(); 
-    renderTableKelompok(); 
-    renderTablePembimbing(); 
-    renderPenilaianDanSertifikat();
-    
-    loadingDiv.classList.add("hidden"); 
-    mainContent.classList.remove("hidden"); 
+      
+      renderDashboard(); 
+      renderTableLaporan(); 
+      renderTableSiswa(); 
+      renderTableKelompok(); 
+      renderTablePembimbing(); 
+      renderPenilaianDanSertifikat();
+      
+      loadingDiv.classList.add("hidden"); 
+      mainContent.classList.remove("hidden"); 
+    } else {
+      // Jika error dari backend (misal salah action)
+      throw new Error(raw.message || "Aksi ditolak oleh server.");
+    }
   } catch (error) { 
-    console.error("Error:", error); 
-    document.getElementById("loading-text").innerText = "Gagal memuat data. Pastikan link Google Script benar."; 
+    console.error("Fetch Error:", error); 
+    loadingText.innerHTML = `<div class="error-message"><b>Gagal Memuat Data.</b><br>${error.message}<br>Pastikan link SCRIPT_URL sudah benar dan sudah di-Deploy sebagai Web App "Anyone".</div>`; 
     document.querySelector(".spinner").style.display = "none"; 
   } 
 } 
@@ -489,7 +491,7 @@ function renderDashboard(){
   
   laporan.forEach(item => { 
     const nama = item.nama || item.nama_siswa || item.username; 
-    const evalNilai = parseNilai(item.nilai_pembimbing || item.Nilai_Pembimbing);
+    const evalNilai = parseNilai(item.nilai_pembimbing); // disesuaikan dengan lowercase dari GAS
     
     if (nama && evalNilai.isDinilai) { 
       if(!ranking[nama]) ranking[nama] = 0; 
@@ -512,7 +514,6 @@ function renderDashboard(){
   renderChart(topData.map(d => d[0]), topData.map(d => d[1])); 
 } 
 
-// --- RENDER GRAFIK CHART.JS ---
 function renderChart(labels, data) { 
   const ctx = document.getElementById('rankingChart').getContext('2d'); 
   if(chartInstance) chartInstance.destroy(); 
@@ -583,7 +584,7 @@ function renderTableKelompok() {
   tbody.innerHTML = data.map(row => "<tr>" + headers.map(h => `<td>${row[h] || '-'}</td>`).join("") + "</tr>").join(""); 
 }
 
-// --- RENDER TABEL PEMBIMBING & KINERJA KELOMPOK ---
+// --- RENDER TABEL PEMBIMBING ---
 function renderTablePembimbing() {
   const tbodyProgres = document.querySelector("#tablePembimbing tbody");
   const tbodyPenilaian = document.querySelector("#tablePenilaianPembimbing tbody");
@@ -602,32 +603,26 @@ function renderTablePembimbing() {
   let htmlKinerja = "";
 
   kelompokMaster.forEach(k => {
-      // Ambil Nama Kelompok dan Pembimbing (Akurasi Tinggi dari Data Master)
-      const namaKelompok = k.kelompok || k.Kelompok || "-";
-      const namaPembimbing = k.pembimbing || k.Pembimbing || k.UsernamePembimbing || "Belum Ditentukan";
+      const namaKelompok = k.kelompok || "-";
+      const namaPembimbing = k.pembimbing || "Belum Ditentukan";
       
-      // Hitung jumlah siswa di kelompok tersebut
       const jumlahSiswa = siswaList.filter(s => 
           (s.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       ).length;
       
-      // Filter laporan langsung dari identifier 'kelompok' di Tabel Laporan
       const laporanKelompok = laporanList.filter(lap => 
-          (lap.kelompok || lap.Kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
+          (lap.kelompok || '').toLowerCase() === namaKelompok.toLowerCase()
       );
 
       const totalMasuk = laporanKelompok.length;
       
-      // Cek yang sudah dinilai menggunakan parseNilai
       const sudahDinilai = laporanKelompok.filter(lap => {
-          const nilai = lap.nilai_pembimbing || lap.Nilai_Pembimbing; 
-          return parseNilai(nilai).isDinilai;
+          return parseNilai(lap.nilai_pembimbing).isDinilai;
       }).length;
       
       const belumDinilai = totalMasuk - sudahDinilai;
       const persen = totalMasuk > 0 ? Math.round((sudahDinilai / totalMasuk) * 100) : 0;
 
-      // Render Tabel 1: Progres Kelompok
       let badgeProgres = `<span class="badge badge-danger">Rendah</span>`;
       if (totalMasuk > (jumlahSiswa * 7)) badgeProgres = `<span class="badge badge-warning">Sedang</span>`; 
       if (totalMasuk > (jumlahSiswa * 15)) badgeProgres = `<span class="badge badge-active">Tinggi</span>`;
@@ -643,7 +638,6 @@ function renderTablePembimbing() {
         </tr>
       `;
 
-      // Render Tabel 2: Kinerja Pembimbing
       let badgeKinerja = "badge-danger";
       if (persen >= 50) badgeKinerja = "badge-warning";
       if (persen >= 90) badgeKinerja = "badge-active"; 
@@ -696,9 +690,8 @@ function renderPenilaianDanSertifikat() {
       let akumulasiNilai = 0;
       let countDinilai = 0;
       
-      // Kalkulasi rata-rata menggunakan fungsi parseNilai
       laporanSiswa.forEach(lap => {
-          const evalNilai = parseNilai(lap.nilai_pembimbing || lap.Nilai_Pembimbing);
+          const evalNilai = parseNilai(lap.nilai_pembimbing);
           if (evalNilai.isDinilai) {
               akumulasiNilai += evalNilai.value;
               countDinilai++;
@@ -740,7 +733,6 @@ function renderPenilaianDanSertifikat() {
   tbodySertifikat.innerHTML = htmlSertifikat || "<tr><td colspan='5' style='text-align:center;'>Belum ada siswa yang memenuhi syarat sertifikat.</td></tr>";
 }
 
-// Menjalankan fungsi memuat data ketika halaman HTML pertama kali termuat
 document.addEventListener("DOMContentLoaded", () => {
     loadData();
 });
